@@ -45,3 +45,30 @@ Le but est de permettre aux utilisateurs de **publier leurs compétences** et au
 
 ## 📂 Structure du projet (exemple)
 
+---
+
+## 🚧 Roadmap
+
+- [ ] Définir l’UI/UX (maquettes Figma)  
+- [ ] Mettre en place l’authentification (PHP + SQL)  
+- [ ] Créer le système de profils freelances  
+- [ ] Implémenter la recherche et les filtres (JS + SQL)  
+- [ ] Ajouter la messagerie interne  
+- [ ] Intégrer le système de paiement  
+- [ ] Déployer la première version bêta  
+
+---
+
+## 🤝 Contribution
+
+Les contributions sont les bienvenues !  
+- Forkez le repo  
+- Créez une branche (`feature/ma-fonctionnalite`)  
+- Committez vos changements  
+- Ouvrez une Pull Request 🚀  
+
+---
+
+## 📜 Licence
+
+Ce projet est sous licence **MIT** – libre à vous de l’utiliser, le modifier et l’améliorer.
