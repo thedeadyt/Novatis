@@ -1,0 +1,63 @@
+/* Import Google Font Tinos */
+@import url('https://fonts.googleapis.com/css2?family=Tinos:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
+/* Déclaration des polices locales */
+@font-face {
+  font-family: 'Bounded';
+  src: url('/Alex2/public/asset/fonts/Bounded-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Bounded';
+  src: url('/Alex2/public/asset/fonts/Bounded-Black.ttf') format('truetype');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  /* === COULEURS === */
+  --color-bg: #e8e8e8;
+  --color-white: #e8e8e8;
+  --color-black: #1f2020;
+  --color-green: #B41200;
+
+  /* Variantes Accent (plus saturées ou plus foncées) */
+  --color-accent-1: #1f2020; /* noir foncé base */
+  --color-accent-2: #7F0D00; /* rouge foncé (dark green) */
+  --color-accent-4: #3a3a3a; /* gris foncé */
+
+  /* Variantes Hover (plus claires ou dé-saturées) */
+  --color-hover-1: #464646; /* gris moyen */
+  --color-hover-2: #E04830; /* rouge clair  */
+  --color-hover-4: #f0f0f0; /* blanc cassé */
+  /* Variantes btn */
+    --btn-bg: rgba(31, 32, 32, 0.15);
+    --btn-hover-bg: rgba(31, 32, 32, 0.25);
+  /* === TYPOGRAPHIE === */
+  --font-tinos: 'Tinos', serif;
+  --font-bounded: 'Bounded', sans-serif;
+
+  --font-base: var(--font-tinos);
+  --font-heading: var(--font-bounded);
+
+  /* === OMBRES === */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.15);
+}
+html, body {
+  height: 100%;
+  margin: 0;
+}
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+#content {
+  flex: 1;
+}
