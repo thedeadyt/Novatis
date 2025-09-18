@@ -1,0 +1,141 @@
+/* sidebar.css */
+.sidebar {
+    position: fixed;       /* si ce n'est pas déjà le cas */
+    top: 72px;             /* hauteur du header */
+    left: 0;
+    bottom: 0;
+    width: 260px;
+    background: var(--color-black);
+    padding: 20px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    z-index: 10;           /* dessous le header si header z-index > 10 */
+}
+
+.sidebar .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+}
+
+.sidebar .brand .logo {
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    background: var(--color-green);
+    display: inline-block;
+}
+
+.sidebar .brand h1 {
+    font-size: 16px;
+    margin: 0;
+    color: var(--color-white);
+}
+
+.sidebar nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 10px 0 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.sidebar nav ul li a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    color: var(--color-white);
+    text-decoration: none;
+    font-weight: 600;
+    transition: background 0.2s ease;
+}
+
+.sidebar nav ul li a:hover {
+    background: var(--color-hover-1);
+}
+
+.sidebar nav ul li a.active {
+    background: var(--color-accent-4);
+    box-shadow: inset 3px 0 0 var(--color-green);
+}
+
+.sidebar .badge {
+    font-size: 12px;
+    padding: 2px 6px;
+    border-radius: 999px;
+    background: var(--color-hover-1);
+}
+
+.sidebar .spacer {
+    flex: 1;
+}
+
+.sidebar .user-info {
+    font-size: 13px;
+    opacity: 0.9;
+    color: var(--color-white);
+}
+
+.sidebar .user-info a {
+    color: var(--color-white);
+    text-decoration: underline;
+}
+
+.sidebar + .content {
+    padding: 24px;
+    flex: 1;
+    overflow: auto;
+    color: var(--color-black);
+}
+
+/* Responsive : cache la sidebar sous 720px */
+@media (max-width: 720px) {
+    .sidebar {
+        position: fixed;
+        left: 0;
+        top: 72px; /* Décalage sous le header */
+        bottom: 0;
+        transform: translateX(-110%);
+        transition: transform .22s ease;
+        z-index: 20;
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+    .toggle-btn {
+        display: inline-flex;
+    }
+
+    body.sidebar-open .overlay {
+        display: block;
+    }
+
+    .overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        top: 72px; /* Décalage sous le header */
+        background: rgba(0, 0, 0, 0.35);
+        z-index: 15;
+    }
+}
+
+
+.toggle-btn {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    border: 1px solid var(--color-hover-4);
+    padding: 8px;
+    border-radius: 8px;
+    color: inherit;
+    cursor: pointer;
+}

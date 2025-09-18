@@ -1,15 +1,19 @@
 <?php
 require_once __DIR__ . '/../../config/config.php';
 
+
 if (session_status() === PHP_SESSION_NONE) {
-    session_start();
+session_start();
 }
+
 
 // Vérifie si l'utilisateur est connecté
 if (!isset($_SESSION['user'])) {
-    header('Location: /auth/login.php');
-    exit;
+header('Location: ' . BASE_URL . '/login');
+exit;
+
 }
+
 
 // Exemple simple de détection d'admin
 $isAdmin = isset($_SESSION['user']['role']) && $_SESSION['user']['role'] === 'admin';
@@ -21,11 +25,17 @@ $isAdmin = isset($_SESSION['user']['role']) && $_SESSION['user']['role'] === 'ad
     <meta http-equiv='X-UA-Compatible' content='IE=edge'>
     <title>Novatis | Dashboard</title>
     <meta name='viewport' content='width=device-width, initial-scale=1'>
-    <link rel='stylesheet' type='text/css' media='screen' href='main.css'>
-    <link rel='stylesheet' type='text/css' media='screen' href='sidebar.css'>
-    <script src='main.js' defer></script>
+    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/variables.css">
+    <link rel='stylesheet' type='text/css' media='screen' href='<?= BASE_URL ?>/assets/css/sidebar.css'>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel='stylesheet' type='text/css' media='screen' href='<?= BASE_URL ?>/asset/css/index.css'>
+    <!-- React & ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
 <body>
+         <?php include __DIR__ . '/../../includes/header.php';?>
     <aside class="sidebar" id="sidebar">
         <div class="brand">
             <span class="logo" aria-hidden="true"></span>
