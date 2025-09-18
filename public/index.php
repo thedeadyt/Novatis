@@ -9,8 +9,8 @@ require_once __DIR__ . '/../config/config.php';
     <meta http-equiv='X-UA-Compatible' content='IE=edge'>
     <title>Novatis</title>
     <meta name='viewport' content='width=device-width, initial-scale=1'>
-    <link rel='stylesheet' type='text/css' media='screen' href='main.css'>
-    <script src='main.js'></script>
+    <link rel='stylesheet' type='text/css' media='screen' href='<?= BASE_URL ?>/assets/css/Variables.css'>
+    <link rel='stylesheet' type='text/css' media='screen' href='<?= BASE_URL ?>/assets/css/Footer.css'>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -23,5 +23,6 @@ require_once __DIR__ . '/../config/config.php';
 </head>
 <body>
      <?php include __DIR__ . '/../includes/header.php';?>
+     <?php include __DIR__ . '/../includes/footer.php';?>
 </body>
 </html>

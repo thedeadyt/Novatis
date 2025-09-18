@@ -1,5 +1,6 @@
 <div id="footer-root"></div>
-//-- IGNORE ---
+
+
 <script type="text/babel">
   function Footer() {
     const links = [
@@ -29,8 +30,8 @@
             </p>
           </div>
 
-          {/* Liens rapides */}
-          <div>
+          {/* Liens rapides centrés */}
+          <div className="flex flex-col items-center">
             <h3 className="font-semibold mb-3">Navigation</h3>
             <ul className="space-y-2">
               {links.map((link, i) => (
