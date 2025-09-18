@@ -1,5 +1,5 @@
 <div id="footer-root"></div>
-//-- IGNORE ---
+
 <script type="text/babel">
   function Footer() {
     const links = [
@@ -22,7 +22,7 @@
           <div>
             <a href="<?= BASE_URL ?>" className="flex items-center space-x-2 mb-4">
               <img src="<?= BASE_URL ?>/asset/img/logo.png" alt="Logo" className="w-12 h-12 rounded-full" />
-              <span className="text-xl font-bold">&lt;Novatis/&gt;</span>
+              <span className="text-xl font-bold">Novatis</span>
             </a>
             <p className="text-sm text-gray-400">
               Plateforme de mise en relation entre clients et prestataires.
@@ -60,7 +60,7 @@
 
         {/* Bas du footer */}
         <div className="border-t border-gray-700 py-4 text-center text-sm text-gray-400">
-          © {new Date().getFullYear()} &lt;Novatis/&gt;. Tous droits réservés.
+          © {new Date().getFullYear()} Novatis Tous droits réservés.
         </div>
       </footer>
     );

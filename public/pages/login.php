@@ -7,7 +7,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // Si l'utilisateur est déjà connecté, on le redirige vers le dashboard
 if (isset($_SESSION['user'])) {
-    header('Location: ./dashboard');
+    header('Location: ' . BASE_URL . '/dashboard');
     exit;
 }
 

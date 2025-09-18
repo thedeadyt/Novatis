@@ -1,0 +1,32 @@
+<?php
+require_once __DIR__ . '/../../config/config.php';
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Supprime uniquement les informations de l'utilisateur
+unset($_SESSION['user']);
+
+// Redirection vers la page login après 2 secondes
+$redirectUrl = BASE_URL . '../index.php';
+?>
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Novatis | Déconnexion</title>
+    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="login.css">
+    <meta http-equiv="refresh" content="2;url=<?= $redirectUrl ?>">
+</head>
+<body>
+    <div class="login-container">
+        <h2>Déconnexion</h2>
+        <p class="success" style="text-align:center; margin-top:20px;">
+            Vous avez été déconnecté avec succès. Redirection vers la page d'Accueil'...
+        </p>
+    </div>
+</body>
+</html>

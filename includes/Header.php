@@ -128,7 +128,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                   </svg>
                   Paramètres
                 </a>
-                <a href="#" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                <a href="../public/pages/Dashboard.php" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none"
                        viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
