@@ -1,5 +1,4 @@
 <div id="footer-root"></div>
-//-- IGNORE ---
 <script type="text/babel">
   function Footer() {
     const links = [
