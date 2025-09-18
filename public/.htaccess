@@ -1,0 +1,39 @@
+RewriteEngine On
+
+###############################################
+# 1. Pages spécifiques (publiques)
+###############################################
+RewriteRule ^Mentions-L[ée]gales$ pages/Mentions.php [L,NC]
+RewriteRule ^Politique-de-confidentialit[ée]$ pages/Confidentialite.php [L,NC]
+RewriteRule ^Nos-R[ée]alisations$ pages/NosProjets.php [L,NC]
+
+# Exclusion des fichiers sensibles
+RewriteCond %{REQUEST_URI} ^/SendMailFunction\.php$ [NC,OR]
+RewriteCond %{REQUEST_URI} ^/PHPMailer-master/ [NC]
+RewriteRule .* - [L]
+
+###############################################
+# 2. Redirection /admin ou /admin/ vers login
+###############################################
+RewriteRule ^admin/?$ pages/login.php [L,NC]
+
+###############################################
+# 3. Protection des autres fichiers dans /admin
+###############################################
+# Si on est dans /admin et que ce n'est ni index.php ni auth.php
+RewriteCond %{REQUEST_URI} ^/admin/ [NC]
+RewriteCond %{REQUEST_URI} !^/admin/auth\.php$ [NC]
+RewriteCond %{REQUEST_URI} !^/admin/index\.php$ [NC]
+RewriteRule ^admin/.*$ admin/auth.php [QSA,L]
+
+###############################################
+# 4. Réécriture générique des pages propres (publiques)
+###############################################
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^([a-zA-Z0-9À-ÿ_-]+)$ pages/$1.php [NC,L]
+
+###############################################
+# 5. Page 404 personnalisée
+###############################################
+ErrorDocument 404 /pages/404.php
