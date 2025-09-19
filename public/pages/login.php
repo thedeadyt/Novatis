@@ -38,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'role' => $user['role'] // admin ou user
                 ];
 
-                header('Location: /dashboard');
+                header('Location: ' . BASE_URL . '/dashboard');
                 exit;
             } else {
                 $error = 'Email ou mot de passe incorrect.';
@@ -55,8 +55,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <title>Novatis | Connexion</title>
-    <link rel="stylesheet" href="main.css">
-    <link rel="stylesheet" href="login.css">
+    <link rel='stylesheet' type='text/css' media='screen' href='<?= BASE_URL ?>/assets/css/Variables.css'>
+    <link rel='stylesheet' type='text/css' media='screen' href='<?= BASE_URL ?>/assets/css/login.css'>
 </head>
 <body>
     <div class="login-container">
@@ -64,19 +64,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php if ($error): ?>
             <div class="error"><?= htmlspecialchars($error) ?></div>
         <?php endif; ?>
-            <form method="post" action="">
-                <label for="email">Email</label>
-                <input type="email" name="email" id="email" value="<?= htmlspecialchars($email) ?>" required>
+        
+        <form method="post" action="">
+            <label for="email">Email</label>
+            <input type="email" name="email" id="email" value="<?= htmlspecialchars($email) ?>" required>
 
-                <label for="password">Mot de passe</label>
-                <input type="password" name="password" id="password" required>
+            <label for="password">Mot de passe</label>
+            <input type="password" name="password" id="password" required>
 
-                <button type="submit">Se connecter</button>
-            </form>
+            <button type="submit">Se connecter</button>
+        </form>
 
-            <div style="margin-top: 12px; text-align:center;">
-                <span>Pas de compte ? </span><a href="register">S'inscrire</a>
-            </div>
+        <div style="margin-top: 12px; text-align:center;">
+            <span>Pas de compte ? </span><a href="register">S'inscrire</a>
+        </div>
     </div>
 </body>
 </html>

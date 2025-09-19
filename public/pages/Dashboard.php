@@ -60,7 +60,7 @@ $isAdmin = isset($_SESSION['user']['role']) && $_SESSION['user']['role'] === 'ad
 
         <div class="user-info">
             <div>Connecté en tant que <strong><?= htmlspecialchars($_SESSION['user']['name'] ?? 'Utilisateur') ?></strong></div>
-            <div style="margin-top:6px"><a href="./logout.php" class="logout-link">Se déconnecter</a></div>
+            <div style="margin-top:6px"><a href="./logout" class="logout-link">Se déconnecter</a></div>
         </div>
     </aside>
 
