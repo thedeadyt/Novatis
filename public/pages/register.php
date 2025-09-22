@@ -32,6 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             // Ajouter l'utilisateur
             $hash = password_hash($password, PASSWORD_DEFAULT);
+
             $stmt = $pdo->prepare("INSERT INTO users (name, email, password) VALUES (:name, :email, :password)");
             $stmt->execute([
                 'name' => $name,
@@ -42,6 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Rediriger vers login
             header('Location: login');
             exit;
+
         }
     }
 }
