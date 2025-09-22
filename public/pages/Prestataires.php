@@ -51,7 +51,7 @@ $prestataires = $stmt->fetchAll(PDO::FETCH_ASSOC);
         $currentUser = null;
         foreach ($prestataires as $row): 
             if ($currentUser !== $row['user_id']): 
-                if ($currentUser !== null) echo "</ul><a href=\"dashboard.php?user={$currentUser}\" class=\"btn-contact\">Contacter</a></div>"; 
+                if ($currentUser !== null) echo '</ul><a href="' . BASE_URL . '/dashboard?user=' . urlencode($currentUser) . '" class="btn-contact">Contacter</a></div>'; 
         ?>
             <!-- Carte Prestataire -->
             <div class="prestataire-card text-black p-6 rounded-2xl shadow-lg">
