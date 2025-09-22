@@ -6,7 +6,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // Si l'utilisateur est déjà connecté, on le redirige vers le dashboard
 if (isset($_SESSION['user'])) {
-    header('Location: /dashboard/');
+    header('Location: /dashboard');
     exit;
 }
 
@@ -32,6 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             // Ajouter l'utilisateur
             $hash = password_hash($password, PASSWORD_DEFAULT);
+
             $stmt = $pdo->prepare("INSERT INTO users (name, email, password) VALUES (:name, :email, :password)");
             $stmt->execute([
                 'name' => $name,
@@ -42,6 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Rediriger vers login
             header('Location: login');
             exit;
+
         }
     }
 }
@@ -52,8 +54,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <title>Novatis | Inscription</title>
-    <link rel="stylesheet" href="main.css">
-    <link rel="stylesheet" href="login.css">
+    <link rel='stylesheet' type='text/css' media='screen' href='<?= BASE_URL ?>/assets/css/Variables.css'>
+    <link rel='stylesheet' type='text/css' media='screen' href='<?= BASE_URL ?>/assets/css/register.css'>
 </head>
 <body>
     <div class="login-container">
@@ -78,7 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </form>
 
         <div style="margin-top: 12px; text-align:center;">
-            <span>Déjà un compte ? </span><a href="login.php">Se connecter</a>
+            <span>Déjà un compte ? </span><a href="login">Se connecter</a>
         </div>
     </div>
 </body>
