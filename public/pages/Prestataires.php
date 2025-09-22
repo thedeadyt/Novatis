@@ -42,38 +42,46 @@ $prestataires = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <body>
     <?php include __DIR__ . '/../../includes/Header.php';?>
     <div class="content" id="content">
-        <div class="Prestataires flex justify-center mt-20 space-x-6 overflow-x-auto""> <!-- Contenu principal de la page -->
-    <h1>Liste des Prestataires</h1>
+<!-- Container Prestataires -->
+<div class="Prestataires max-w-7xl mx-auto mt-32 px-4">
+    <h1 class="text-3xl font-bold text-center mb-10">Liste des Prestataires</h1>
 
-        <div class="prestataires">
-            <?php 
-            $currentUser = null;
-            foreach ($prestataires as $row): 
-                if ($currentUser !== $row['user_id']): 
-                    if ($currentUser !== null) echo "</ul><a href=\"dashboard.php?user={$currentUser}\" class=\"btn-contact\">Contacter</a></div>"; 
-            ?>
-                <div class="prestataire-card">
-                    <img src="<?= htmlspecialchars($row['avatar'] ?? 'default.png') ?>" alt="Avatar" class="avatar">
-                    <h2><?= htmlspecialchars($row['name']) ?></h2>
-                    <p><?= htmlspecialchars($row['bio']) ?></p>
-                    <h3>Compétences :</h3>
-                    <ul>
-            <?php 
-                $currentUser = $row['user_id']; 
-                endif; 
-            ?>
-                        <li>
-                            <?= htmlspecialchars($row['competence']) ?> 
-                            — <?= number_format($row['price'], 2, ',', ' ') ?> € 
-                            (<?= (int)$row['delivery_days'] ?> jours)
-                        </li>
-            <?php endforeach; ?>
-                    </ul>
-                    <a href="dashboard.php?user=<?= $currentUser ?>" class="btn-contact">Contacter</a>
-                </div>
-        </div>
-        </div>
-     </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+        <?php 
+        $currentUser = null;
+        foreach ($prestataires as $row): 
+            if ($currentUser !== $row['user_id']): 
+                if ($currentUser !== null) echo "</ul><a href=\"dashboard.php?user={$currentUser}\" class=\"btn-contact\">Contacter</a></div>"; 
+        ?>
+            <!-- Carte Prestataire -->
+            <div class="prestataire-card text-black p-6 rounded-2xl shadow-lg">
+                <img src="<?= htmlspecialchars($row['avatar'] ?? 'default.png') ?>" 
+                     alt="Avatar" 
+                     class="avatar w-24 h-24 rounded-full mx-auto mb-4">
+                <h2 class="text-xl font-semibold text-center"><?= htmlspecialchars($row['name']) ?></h2>
+                <p class="text-gray-300 text-center mb-4"><?= htmlspecialchars($row['bio']) ?></p>
+                <h3 class="font-bold mb-2">Compétences :</h3>
+                <ul class="list-disc list-inside text-sm space-y-1">
+        <?php 
+            $currentUser = $row['user_id']; 
+            endif; 
+        ?>
+                    <li>
+                        <?= htmlspecialchars($row['competence']) ?> 
+                        — <?= number_format($row['price'], 2, ',', ' ') ?> € 
+                        (<?= (int)$row['delivery_days'] ?> jours)
+                    </li>
+        <?php endforeach; ?>
+                </ul>
+                <a href="dashboard.php?user=<?= $currentUser ?>" 
+                   class="btn-contact mt-4 inline-block bg-white text-black px-4 py-2 rounded-lg hover:bg-gray-200 transition">
+                   Contacter
+                </a>
+            </div>
+    </div>
+</div>
+
+    </div>
     <?php include __DIR__ . '/../../includes/Footer.php';?>
 </body>
 </html>
