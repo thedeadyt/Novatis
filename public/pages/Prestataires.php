@@ -42,10 +42,10 @@ $prestataires = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <body>
     <?php include __DIR__ . '/../../includes/Header.php';?>
     <div class="content" id="content">
-        <div class="Prestataires flex justify-center mt-20 space-x-6 overflow-x-auto""> <!-- Contenu principal de la page -->
+        <div class="Prestataires""> <!-- Contenu principal de la page -->
     <h1>Liste des Prestataires</h1>
 
-        <div class="prestataires">
+        <div class="prestataires mt-20">
             <?php 
             $currentUser = null;
             foreach ($prestataires as $row): 
