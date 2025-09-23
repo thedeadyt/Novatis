@@ -25,14 +25,14 @@
               <span className="text-xl font-bold">Novatis</span>
             </a>
             <p className="text-sm text-gray-400">
-              Plateforme de mise en relation entre clients et prestataires.
+              Plateforme de mise en relation entre les étudiants pour partager leurs services et leurs projets.
             </p>
           </div>
 
           {/* Liens rapides centrés */}
           <div className="flex flex-col items-center">
             <h3 className="font-semibold mb-3">Navigation</h3>
-            <ul className="space-y-2">
+            <ul className="flex flex-col items-center space-y-2">
               {links.map((link, i) => (
                 <li key={i}>
                   <a href={link.href} className="hover:text-white transition-colors">
@@ -44,9 +44,9 @@
           </div>
 
           {/* Liens légaux */}
-          <div>
+          <div className="flex flex-col items-center">
             <h3 className="font-semibold mb-3">Informations légales</h3>
-            <ul className="space-y-2">
+            <ul className="flex flex-col items-center space-y-2">
               {legalLinks.map((link, i) => (
                 <li key={i}>
                   <a href={link.href} className="hover:text-white transition-colors">

@@ -530,6 +530,7 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
                 setLoading(false);
             };
 
+
             const loadMessages = async (orderId) => {
                 const result = await apiCall(`messages.php?order_id=${orderId}`);
                 if (result.success) {
@@ -1268,5 +1269,6 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
         // Render Dashboard
         ReactDOM.render(React.createElement(Dashboard), document.getElementById('dashboard-root'));
     </script>
+    <?php include __DIR__ . '/../../includes/Footer.php';?>
 </body>
 </html>
