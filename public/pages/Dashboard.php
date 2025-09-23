@@ -5,13 +5,13 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Vérifie si l'utilisateur est connecté
+// Vï¿½rifie si l'utilisateur est connectï¿½
 if (!isset($_SESSION['user'])) {
     header('Location: ' . BASE_URL . '/login');
     exit;
 }
 
-// Récupération des données utilisateur
+// Rï¿½cupï¿½ration des donnï¿½es utilisateur
 $user = $_SESSION['user'];
 $isAdmin = isset($user['role']) && $user['role'] === 'admin';
 ?>
@@ -153,7 +153,7 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
         const ReactDOM = window.ReactDOM;
         const { useState, useEffect } = React;
 
-        // Données utilisateur depuis PHP
+        // Donnï¿½es utilisateur depuis PHP
         const userData = {
             id: <?= json_encode($user['id'] ?? 0) ?>,
             name: <?= json_encode($user['name'] ?? 'Utilisateur') ?>,
@@ -330,20 +330,20 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
         // Sidebar Component
         const Sidebar = ({ activeTab, setActiveTab, isOpen, onClose, data, handleLogout }) => {
             const userMenuItems = [
-                { id: 'overview', icon: '=Ê', label: 'Vue d\'ensemble' },
-                { id: 'messages', icon: '=¬', label: 'Messages', badge: data.unreadMessages || 0 },
-                { id: 'services', icon: '=Í', label: 'Mes Services' },
-                { id: 'orders', icon: '=æ', label: 'Commandes' },
-                { id: 'portfolio', icon: '=¼', label: 'Portfolio' },
+                { id: 'overview', icon: '=ï¿½', label: 'Vue d\'ensemble' },
+                { id: 'messages', icon: '=ï¿½', label: 'Messages', badge: data.unreadMessages || 0 },
+                { id: 'services', icon: '=ï¿½', label: 'Mes Services' },
+                { id: 'orders', icon: '=ï¿½', label: 'Commandes' },
+                { id: 'portfolio', icon: '=ï¿½', label: 'Portfolio' },
                 { id: 'former-clients', icon: '=e', label: 'Anciens Clients' }
             ];
 
             const adminMenuItems = [
-                { id: 'overview', icon: '=Ê', label: 'Vue d\'ensemble' },
+                { id: 'overview', icon: '=ï¿½', label: 'Vue d\'ensemble' },
                 { id: 'admin-users', icon: '=e', label: 'Utilisateurs' },
-                { id: 'services', icon: '=Í', label: 'Tous les Services' },
-                { id: 'orders', icon: '=æ', label: 'Toutes les Commandes' },
-                { id: 'admin-support', icon: '<˜', label: 'Support', badge: 0 }
+                { id: 'services', icon: '=ï¿½', label: 'Tous les Services' },
+                { id: 'orders', icon: '=ï¿½', label: 'Toutes les Commandes' },
+                { id: 'admin-support', icon: '<ï¿½', label: 'Support', badge: 0 }
             ];
 
             const menuItems = isAdmin ? adminMenuItems : userMenuItems;
@@ -401,7 +401,7 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
                         onClick: handleLogout,
                         className: "w-full text-left text-sm transition-opacity",
                         style: {color: 'var(--color-red)'}
-                    }, "Se déconnecter")
+                    }, "Se dï¿½connecter")
                 )
             );
         };
@@ -425,9 +425,9 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
                 const statusLabels = {
                     pending: 'En attente',
                     in_progress: 'En cours',
-                    delivered: 'Livré',
-                    completed: 'Terminé',
-                    cancelled: 'Annulé'
+                    delivered: 'Livrï¿½',
+                    completed: 'Terminï¿½',
+                    cancelled: 'Annulï¿½'
                 };
                 return statusLabels[status] || status;
             };
@@ -436,15 +436,15 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
                 if (isAdmin) {
                     return [
                         { title: "Utilisateurs", value: data.stats.total_users || 0, icon: "=e", color: "bg-blue-100" },
-                        { title: "Commandes", value: data.stats.total_orders || 0, icon: "=æ", color: "bg-green-100" },
-                        { title: "Services", value: data.stats.active_services || 0, icon: "=Í", color: "bg-purple-100" },
-                        { title: "Tickets", value: data.stats.open_tickets || 0, icon: "<˜", color: "bg-red-100" }
+                        { title: "Commandes", value: data.stats.total_orders || 0, icon: "=ï¿½", color: "bg-green-100" },
+                        { title: "Services", value: data.stats.active_services || 0, icon: "=ï¿½", color: "bg-purple-100" },
+                        { title: "Tickets", value: data.stats.open_tickets || 0, icon: "<ï¿½", color: "bg-red-100" }
                     ];
                 } else {
                     return [
-                        { title: "Revenus", value: `${data.stats.earnings || 0}¬`, icon: "=°", color: "bg-green-100" },
-                        { title: "Ventes", value: data.stats.sales || 0, icon: "=È", color: "bg-blue-100" },
-                        { title: "Achats", value: data.stats.purchases || 0, icon: "=Ò", color: "bg-purple-100" },
+                        { title: "Revenus", value: `${data.stats.earnings || 0}ï¿½`, icon: "=ï¿½", color: "bg-green-100" },
+                        { title: "Ventes", value: data.stats.sales || 0, icon: "=ï¿½", color: "bg-blue-100" },
+                        { title: "Achats", value: data.stats.purchases || 0, icon: "=ï¿½", color: "bg-purple-100" },
                         { title: "Note", value: `${data.stats.rating || 0}/5`, icon: "P", color: "bg-yellow-100" }
                     ];
                 }
@@ -462,13 +462,13 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
                 React.createElement('div', { className: "grid grid-cols-1 lg:grid-cols-2 gap-6" },
                     // Services/Commandes
                     React.createElement('div', { className: "bg-white rounded-lg p-6", style: {boxShadow: 'var(--shadow-md)'} },
-                        React.createElement('h3', { className: "text-lg font-bold mb-4" }, isAdmin ? "Services Récents" : "Mes Services"),
+                        React.createElement('h3', { className: "text-lg font-bold mb-4" }, isAdmin ? "Services Rï¿½cents" : "Mes Services"),
                         React.createElement('div', { className: "space-y-3" },
                             data.services.slice(0, 3).map(service =>
                                 React.createElement('div', { key: service.id, className: "flex items-center justify-between p-3 bg-gray-50 rounded-lg" },
                                     React.createElement('div', null,
                                         React.createElement('p', { className: "font-medium" }, service.title),
-                                        React.createElement('p', { className: "text-sm opacity-70" }, `${service.price}¬`),
+                                        React.createElement('p', { className: "text-sm opacity-70" }, `${service.price}ï¿½`),
                                         isAdmin && React.createElement('p', { className: "text-xs text-gray-500" }, `par ${service.user_name}`)
                                     ),
                                     React.createElement('span', {
@@ -482,15 +482,15 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
 
                     // Commandes
                     React.createElement('div', { className: "bg-white rounded-lg p-6", style: {boxShadow: 'var(--shadow-md)'} },
-                        React.createElement('h3', { className: "text-lg font-bold mb-4" }, "Commandes Récentes"),
+                        React.createElement('h3', { className: "text-lg font-bold mb-4" }, "Commandes Rï¿½centes"),
                         React.createElement('div', { className: "space-y-3" },
                             data.orders.slice(0, 3).map(order =>
                                 React.createElement('div', { key: order.id, className: "flex items-center justify-between p-3 bg-gray-50 rounded-lg" },
                                     React.createElement('div', null,
                                         React.createElement('p', { className: "font-medium" }, order.title),
-                                        React.createElement('p', { className: "text-sm opacity-70" }, `${order.price}¬`),
+                                        React.createElement('p', { className: "text-sm opacity-70" }, `${order.price}ï¿½`),
                                         React.createElement('p', { className: "text-xs text-gray-500" },
-                                            isAdmin ? `${order.buyer_name} ’ ${order.seller_name}` :
+                                            isAdmin ? `${order.buyer_name} ï¿½ ${order.seller_name}` :
                                             order.user_role === 'buyer' ? `Vendeur: ${order.seller_name}` : `Acheteur: ${order.buyer_name}`
                                         )
                                     ),
@@ -526,6 +526,7 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
                 }
                 setLoading(false);
             };
+
 
             const loadMessages = async (orderId) => {
                 const result = await apiCall(`messages.php?order_id=${orderId}`);
@@ -565,7 +566,7 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
                                 React.createElement('button', {
                                     onClick: () => { setSelectedConversation(null); setMessages([]); },
                                     className: "text-gray-500 hover:text-gray-700"
-                                }, " Retour"),
+                                }, "ï¿½ Retour"),
                                 React.createElement('h3', { className: "font-medium" }, selectedConversation.title)
                             )
                         ),
@@ -682,7 +683,7 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
                                 React.createElement('h4', { className: "font-medium mb-2" }, service.title),
                                 React.createElement('p', { className: "text-sm text-gray-600 mb-3 line-clamp-2" }, service.description),
                                 React.createElement('div', { className: "flex items-center justify-between" },
-                                    React.createElement('span', { className: "font-bold text-lg", style: {color: 'var(--color-red)'} }, `${service.price}¬`),
+                                    React.createElement('span', { className: "font-bold text-lg", style: {color: 'var(--color-red)'} }, `${service.price}ï¿½`),
                                     React.createElement('span', {
                                         className: `px-2 py-1 text-xs rounded-full ${service.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`
                                     }, service.status)
@@ -727,9 +728,9 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
                 const statusLabels = {
                     pending: 'En attente',
                     in_progress: 'En cours',
-                    delivered: 'Livré',
-                    completed: 'Terminé',
-                    cancelled: 'Annulé'
+                    delivered: 'Livrï¿½',
+                    completed: 'Terminï¿½',
+                    cancelled: 'Annulï¿½'
                 };
                 return statusLabels[status] || status;
             };
@@ -757,7 +758,7 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
                                 React.createElement('div', { className: "grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600" },
                                     React.createElement('div', null,
                                         React.createElement('span', { className: "font-medium" }, "Prix: "),
-                                        React.createElement('span', null, `${order.price}¬`)
+                                        React.createElement('span', null, `${order.price}ï¿½`)
                                     ),
                                     React.createElement('div', null,
                                         React.createElement('span', { className: "font-medium" },
@@ -769,7 +770,7 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
                                         )
                                     ),
                                     order.deadline && React.createElement('div', null,
-                                        React.createElement('span', { className: "font-medium" }, "Échéance: "),
+                                        React.createElement('span', { className: "font-medium" }, "ï¿½chï¿½ance: "),
                                         React.createElement('span', null, new Date(order.deadline).toLocaleDateString())
                                     )
                                 ),
@@ -785,7 +786,7 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
                                     order.status === 'in_progress' && React.createElement('button', {
                                         onClick: () => updateOrderStatus(order.id, 'delivered'),
                                         className: "btn-primary px-3 py-1 text-sm rounded"
-                                    }, "Marquer comme livré"),
+                                    }, "Marquer comme livrï¿½"),
                                     React.createElement('button', {
                                         onClick: () => updateOrderStatus(order.id, 'cancelled'),
                                         className: "btn-secondary px-3 py-1 text-sm rounded"
@@ -838,7 +839,7 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
             };
 
             const handleDelete = async (projectId) => {
-                if (confirm('Êtes-vous sûr de vouloir supprimer ce projet ?')) {
+                if (confirm('ï¿½tes-vous sï¿½r de vouloir supprimer ce projet ?')) {
                     const result = await apiCall('portfolio.php', 'DELETE', { id: projectId });
                     if (result.success) {
                         loadData();
@@ -873,7 +874,7 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
                             onChange: (e) => setFormData({...formData, category_id: e.target.value}),
                             className: "w-full p-3 border rounded-lg"
                         },
-                            React.createElement('option', { value: "" }, "Sélectionner une catégorie"),
+                            React.createElement('option', { value: "" }, "Sï¿½lectionner une catï¿½gorie"),
                             data.categories.map(cat =>
                                 React.createElement('option', { key: cat.id, value: cat.id }, cat.name)
                             )
@@ -977,7 +978,7 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
                                         React.createElement('span', { className: "font-medium" }, client.order_count)
                                     ),
                                     React.createElement('div', { className: "flex justify-between" },
-                                        React.createElement('span', null, "Dernière commande:"),
+                                        React.createElement('span', null, "Derniï¿½re commande:"),
                                         React.createElement('span', { className: "font-medium" },
                                             new Date(client.last_order).toLocaleDateString()
                                         )
@@ -1019,7 +1020,7 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
             };
 
             const deleteUser = async (userId) => {
-                if (confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) {
+                if (confirm('ï¿½tes-vous sï¿½r de vouloir supprimer cet utilisateur ?')) {
                     const result = await apiCall('users.php', 'DELETE', { user_id: userId });
                     if (result.success) {
                         loadUsers();
@@ -1042,7 +1043,7 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
                             React.createElement('tr', null,
                                 React.createElement('th', { className: "px-6 py-3" }, "Utilisateur"),
                                 React.createElement('th', { className: "px-6 py-3" }, "Email"),
-                                React.createElement('th', { className: "px-6 py-3" }, "Rôle"),
+                                React.createElement('th', { className: "px-6 py-3" }, "Rï¿½le"),
                                 React.createElement('th', { className: "px-6 py-3" }, "Note"),
                                 React.createElement('th', { className: "px-6 py-3" }, "Statistiques"),
                                 React.createElement('th', { className: "px-6 py-3" }, "Actions")
@@ -1089,7 +1090,7 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
                                     React.createElement('td', { className: "px-6 py-4 text-xs text-gray-600" },
                                         React.createElement('div', null, `Ventes: ${user.sales_count || 0}`),
                                         React.createElement('div', null, `Achats: ${user.purchases_count || 0}`),
-                                        React.createElement('div', null, `Revenus: ${user.total_earnings || 0}¬`)
+                                        React.createElement('div', null, `Revenus: ${user.total_earnings || 0}ï¿½`)
                                     ),
                                     React.createElement('td', { className: "px-6 py-4" },
                                         user.id !== userData.id && React.createElement('button', {
@@ -1155,8 +1156,8 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
                 const statusLabels = {
                     open: 'Ouvert',
                     in_progress: 'En cours',
-                    resolved: 'Résolu',
-                    closed: 'Fermé'
+                    resolved: 'Rï¿½solu',
+                    closed: 'Fermï¿½'
                 };
                 return statusLabels[status] || status;
             };
@@ -1173,7 +1174,7 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
                         React.createElement('button', {
                             onClick: () => setSelectedTicket(null),
                             className: "text-gray-500 hover:text-gray-700"
-                        }, " Retour"),
+                        }, "ï¿½ Retour"),
                         React.createElement('h3', { className: "text-lg font-bold" }, "Ticket Support")
                     ),
 
@@ -1204,29 +1205,29 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
                             },
                                 React.createElement('option', { value: "open" }, "Ouvert"),
                                 React.createElement('option', { value: "in_progress" }, "En cours"),
-                                React.createElement('option', { value: "resolved" }, "Résolu"),
-                                React.createElement('option', { value: "closed" }, "Fermé")
+                                React.createElement('option', { value: "resolved" }, "Rï¿½solu"),
+                                React.createElement('option', { value: "closed" }, "Fermï¿½")
                             )
                         ),
 
                         selectedTicket.admin_response && React.createElement('div', null,
-                            React.createElement('h5', { className: "font-medium mb-2" }, "Réponse admin:"),
+                            React.createElement('h5', { className: "font-medium mb-2" }, "Rï¿½ponse admin:"),
                             React.createElement('p', { className: "text-gray-700 bg-blue-50 p-3 rounded" }, selectedTicket.admin_response)
                         ),
 
                         React.createElement('div', null,
-                            React.createElement('h5', { className: "font-medium mb-2" }, "Répondre au ticket:"),
+                            React.createElement('h5', { className: "font-medium mb-2" }, "Rï¿½pondre au ticket:"),
                             React.createElement('textarea', {
                                 value: response,
                                 onChange: (e) => setResponse(e.target.value),
-                                placeholder: "Votre réponse...",
+                                placeholder: "Votre rï¿½ponse...",
                                 className: "w-full p-3 border rounded-lg",
                                 rows: 4
                             }),
                             React.createElement('button', {
                                 onClick: respondToTicket,
                                 className: "btn-primary px-4 py-2 rounded-lg mt-2"
-                            }, "Envoyer la réponse")
+                            }, "Envoyer la rï¿½ponse")
                         )
                     )
                 );
@@ -1265,5 +1266,6 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
         // Render Dashboard
         ReactDOM.render(React.createElement(Dashboard), document.getElementById('dashboard-root'));
     </script>
+    <?php include __DIR__ . '/../../includes/Footer.php';?>
 </body>
 </html>
