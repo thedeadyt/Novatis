@@ -60,6 +60,74 @@ try {
             echo json_encode(['success' => true, 'orders' => $orders]);
             break;
 
+        case 'POST':
+            // Créer une nouvelle commande
+            $service_id = $_POST['service_id'] ?? null;
+            $seller_id = $_POST['seller_id'] ?? null;
+            $buyer_id = $_POST['buyer_id'] ?? null;
+            $price = $_POST['price'] ?? null;
+            $description = $_POST['description'] ?? '';
+            $message = $_POST['message'] ?? '';
+
+            if (!$service_id || !$seller_id || !$buyer_id || !$price) {
+                echo json_encode(['success' => false, 'error' => 'Données manquantes']);
+                exit;
+            }
+
+            // Vérifier que l'utilisateur connecté est bien l'acheteur
+            if ($buyer_id != $user_id) {
+                http_response_code(403);
+                echo json_encode(['success' => false, 'error' => 'Accès refusé']);
+                exit;
+            }
+
+            // Vérifier que le service existe et est actif
+            $stmt = $pdo->prepare("SELECT * FROM services WHERE id = ? AND status = 'active'");
+            $stmt->execute([$service_id]);
+            $service = $stmt->fetch();
+
+            if (!$service) {
+                echo json_encode(['success' => false, 'error' => 'Service non trouvé ou inactif']);
+                exit;
+            }
+
+            // Calculer la deadline
+            $deadline = date('Y-m-d H:i:s', strtotime('+' . $service['delivery_days'] . ' days'));
+
+            // Créer la commande
+            $stmt = $pdo->prepare("
+                INSERT INTO orders (service_id, buyer_id, seller_id, price, description, deadline, status, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, 'pending', NOW())
+            ");
+            $stmt->execute([$service_id, $buyer_id, $seller_id, $price, $description, $deadline]);
+
+            $order_id = $pdo->lastInsertId();
+
+            // Si un message a été fourni, l'envoyer automatiquement
+            if (!empty($message)) {
+                // Récupérer le nom de l'utilisateur pour personnaliser le message
+                $stmt = $pdo->prepare("SELECT name FROM users WHERE id = ?");
+                $stmt->execute([$buyer_id]);
+                $buyer_name = $stmt->fetchColumn();
+
+                // Construire le message complet
+                $full_message = "🆕 Nouvelle commande pour le service : " . $service['title'] . "\n\n";
+                $full_message .= "Message de " . $buyer_name . " :\n";
+                $full_message .= $message;
+
+                // Insérer le message dans la table messages
+                $stmt = $pdo->prepare("INSERT INTO messages (order_id, sender_id, content, created_at) VALUES (?, ?, ?, NOW())");
+                $stmt->execute([$order_id, $buyer_id, $full_message]);
+            }
+
+            echo json_encode([
+                'success' => true,
+                'message' => 'Commande créée avec succès' . (!empty($message) ? ' et message envoyé' : ''),
+                'order_id' => $order_id,
+                'redirect' => BASE_URL . '/dashboard?tab=messages'
+            ]);
+            break;
+
         case 'PUT':
             $data = json_decode(file_get_contents('php://input'), true);
 

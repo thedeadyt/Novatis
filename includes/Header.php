@@ -136,7 +136,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                   </svg>
                   Dashboard
                 </a>
-                <a href="#" className="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
+                <a href="<?= BASE_URL ?>/pages/logout.php" className="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none"
                        viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
@@ -191,7 +191,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                 </svg>
                 Dashboard
               </a>
-              <a href="#" className="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
+              <a href="<?= BASE_URL ?>/pages/logout.php" className="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none"
                      viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"

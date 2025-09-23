@@ -14,12 +14,20 @@ if (!isset($_SESSION['user'])) {
 $user = $_SESSION['user'];
 $prestataire_id = $_GET['prestataire'] ?? null;
 
-// Récupérer les informations du prestataire
+// Récupérer les informations du prestataire et ses services
 $prestataire = null;
+$services = [];
 if ($prestataire_id) {
     $stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
     $stmt->execute([$prestataire_id]);
     $prestataire = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    // Récupérer les services du prestataire
+    if ($prestataire) {
+        $stmt = $pdo->prepare("SELECT * FROM services WHERE user_id = ? AND status = 'active' ORDER BY price ASC");
+        $stmt->execute([$prestataire_id]);
+        $services = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }
 
 if (!$prestataire) {
@@ -101,31 +109,132 @@ if (!$prestataire) {
                 </div>
             </div>
 
-            <!-- Message d'information -->
-            <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
-                <h3 class="font-bold text-blue-800 mb-2">Comment contacter ce prestataire ?</h3>
-                <p class="text-blue-700 mb-4">
-                    Pour contacter ce prestataire, vous devez d'abord commander un de ses services.
-                    Une fois la commande passée, vous pourrez échanger via le système de messagerie intégré.
-                </p>
-                <a href="<?= BASE_URL ?>/prestataires" class="btn-primary px-4 py-2 rounded-lg inline-block">
-                    Voir ses services
-                </a>
+            <!-- Services disponibles -->
+            <div class="bg-white rounded-lg p-6 mb-6 shadow-lg">
+                <h3 class="font-bold text-xl mb-4">Services disponibles</h3>
+
+                <?php if (empty($services)): ?>
+                    <p class="text-gray-600 text-center py-8">Ce prestataire n'a pas encore de services actifs.</p>
+                <?php else: ?>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <?php foreach ($services as $service): ?>
+                            <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                                <?php if ($service['image']): ?>
+                                    <img src="<?= htmlspecialchars($service['image']) ?>"
+                                         alt="<?= htmlspecialchars($service['title']) ?>"
+                                         class="w-full h-32 object-cover rounded-lg mb-3">
+                                <?php endif; ?>
+
+                                <h4 class="font-bold text-lg mb-2"><?= htmlspecialchars($service['title']) ?></h4>
+                                <p class="text-gray-600 text-sm mb-3"><?= htmlspecialchars($service['description']) ?></p>
+
+                                <div class="flex items-center justify-between mb-4">
+                                    <span class="font-bold text-xl text-red-600"><?= number_format($service['price'], 2, ',', ' ') ?> €</span>
+                                    <span class="text-sm text-gray-500">Livraison: <?= $service['delivery_days'] ?> jour<?= $service['delivery_days'] > 1 ? 's' : '' ?></span>
+                                </div>
+
+                                <form action="<?= BASE_URL ?>/api/orders.php" method="POST" class="order-form">
+                                    <input type="hidden" name="service_id" value="<?= $service['id'] ?>">
+                                    <input type="hidden" name="seller_id" value="<?= $prestataire['id'] ?>">
+                                    <input type="hidden" name="buyer_id" value="<?= $user['id'] ?>">
+                                    <input type="hidden" name="price" value="<?= $service['price'] ?>">
+
+                                    <div class="mb-3">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                                            Détails de votre demande (optionnel)
+                                        </label>
+                                        <textarea name="description"
+                                                  class="w-full p-2 border border-gray-300 rounded-lg text-sm"
+                                                  rows="2"
+                                                  placeholder="Précisez vos besoins particuliers..."></textarea>
+                                    </div>
+
+                                    <div class="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
+                                        <label class="block text-sm font-bold text-blue-800 mb-2">
+                                            💬 Message pour <?= htmlspecialchars($prestataire['name']) ?>
+                                        </label>
+                                        <textarea name="message"
+                                                  class="w-full p-3 border border-blue-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                  rows="3"
+                                                  placeholder="Bonjour <?= htmlspecialchars($prestataire['name']) ?>, je suis intéressé par votre service. Voici mes besoins spécifiques..."></textarea>
+                                        <p class="text-xs text-blue-600 mt-2 flex items-center">
+                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                            Ce message sera envoyé directement au prestataire dès que votre commande sera confirmée.
+                                        </p>
+                                    </div>
+
+                                    <button type="submit" class="btn-primary w-full px-4 py-2 rounded-lg">
+                                        Commander ce service
+                                    </button>
+                                </form>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
             </div>
 
-            <!-- Alternative: Redirection vers Dashboard -->
+            <!-- Info sur la messagerie -->
+            <div class="bg-green-50 border border-green-200 rounded-lg p-6 mb-6">
+                <h3 class="font-bold text-green-800 mb-2">💬 Après votre commande</h3>
+                <p class="text-green-700">
+                    Une fois votre commande passée, vous pourrez directement échanger avec
+                    <strong><?= htmlspecialchars($prestataire['name']) ?></strong> via le système de messagerie
+                    intégré dans votre dashboard.
+                </p>
+            </div>
+
+            <!-- Navigation -->
             <div class="bg-white rounded-lg p-6 shadow-lg">
-                <h3 class="font-bold mb-4">Accès rapide</h3>
-                <div class="flex space-x-4">
+                <h3 class="font-bold mb-4">Navigation</h3>
+                <div class="flex flex-wrap gap-3">
                     <a href="<?= BASE_URL ?>/dashboard" class="btn-secondary px-4 py-2 rounded-lg">
                         Mon Dashboard
                     </a>
-                    <a href="<?= BASE_URL ?>/services" class="btn-secondary px-4 py-2 rounded-lg">
-                        Parcourir les services
+                    <a href="<?= BASE_URL ?>/prestataires" class="btn-secondary px-4 py-2 rounded-lg">
+                        Autres prestataires
                     </a>
                 </div>
             </div>
         </div>
     </div>
+
+    <script>
+        // Gérer la soumission des commandes
+        document.querySelectorAll('.order-form').forEach(form => {
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+
+                const button = this.querySelector('button[type="submit"]');
+                const originalText = button.textContent;
+                button.textContent = 'Commande en cours...';
+                button.disabled = true;
+
+                try {
+                    const formData = new FormData(this);
+                    const response = await fetch(this.action, {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        alert('Commande créée avec succès ! Vous allez être redirigé vers votre dashboard.');
+                        window.location.href = result.redirect || '<?= BASE_URL ?>/dashboard';
+                    } else {
+                        alert('Erreur: ' + result.error);
+                        button.textContent = originalText;
+                        button.disabled = false;
+                    }
+                } catch (error) {
+                    alert('Erreur lors de la commande: ' + error.message);
+                    button.textContent = originalText;
+                    button.disabled = false;
+                }
+            });
+        });
+    </script>
 </body>
 </html>
