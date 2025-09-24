@@ -49,6 +49,11 @@ if (!$prestataire) {
     <!-- Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
 
+    <!-- React & ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
     <style>
         body {
             font-family: var(--font-tinos);
@@ -96,9 +101,7 @@ if (!$prestataire) {
             <!-- Info Prestataire -->
             <div class="bg-white rounded-lg p-6 mb-6 shadow-lg">
                 <div class="flex items-center space-x-4">
-                    <img src="<?= htmlspecialchars($prestataire['avatar'] ?? 'default.png') ?>"
-                         alt="Avatar"
-                         class="w-16 h-16 rounded-full object-cover">
+                    <div id="prestataire-avatar" data-avatar="<?= htmlspecialchars($prestataire['avatar'] ?? '') ?>" data-name="<?= htmlspecialchars($prestataire['name']) ?>" class="w-16 h-16"></div>
                     <div>
                         <h2 class="text-xl font-bold"><?= htmlspecialchars($prestataire['name']) ?></h2>
                         <p class="text-gray-600"><?= htmlspecialchars($prestataire['email']) ?></p>
@@ -234,6 +237,58 @@ if (!$prestataire) {
                     button.disabled = false;
                 }
             });
+        });
+    </script>
+
+    <!-- Script pour l'avatar -->
+    <script type="text/babel">
+        // SVG Avatar anonyme
+        const AnonymousAvatar = ({ className = "", size = 64 }) => (
+            React.createElement('div', {
+                className: `${className} flex items-center justify-center bg-gray-300 rounded-full`,
+                style: { width: size, height: size }
+            },
+                React.createElement('svg', {
+                    width: size * 0.6,
+                    height: size * 0.6,
+                    viewBox: "0 0 24 24",
+                    fill: "none",
+                    xmlns: "http://www.w3.org/2000/svg"
+                },
+                    React.createElement('path', {
+                        d: "M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z",
+                        fill: "#9CA3AF"
+                    })
+                )
+            )
+        );
+
+        // Initialiser l'avatar
+        document.addEventListener('DOMContentLoaded', function() {
+            const avatarContainer = document.getElementById('prestataire-avatar');
+            if (avatarContainer) {
+                const avatarUrl = avatarContainer.dataset.avatar;
+                const userName = avatarContainer.dataset.name;
+
+                if (avatarUrl && avatarUrl.trim() !== '') {
+                    // Créer l'image avec fallback
+                    const img = React.createElement('img', {
+                        src: avatarUrl,
+                        alt: `Avatar de ${userName}`,
+                        className: "w-16 h-16 rounded-full object-cover",
+                        onError: (e) => {
+                            // Si l'image échoue, remplacer par le SVG
+                            const svgElement = React.createElement(AnonymousAvatar, { size: 64 });
+                            ReactDOM.render(svgElement, avatarContainer);
+                        }
+                    });
+                    ReactDOM.render(img, avatarContainer);
+                } else {
+                    // Pas d'avatar, utiliser directement le SVG
+                    const svgElement = React.createElement(AnonymousAvatar, { size: 64 });
+                    ReactDOM.render(svgElement, avatarContainer);
+                }
+            }
         });
     </script>
 </body>

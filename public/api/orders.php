@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../../config/config.php';
+require_once __DIR__ . '/create_notification.php';
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -103,6 +104,27 @@ try {
 
             $order_id = $pdo->lastInsertId();
 
+            // Créer des notifications pour la nouvelle commande
+            // Notification pour le vendeur
+            createNotification(
+                $seller_id,
+                'order',
+                'Nouvelle commande',
+                "Vous avez reçu une nouvelle commande pour \"{$service['title']}\"",
+                '/dashboard?tab=orders',
+                ['order_id' => $order_id, 'service_id' => $service_id]
+            );
+
+            // Notification pour l'acheteur
+            createNotification(
+                $buyer_id,
+                'order',
+                'Commande créée',
+                "Votre commande pour \"{$service['title']}\" a été créée avec succès",
+                '/dashboard?tab=orders',
+                ['order_id' => $order_id, 'service_id' => $service_id]
+            );
+
             // Si un message a été fourni, l'envoyer automatiquement
             if (!empty($message)) {
                 // Récupérer le nom de l'utilisateur pour personnaliser le message
@@ -148,6 +170,96 @@ try {
 
                 $stmt = $pdo->prepare("UPDATE orders SET status = ? WHERE id = ?");
                 $stmt->execute([$new_status, $order_id]);
+
+                // Récupérer les détails de la commande pour les notifications
+                $stmt = $pdo->prepare("
+                    SELECT o.*, s.title as service_title, s.user_id as seller_id,
+                           buyer.name as buyer_name, seller.name as seller_name
+                    FROM orders o
+                    JOIN services s ON s.id = o.service_id
+                    JOIN users buyer ON buyer.id = o.buyer_id
+                    JOIN users seller ON seller.id = s.user_id
+                    WHERE o.id = ?
+                ");
+                $stmt->execute([$order_id]);
+                $order_details = $stmt->fetch();
+
+                // Créer des notifications selon le nouveau statut
+                $status_messages = [
+                    'in_progress' => [
+                        'buyer' => "Votre commande \"{$order_details['service_title']}\" a été acceptée et est en cours de traitement",
+                        'seller' => "Vous avez accepté la commande \"{$order_details['service_title']}\""
+                    ],
+                    'delivered' => [
+                        'buyer' => "Votre commande \"{$order_details['service_title']}\" a été livrée",
+                        'seller' => "Vous avez livré la commande \"{$order_details['service_title']}\""
+                    ],
+                    'completed' => [
+                        'buyer' => "Votre commande \"{$order_details['service_title']}\" est terminée",
+                        'seller' => "La commande \"{$order_details['service_title']}\" a été marquée comme terminée"
+                    ],
+                    'cancelled' => [
+                        'buyer' => "Votre commande \"{$order_details['service_title']}\" a été annulée",
+                        'seller' => "La commande \"{$order_details['service_title']}\" a été annulée"
+                    ]
+                ];
+
+                if (isset($status_messages[$new_status])) {
+                    // Notification pour l'acheteur
+                    createNotification(
+                        $order_details['buyer_id'],
+                        'order',
+                        'Mise à jour de commande',
+                        $status_messages[$new_status]['buyer'],
+                        '/dashboard?tab=orders'
+                    );
+
+                    // Notification pour le vendeur (sauf si c'est lui qui fait l'action)
+                    if ($order_details['seller_id'] != $user_id) {
+                        createNotification(
+                            $order_details['seller_id'],
+                            'order',
+                            'Mise à jour de commande',
+                            $status_messages[$new_status]['seller'],
+                            '/dashboard?tab=orders'
+                        );
+                    }
+                }
+
+                // Si le statut passe à "delivered", envoyer un message automatique pour demander une évaluation
+                if ($new_status === 'delivered') {
+                    try {
+                        // Créer un message automatique dans le chat pour demander l'évaluation
+                        $rating_message = "🎉 Félicitations ! Votre commande \"{$order_details['service_title']}\" a été livrée avec succès !\n\n" .
+                                        "✨ Nous espérons que vous êtes pleinement satisfait(e) du travail réalisé.\n\n" .
+                                        "⭐ Pour aider notre communauté, pourriez-vous prendre un moment pour évaluer ce prestataire ?\n" .
+                                        "Votre avis est précieux et aide les autres utilisateurs à faire leurs choix.\n\n" .
+                                        "📝 Voici ce que vous pouvez faire :\n" .
+                                        "• Noter le travail de 1 à 5 étoiles\n" .
+                                        "• Laisser un commentaire constructif\n" .
+                                        "• Partager votre expérience\n\n" .
+                                        "Merci de contribuer à la qualité de notre plateforme ! 🙏";
+
+                        // Insérer le message automatique (expéditeur = système, donc on utilise l'ID du vendeur pour faire comme si c'était lui)
+                        $stmt = $pdo->prepare("INSERT INTO messages (order_id, sender_id, content, created_at) VALUES (?, ?, ?, NOW())");
+                        $stmt->execute([$order_id, $order_details['seller_id'], $rating_message]);
+
+                        // Créer une notification pour ce nouveau message
+                        if (function_exists('createNotification')) {
+                            createNotification(
+                                $order_details['buyer_id'],
+                                'message',
+                                'Demande d\'évaluation',
+                                "Votre commande a été livrée ! Laissez une évaluation pour aider les autres utilisateurs.",
+                                '/dashboard?tab=messages',
+                                ['order_id' => $order_id, 'type' => 'rating_request']
+                            );
+                        }
+                    } catch (Exception $e) {
+                        // Ne pas faire échouer la mise à jour du statut si le message automatique échoue
+                        error_log("Erreur lors de l'envoi du message d'évaluation: " . $e->getMessage());
+                    }
+                }
 
                 echo json_encode(['success' => true, 'message' => 'Statut mis à jour']);
             } else {

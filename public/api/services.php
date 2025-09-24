@@ -48,12 +48,18 @@ try {
 
         case 'POST':
             // Créer un nouveau service
-            $title = $_POST['title'] ?? null;
-            $description = $_POST['description'] ?? null;
-            $category_id = $_POST['category_id'] ?? null;
-            $price = $_POST['price'] ?? null;
-            $delivery_days = $_POST['delivery_days'] ?? null;
-            $image = $_POST['image'] ?? null;
+            $data = json_decode(file_get_contents('php://input'), true);
+            if (!$data) {
+                // Fallback pour form-data
+                $data = $_POST;
+            }
+
+            $title = $data['title'] ?? null;
+            $description = $data['description'] ?? null;
+            $category_id = $data['category_id'] ?? null;
+            $price = $data['price'] ?? null;
+            $delivery_days = $data['delivery_days'] ?? null;
+            $image = $data['image'] ?? null;
 
             if (!$title || !$description || !$price || !$delivery_days) {
                 echo json_encode(['success' => false, 'error' => 'Données manquantes']);

@@ -143,9 +143,7 @@ foreach ($prestataires as &$prestataire) {
                  data-min-price="<?= min(array_column($prestataire['services_list'], 'price')) ?>"
                  data-min-delivery="<?= min(array_column($prestataire['services_list'], 'delivery_days')) ?>">
                 <div class="prestataire-header">
-                    <img src="<?= htmlspecialchars($prestataire['avatar'] ?? BASE_URL . '/assets/images/default-avatar.png') ?>"
-                         alt="Avatar de <?= htmlspecialchars($prestataire['name']) ?>"
-                         class="avatar">
+                    <div class="avatar-container" data-avatar="<?= htmlspecialchars($prestataire['avatar'] ?? '') ?>" data-name="<?= htmlspecialchars($prestataire['name']) ?>"></div>
                 </div>
 
                 <div class="prestataire-info">
@@ -200,6 +198,59 @@ foreach ($prestataires as &$prestataire) {
 
     </div>
     <?php include __DIR__ . '/../../includes/Footer.php';?>
+
+    <!-- Script pour les avatars -->
+    <script type="text/babel">
+        // SVG Avatar anonyme
+        const AnonymousAvatar = ({ className = "", size = 80 }) => (
+            React.createElement('div', {
+                className: `${className} flex items-center justify-center bg-gray-300 rounded-full`,
+                style: { width: size, height: size }
+            },
+                React.createElement('svg', {
+                    width: size * 0.6,
+                    height: size * 0.6,
+                    viewBox: "0 0 24 24",
+                    fill: "none",
+                    xmlns: "http://www.w3.org/2000/svg"
+                },
+                    React.createElement('path', {
+                        d: "M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z",
+                        fill: "#9CA3AF"
+                    })
+                )
+            )
+        );
+
+        // Initialiser les avatars
+        document.addEventListener('DOMContentLoaded', function() {
+            const avatarContainers = document.querySelectorAll('.avatar-container');
+
+            avatarContainers.forEach(container => {
+                const avatarUrl = container.dataset.avatar;
+                const userName = container.dataset.name;
+
+                if (avatarUrl && avatarUrl.trim() !== '') {
+                    // Créer l'image avec fallback
+                    const img = React.createElement('img', {
+                        src: avatarUrl,
+                        alt: `Avatar de ${userName}`,
+                        className: "avatar",
+                        onError: (e) => {
+                            // Si l'image échoue, remplacer par le SVG
+                            const svgElement = React.createElement(AnonymousAvatar, { size: 80 });
+                            ReactDOM.render(svgElement, container);
+                        }
+                    });
+                    ReactDOM.render(img, container);
+                } else {
+                    // Pas d'avatar, utiliser directement le SVG
+                    const svgElement = React.createElement(AnonymousAvatar, { size: 80 });
+                    ReactDOM.render(svgElement, container);
+                }
+            });
+        });
+    </script>
 
     <!-- Script JavaScript pour les fonctionnalités interactives -->
     <script type="text/babel">

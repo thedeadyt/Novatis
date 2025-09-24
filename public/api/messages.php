@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../../config/config.php';
+require_once __DIR__ . '/create_notification.php';
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -74,6 +75,16 @@ try {
                 $stmt = $pdo->prepare("UPDATE messages SET is_read = 1 WHERE order_id = ? AND sender_id != ?");
                 $stmt->execute([$order_id, $user_id]);
 
+                // Synchroniser avec les notifications - marquer comme lues les notifications de messages pour cette commande
+                $stmt = $pdo->prepare("
+                    UPDATE notifications
+                    SET is_read = 1
+                    WHERE user_id = ?
+                    AND type = 'message'
+                    AND JSON_EXTRACT(metadata, '$.order_id') = ?
+                ");
+                $stmt->execute([$user_id, $order_id]);
+
                 echo json_encode(['success' => true, 'messages' => $messages, 'order' => $order]);
             }
             break;
@@ -104,6 +115,35 @@ try {
                 // Insérer le message
                 $stmt = $pdo->prepare("INSERT INTO messages (order_id, sender_id, content) VALUES (?, ?, ?)");
                 $stmt->execute([$order_id, $user_id, $content]);
+
+                // Créer une notification pour le destinataire (optionnel, ne doit pas casser l'envoi)
+                try {
+                    // Récupérer les détails pour la notification
+                    $stmt = $pdo->prepare("
+                        SELECT o.*, s.title as service_title, sender.name as sender_name,
+                               CASE WHEN o.buyer_id = ? THEN o.seller_id ELSE o.buyer_id END as recipient_id
+                        FROM orders o
+                        JOIN services s ON s.id = o.service_id
+                        JOIN users sender ON sender.id = ?
+                        WHERE o.id = ?
+                    ");
+                    $stmt->execute([$user_id, $user_id, $order_id]);
+                    $order_details = $stmt->fetch();
+
+                    if ($order_details && $order_details['recipient_id'] && function_exists('createNotification')) {
+                        createNotification(
+                            $order_details['recipient_id'],
+                            'message',
+                            'Nouveau message',
+                            "Vous avez reçu un nouveau message de {$order_details['sender_name']} concernant \"{$order_details['service_title']}\"",
+                            '/dashboard?tab=messages',
+                            ['order_id' => $order_id, 'sender_id' => $user_id]
+                        );
+                    }
+                } catch (Exception $e) {
+                    // Erreur de notification ne doit JAMAIS casser l'envoi de message
+                    error_log("Erreur notification lors envoi message: " . $e->getMessage());
+                }
 
                 echo json_encode(['success' => true, 'message' => 'Message envoyé']);
             } else {
