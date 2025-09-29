@@ -6,7 +6,7 @@
       { name: "Accueil", href: "<?= BASE_URL ?>" },
       { name: "Prestataires", href: "<?= BASE_URL ?>/Prestataires" },
       { name: "Contact", href: "<?= BASE_URL ?>/Contact" },
-      { name: "À propos", href: "<?= BASE_URL ?>/A-propos" },
+      { name: "À propos", href: "<?= BASE_URL ?>/pages/Apropos.php" },
     ];
 
     const legalLinks = [
