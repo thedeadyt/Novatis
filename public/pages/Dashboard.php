@@ -112,10 +112,20 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
         .sidebar-mobile {
             transform: translateX(-100%);
             transition: transform 0.3s ease;
+            top: 80px; /* Décaler en dessous du header */
+            height: calc(100vh - 80px); /* Ajuster la hauteur */
         }
 
         .sidebar-mobile.open {
             transform: translateX(0);
+        }
+
+        @media (min-width: 1024px) {
+            .sidebar-mobile {
+                top: 80px; /* Même pour desktop */
+                height: calc(100vh - 80px);
+                position: fixed;
+            }
         }
 
         .message-input {

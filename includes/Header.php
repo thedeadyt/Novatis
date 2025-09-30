@@ -92,7 +92,7 @@ $userInfo = [
 
           {/* Logo + Nom */}
           <a href="<?= BASE_URL ?>" className="flex items-center space-x-2">
-            <img src="<?= BASE_URL ?>/asset/img/logo.png" alt="Logo" className="w-12 h-12 rounded-full" />
+            <img src="<?= BASE_URL ?>/asset/img/logo.svg" alt="Logo" className="w-12 h-12 rounded-full" />
             <span className="text-xl font-bold">Novatis</span>
           </a>
 
@@ -200,7 +200,7 @@ $userInfo = [
 
                   {/* Menu items */}
                   <div className="py-2">
-                    <a href="<?= BASE_URL ?>/Dashboard" className="flex items-center px-5 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors">
+                    <a href="<?= BASE_URL ?>/pages/Dashboard.php" className="flex items-center px-5 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-3 text-gray-400" fill="none"
                            viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
@@ -208,7 +208,7 @@ $userInfo = [
                       </svg>
                       Dashboard
                     </a>
-                    <a href="<?= BASE_URL ?>/Parametres" className="flex items-center px-5 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors">
+                    <a href="<?= BASE_URL ?>/pages/Settings.php" className="flex items-center px-5 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 2122 2122"
@@ -297,7 +297,7 @@ $userInfo = [
                 </div>
 
                 {/* Menu liens */}
-                <a href="<?= BASE_URL ?>/Dashboard" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded">
+                <a href="<?= BASE_URL ?>/pages/Dashboard.php" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none"
                        viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
@@ -305,7 +305,7 @@ $userInfo = [
                   </svg>
                   Dashboard
                 </a>
-                <a href="<?= BASE_URL ?>/Parametres" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded">
+                <a href="<?= BASE_URL ?>/pages/Settings.php" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded">
                   <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 2122 2122"
