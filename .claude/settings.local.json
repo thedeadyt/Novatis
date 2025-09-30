@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(php:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(dir)",
+      "Bash(del \"setup_settings.php\" \"insert_sample_data.php\" \"check_triggers.php\" \"create_settings_tables.sql\")"
     ],
     "deny": [],
     "ask": []
