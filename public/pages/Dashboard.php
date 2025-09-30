@@ -7,7 +7,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // Vérifie si l'utilisateur est connecté
 if (!isset($_SESSION['user'])) {
-    header('Location: ' . BASE_URL . '/login');
+    header('Location: ' . BASE_URL . '/pages/Autentification.php');
     exit;
 }
 

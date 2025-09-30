@@ -143,7 +143,7 @@ function updateProfile($pdo, $pdo_settings, $user) {
         // Validation
         if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $_SESSION['error_message'] = 'Email invalide';
-            header('Location: ' . BASE_URL . '/pages/Settings.php');
+            header('Location: ' . BASE_URL . '/pages/Parametres?section=profile');
             return;
         }
 
@@ -152,7 +152,7 @@ function updateProfile($pdo, $pdo_settings, $user) {
         $stmt->execute([$email, $user['id']]);
         if ($stmt->fetch()) {
             $_SESSION['error_message'] = 'Cette adresse email est déjà utilisée';
-            header('Location: ' . BASE_URL . '/pages/Settings.php');
+            header('Location: ' . BASE_URL . '/pages/Parametres?section=profile');
             return;
         }
 
@@ -177,11 +177,11 @@ function updateProfile($pdo, $pdo_settings, $user) {
         $_SESSION['user']['phone'] = $phone;
 
         $_SESSION['success_message'] = 'Profil mis à jour avec succès';
-        header('Location: ' . BASE_URL . '/pages/Settings.php?section=profile');
+        header('Location: ' . BASE_URL . '/pages/Parametres?section=profile');
 
     } catch (Exception $e) {
         $_SESSION['error_message'] = 'Erreur lors de la mise à jour du profil : ' . $e->getMessage();
-        header('Location: ' . BASE_URL . '/pages/Settings.php?section=profile');
+        header('Location: ' . BASE_URL . '/pages/Parametres?section=profile');
     }
 }
 
@@ -194,19 +194,19 @@ function changePassword($pdo, $user) {
         // Validation
         if (empty($currentPassword) || empty($newPassword) || empty($confirmPassword)) {
             $_SESSION['error_message'] = 'Tous les champs sont requis';
-            header('Location: ' . BASE_URL . '/pages/Settings.php?section=security');
+            header('Location: ' . BASE_URL . '/pages/Parametres?section=security');
             return;
         }
 
         if ($newPassword !== $confirmPassword) {
             $_SESSION['error_message'] = 'Les mots de passe ne correspondent pas';
-            header('Location: ' . BASE_URL . '/pages/Settings.php?section=security');
+            header('Location: ' . BASE_URL . '/pages/Parametres?section=security');
             return;
         }
 
         if (strlen($newPassword) < 8) {
             $_SESSION['error_message'] = 'Le mot de passe doit contenir au moins 8 caractères';
-            header('Location: ' . BASE_URL . '/pages/Settings.php?section=security');
+            header('Location: ' . BASE_URL . '/pages/Parametres?section=security');
             return;
         }
 
@@ -217,7 +217,7 @@ function changePassword($pdo, $user) {
 
         if (!$userData || !password_verify($currentPassword, $userData['password'])) {
             $_SESSION['error_message'] = 'Mot de passe actuel incorrect';
-            header('Location: ' . BASE_URL . '/pages/Settings.php?section=security');
+            header('Location: ' . BASE_URL . '/pages/Parametres?section=security');
             return;
         }
 
@@ -229,11 +229,11 @@ function changePassword($pdo, $user) {
         $stmt->execute([$hashedPassword, $user['id']]);
 
         $_SESSION['success_message'] = 'Mot de passe modifié avec succès';
-        header('Location: ' . BASE_URL . '/pages/Settings.php?section=security');
+        header('Location: ' . BASE_URL . '/pages/Parametres?section=security');
 
     } catch (Exception $e) {
         $_SESSION['error_message'] = 'Erreur lors du changement de mot de passe : ' . $e->getMessage();
-        header('Location: ' . BASE_URL . '/pages/Settings.php?section=security');
+        header('Location: ' . BASE_URL . '/pages/Parametres?section=security');
     }
 }
 
@@ -273,11 +273,11 @@ function toggle2FA($pdo, $user) {
         }
 
         $_SESSION['user']['two_factor_enabled'] = $newStatus;
-        header('Location: ' . BASE_URL . '/pages/Settings.php?section=security');
+        header('Location: ' . BASE_URL . '/pages/Parametres?section=security');
 
     } catch (Exception $e) {
         $_SESSION['error_message'] = 'Erreur lors de la modification de l\'A2F : ' . $e->getMessage();
-        header('Location: ' . BASE_URL . '/pages/Settings.php?section=security');
+        header('Location: ' . BASE_URL . '/pages/Parametres?section=security');
     }
 }
 
@@ -298,11 +298,11 @@ function updateNotifications($pdo, $user) {
         $stmt->execute([$user['id'], $emailNotifications, $pushNotifications, $smsNotifications]);
 
         $_SESSION['success_message'] = 'Préférences de notifications mises à jour';
-        header('Location: ' . BASE_URL . '/pages/Settings.php?section=notifications');
+        header('Location: ' . BASE_URL . '/pages/Parametres?section=notifications');
 
     } catch (Exception $e) {
         $_SESSION['error_message'] = 'Erreur lors de la mise à jour des notifications : ' . $e->getMessage();
-        header('Location: ' . BASE_URL . '/pages/Settings.php?section=notifications');
+        header('Location: ' . BASE_URL . '/pages/Parametres?section=notifications');
     }
 }
 
@@ -327,11 +327,11 @@ function updatePrivacy($pdo, $user) {
         $stmt->execute([$user['id'], $profileVisibility, $showEmail, $showPhone, $allowSearchEngines, $dataSharing]);
 
         $_SESSION['success_message'] = 'Paramètres de confidentialité mis à jour';
-        header('Location: ' . BASE_URL . '/pages/Settings.php?section=privacy');
+        header('Location: ' . BASE_URL . '/pages/Parametres?section=privacy');
 
     } catch (Exception $e) {
         $_SESSION['error_message'] = 'Erreur lors de la mise à jour de la confidentialité : ' . $e->getMessage();
-        header('Location: ' . BASE_URL . '/pages/Settings.php?section=privacy');
+        header('Location: ' . BASE_URL . '/pages/Parametres?section=privacy');
     }
 }
 
@@ -350,11 +350,11 @@ function updateDisplay($pdo, $user) {
         $stmt->execute([$user['id'], $darkMode, $currency]);
 
         $_SESSION['success_message'] = 'Préférences d\'affichage mises à jour';
-        header('Location: ' . BASE_URL . '/pages/Settings.php?section=display');
+        header('Location: ' . BASE_URL . '/pages/Parametres?section=display');
 
     } catch (Exception $e) {
         $_SESSION['error_message'] = 'Erreur lors de la mise à jour de l\'affichage : ' . $e->getMessage();
-        header('Location: ' . BASE_URL . '/pages/Settings.php?section=display');
+        header('Location: ' . BASE_URL . '/pages/Parametres?section=display');
     }
 }
 

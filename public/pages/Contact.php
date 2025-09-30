@@ -7,7 +7,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // Vérifier si l'utilisateur est connecté
 if (!isset($_SESSION['user'])) {
-    header('Location: ' . BASE_URL . '/login');
+    header('Location: ' . BASE_URL . '/pages/Autentification.php');
     exit;
 }
 
@@ -31,7 +31,7 @@ if ($prestataire_id) {
 }
 
 if (!$prestataire) {
-    header('Location: ' . BASE_URL . '/prestataires');
+    header('Location: ' . BASE_URL . '/pages/Prestataires.php');
     exit;
 }
 ?>
@@ -92,7 +92,7 @@ if (!$prestataire) {
             <div class="bg-white rounded-lg p-6 mb-6 shadow-lg">
                 <div class="flex items-center justify-between">
                     <h1 class="text-2xl font-bold">Contacter un prestataire</h1>
-                    <a href="<?= BASE_URL ?>/prestataires" class="btn-secondary px-4 py-2 rounded-lg">
+                    <a href="<?= BASE_URL ?>/pages/Prestataires.php" class="btn-secondary px-4 py-2 rounded-lg">
                         ← Retour aux prestataires
                     </a>
                 </div>
@@ -192,10 +192,10 @@ if (!$prestataire) {
             <div class="bg-white rounded-lg p-6 shadow-lg">
                 <h3 class="font-bold mb-4">Navigation</h3>
                 <div class="flex flex-wrap gap-3">
-                    <a href="<?= BASE_URL ?>/dashboard" class="btn-secondary px-4 py-2 rounded-lg">
+                    <a href="<?= BASE_URL ?>/pages/Dashboard.php" class="btn-secondary px-4 py-2 rounded-lg">
                         Mon Dashboard
                     </a>
-                    <a href="<?= BASE_URL ?>/prestataires" class="btn-secondary px-4 py-2 rounded-lg">
+                    <a href="<?= BASE_URL ?>/pages/Prestataires.php" class="btn-secondary px-4 py-2 rounded-lg">
                         Autres prestataires
                     </a>
                 </div>
@@ -225,7 +225,7 @@ if (!$prestataire) {
 
                     if (result.success) {
                         alert('Commande créée avec succès ! Vous allez être redirigé vers votre dashboard.');
-                        window.location.href = result.redirect || '<?= BASE_URL ?>/dashboard';
+                        window.location.href = result.redirect || '<?= BASE_URL ?>/pages/Dashboard.php';
                     } else {
                         alert('Erreur: ' + result.error);
                         button.textContent = originalText;

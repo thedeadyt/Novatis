@@ -8,8 +8,8 @@ if (session_status() === PHP_SESSION_NONE) {
 // Supprime uniquement les informations de l'utilisateur
 unset($_SESSION['user']);
 
-// Redirection vers la page login après 2 secondes
-$redirectUrl = BASE_URL . '../index.php';
+// Redirection vers la page d'accueil après 2 secondes
+$redirectUrl = BASE_URL . '/index.php';
 ?>
 
 <!DOCTYPE html>

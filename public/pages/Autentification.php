@@ -300,7 +300,7 @@ if (isset($_SESSION['user'])) {
                                 className: "mb-6 lg:mb-8"
                             },
                                 React.createElement('img', {
-                                    src: "<?= BASE_URL ?>/asset/img/logo.png",
+                                    src: "<?= BASE_URL ?>/assets/img/logo.png",
                                     alt: "Novatis Logo",
                                     className: "w-16 h-16 lg:w-24 lg:h-24 mx-auto rounded-full logo-glow"
                                 })

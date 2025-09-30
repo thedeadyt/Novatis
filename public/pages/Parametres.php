@@ -7,7 +7,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // Vérifie si l'utilisateur est connecté
 if (!isset($_SESSION['user'])) {
-    header('Location: ' . BASE_URL . '/login');
+    header('Location: ' . BASE_URL . '/pages/Autentification.php');
     exit;
 }
 
@@ -1018,7 +1018,7 @@ try {
         function confirmDeleteAccount() {
             if (confirm('Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.')) {
                 if (confirm('Dernière confirmation : toutes vos données seront définitivement perdues. Continuer ?')) {
-                    window.location.href = '<?= BASE_URL ?>/delete-account';
+                    window.location.href = '<?= BASE_URL ?>/pages/delete-account.php';
                 }
             }
         }

@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../config/config.php';
+require_once __DIR__ . '/../../config/config.php';
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -7,7 +7,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // Vérifie si l'utilisateur est connecté
 if (!isset($_SESSION['user'])) {
-    header('Location: ' . BASE_URL . '/login');
+    header('Location: ' . BASE_URL . '/pages/Autentification.php');
     exit;
 }
 
@@ -25,7 +25,7 @@ try {
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch (PDOException $e) {
     $_SESSION['error_message'] = 'Erreur de connexion à la base de données';
-    header('Location: ' . BASE_URL . '/pages/Settings.php');
+    header('Location: ' . BASE_URL . '/pages/Parametres?section=account');
     exit;
 }
 
@@ -73,6 +73,6 @@ try {
 } catch (Exception $e) {
     $pdo->rollback();
     $_SESSION['error_message'] = 'Erreur lors de la suppression du compte : ' . $e->getMessage();
-    header('Location: ' . BASE_URL . '/pages/Settings.php');
+    header('Location: ' . BASE_URL . '/pages/Parametres?section=account');
 }
 ?>

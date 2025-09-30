@@ -208,7 +208,7 @@ $userInfo = [
                       </svg>
                       Dashboard
                     </a>
-                    <a href="<?= BASE_URL ?>/pages/Settings.php" className="flex items-center px-5 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors">
+                    <a href="<?= BASE_URL ?>/pages/Parametres.php?section=profile" className="flex items-center px-5 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 2122 2122"
@@ -305,7 +305,7 @@ $userInfo = [
                   </svg>
                   Dashboard
                 </a>
-                <a href="<?= BASE_URL ?>/pages/Settings.php" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded">
+                <a href="<?= BASE_URL ?>/pages/Parametres.php?section=profile" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded">
                   <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 2122 2122"
