@@ -4,9 +4,9 @@
   function Footer() {
     const links = [
       { name: "Accueil", href: "<?= BASE_URL ?>" },
-      { name: "Prestataires", href: "#", disabled: true },
-      { name: "Contact", href: "#", disabled: true },
-      { name: "À propos", href: "#", disabled: true },
+      { name: "Prestataires", href: "<?= BASE_URL ?>/Prestataires" },
+      { name: "Contact", href: "<?= BASE_URL ?>/Contact" },
+      { name: "À propos", href: "<?= BASE_URL ?>/pages/Apropos.php" },
     ];
 
     const legalLinks = [
