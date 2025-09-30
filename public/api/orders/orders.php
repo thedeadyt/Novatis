@@ -1,6 +1,6 @@
 <?php
-require_once __DIR__ . '/../../config/config.php';
-require_once __DIR__ . '/create_notification.php';
+require_once __DIR__ . '/../../../config/config.php';
+require_once __DIR__ . '/../notifications/create_notification.php';
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();

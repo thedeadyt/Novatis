@@ -136,7 +136,7 @@ if (!$prestataire) {
                                     <span class="text-sm text-gray-500">Livraison: <?= $service['delivery_days'] ?> jour<?= $service['delivery_days'] > 1 ? 's' : '' ?></span>
                                 </div>
 
-                                <form action="<?= BASE_URL ?>/api/orders.php" method="POST" class="order-form">
+                                <form action="<?= BASE_URL ?>/api/orders/orders.php" method="POST" class="order-form">
                                     <input type="hidden" name="service_id" value="<?= $service['id'] ?>">
                                     <input type="hidden" name="seller_id" value="<?= $prestataire['id'] ?>">
                                     <input type="hidden" name="buyer_id" value="<?= $user['id'] ?>">

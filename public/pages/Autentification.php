@@ -257,7 +257,7 @@ if (isset($_SESSION['user'])) {
                 setLoading(true);
 
                 try {
-                    const endpoint = isLogin ? 'login.php' : 'register.php';
+                    const endpoint = isLogin ? 'auth/login.php' : 'auth/register.php';
                     const response = await fetch(`<?= BASE_URL ?>/api/${endpoint}`, {
                         method: 'POST',
                         headers: {
