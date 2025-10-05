@@ -39,6 +39,22 @@ $userInfo = [
   // Données utilisateur depuis PHP
   const userInfo = <?= json_encode($userInfo) ?>;
 
+  // Traductions
+  const t = {
+    home: "<?= __('nav_home') ?>",
+    findProvider: "<?= __('nav_find_provider') ?>",
+    dashboard: "<?= __('nav_dashboard') ?>",
+    profile: "<?= __('nav_profile') ?>",
+    settings: "<?= __('nav_settings') ?>",
+    logout: "<?= __('nav_logout') ?>",
+    login: "<?= __('nav_login') ?>",
+    register: "<?= __('nav_register') ?>",
+    notifications: "<?= __('nav_notifications') ?>",
+    markAllRead: "<?= __('nav_mark_all_read') ?>",
+    viewAll: "<?= __('nav_view_all') ?>",
+    noNotifications: "<?= __('nav_no_notifications') ?>"
+  };
+
   // SVG Avatar anonyme
   const AnonymousAvatar = ({ className, size = 40 }) => (
     React.createElement('div', {
@@ -71,8 +87,8 @@ $userInfo = [
     const navRefs = useRef([]);
 
     const items = [
-      { name: "Accueil", href: "<?= BASE_URL ?>", file: "index.php" },
-      { name: "Trouver un prestataire", href: "<?= BASE_URL ?>/Prestataires", file: "Prestataires.php" },
+      { name: t.home, href: "<?= BASE_URL ?>", file: "index.php" },
+      { name: t.findProvider, href: "<?= BASE_URL ?>/Prestataires", file: "Prestataires.php" },
     ];
 
     useEffect(() => {
@@ -248,10 +264,10 @@ $userInfo = [
                   <div className="absolute right-0 mt-2 w-96 bg-white border rounded-lg shadow-lg z-50 max-h-[500px] overflow-hidden flex flex-col">
                     {/* Header */}
                     <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between bg-gray-50">
-                      <h3 className="font-semibold text-gray-900">Notifications</h3>
+                      <h3 className="font-semibold text-gray-900">{t.notifications}</h3>
                       {unreadCount > 0 && (
                         <button onClick={markAllAsRead} className="text-xs text-blue-600 hover:text-blue-800 font-medium">
-                          Tout marquer comme lu
+                          {t.markAllRead}
                         </button>
                       )}
                     </div>
@@ -263,7 +279,7 @@ $userInfo = [
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto mb-3 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
                           </svg>
-                          <p className="text-sm">Aucune notification</p>
+                          <p className="text-sm">{t.noNotifications}</p>
                         </div>
                       ) : (
                         notifications.map((notif) => (
@@ -301,7 +317,7 @@ $userInfo = [
                     {notifications.length > 0 && (
                       <div className="px-4 py-3 border-t border-gray-200 bg-gray-50 text-center">
                         <a href="<?= BASE_URL ?>/notifications" className="text-sm text-blue-600 hover:text-blue-800 font-medium">
-                          Voir toutes les notifications
+                          {t.viewAll}
                         </a>
                       </div>
                     )}
@@ -380,6 +396,14 @@ $userInfo = [
                       </svg>
                       Dashboard
                     </a>
+                    <a href="<?= BASE_URL ?>/profil?id=<?= $user['id'] ?>" className="flex items-center px-5 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-3 text-gray-400" fill="none"
+                           viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                      </svg>
+                      Voir mon profil
+                    </a>
                     <a href="<?= BASE_URL ?>/Parametres?section=profile" className="flex items-center px-5 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -410,13 +434,13 @@ $userInfo = [
             /* Boutons connexion/inscription pour utilisateurs non connectés */
             <div className="flex items-center space-x-3">
               <a
-                href="<?= BASE_URL ?>/Autentification"
+                href="<?= BASE_URL ?>/Autentification?mode=login"
                 className="text-gray-700 hover:text-gray-900 font-medium px-3 py-2 rounded-md transition-colors"
               >
                 Connexion
               </a>
               <a
-                href="<?= BASE_URL ?>/Autentification"
+                href="<?= BASE_URL ?>/Autentification?mode=register"
                 className="bg-black text-white hover:bg-gray-800 font-medium px-4 py-2 rounded-md transition-colors"
               >
                 S'inscrire
@@ -501,10 +525,10 @@ $userInfo = [
             ) : (
               /* Liens connexion/inscription pour mobile */
               <div className="mt-2 border-t pt-2 space-y-2">
-                <a href="<?= BASE_URL ?>/Autentification" className="block bg-white text-center px-4 py-2 rounded shadow">
+                <a href="<?= BASE_URL ?>/Autentification?mode=login" className="block bg-white text-center px-4 py-2 rounded shadow">
                   Connexion
                 </a>
-                <a href="<?= BASE_URL ?>/Autentification" className="block bg-black text-white text-center px-4 py-2 rounded shadow">
+                <a href="<?= BASE_URL ?>/Autentification?mode=register" className="block bg-black text-white text-center px-4 py-2 rounded shadow">
                   S'inscrire
                 </a>
               </div>

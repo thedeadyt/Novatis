@@ -38,6 +38,63 @@ if (!$prestataire) {
     exit;
 }
 
+// Démarrer la session si pas déjà démarrée
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Récupérer les paramètres de confidentialité
+$stmt = $pdo->prepare("SELECT * FROM user_privacy WHERE user_id = ?");
+$stmt->execute([$userId]);
+$privacy = $stmt->fetch(PDO::FETCH_ASSOC);
+
+// Si pas de paramètres, utiliser les valeurs par défaut
+if (!$privacy) {
+    $privacy = [
+        'profile_visibility' => 'public',
+        'show_email' => false,
+        'show_phone' => false,
+        'allow_search_engines' => true
+    ];
+}
+
+// Vérifier si l'utilisateur connecté peut voir ce profil
+$currentUserId = $_SESSION['user']['id'] ?? null;
+$canViewProfile = true;
+
+// Seuls les modes "public" et "private" sont supportés
+if ($privacy['profile_visibility'] === 'private' && $currentUserId != $userId) {
+    // Profil privé : seul le propriétaire peut le voir
+    ?>
+    <!DOCTYPE html>
+    <html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Profil privé - Novatis</title>
+        <link rel='stylesheet' type='text/css' href='<?= BASE_URL ?>/assets/css/Variables.css'>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    </head>
+    <body class="bg-gray-100">
+        <?php include __DIR__ . '/../../includes/Header.php'; ?>
+        <div class="min-h-screen flex items-center justify-center" style="margin-top: 6rem;">
+            <div class="bg-white rounded-lg shadow-lg p-8 max-w-md text-center">
+                <i class="fas fa-lock text-6xl text-gray-400 mb-4"></i>
+                <h1 class="text-2xl font-bold text-gray-800 mb-2">Profil privé</h1>
+                <p class="text-gray-600 mb-6">Ce profil est configuré en mode privé. Seul le propriétaire peut le consulter.</p>
+                <a href="<?= BASE_URL ?>/Prestataires" class="inline-block bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition">
+                    <i class="fas fa-arrow-left mr-2"></i>Retour aux prestataires
+                </a>
+            </div>
+        </div>
+        <?php include __DIR__ . '/../../includes/Footer.php'; ?>
+    </body>
+    </html>
+    <?php
+    exit;
+}
+
 // Calculer le nom complet
 $prestataire['name'] = trim($prestataire['firstname'] . ' ' . $prestataire['lastname']);
 if (empty($prestataire['name'])) {
@@ -80,6 +137,9 @@ $avgRating = count($reviews) > 0 ? array_sum(array_column($reviews, 'rating')) /
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($prestataire['name']) ?> - Profil | Novatis</title>
+    <?php if (!$privacy['allow_search_engines']): ?>
+    <meta name="robots" content="noindex, nofollow">
+    <?php endif; ?>
     <link rel='stylesheet' type='text/css' href='<?= BASE_URL ?>/assets/css/Variables.css'>
     <link rel='stylesheet' type='text/css' href='<?= BASE_URL ?>/assets/css/Footer.css'>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -192,6 +252,33 @@ $avgRating = count($reviews) > 0 ? array_sum(array_column($reviews, 'rating')) /
                 <div class="text-gray-600 text-sm">Note moyenne</div>
             </div>
         </div>
+
+        <!-- Informations de contact -->
+        <?php if ($privacy['show_email'] || $privacy['show_phone']): ?>
+            <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+                <h2 class="text-2xl font-bold mb-4">
+                    <i class="fas fa-address-card mr-2 text-red-600"></i>Informations de contact
+                </h2>
+                <div class="space-y-3">
+                    <?php if ($privacy['show_email'] && $prestataire['email']): ?>
+                        <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                            <i class="fas fa-envelope text-red-600"></i>
+                            <a href="mailto:<?= htmlspecialchars($prestataire['email']) ?>" class="text-gray-700 hover:text-red-600 transition-colors">
+                                <?= htmlspecialchars($prestataire['email']) ?>
+                            </a>
+                        </div>
+                    <?php endif; ?>
+                    <?php if ($privacy['show_phone'] && $prestataire['phone']): ?>
+                        <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                            <i class="fas fa-phone text-red-600"></i>
+                            <a href="tel:<?= htmlspecialchars($prestataire['phone']) ?>" class="text-gray-700 hover:text-red-600 transition-colors">
+                                <?= htmlspecialchars($prestataire['phone']) ?>
+                            </a>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+        <?php endif; ?>
 
         <!-- Services -->
         <div class="mb-8">

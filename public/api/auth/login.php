@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../../../config/config.php';
 require_once __DIR__ . '/../../../includes/TwoFactorAuth.php';
+require_once __DIR__ . '/../../../includes/NotificationService.php';
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -110,6 +111,28 @@ try {
     // Mettre à jour last_login
     $stmt = $pdo->prepare("UPDATE users SET last_login = NOW() WHERE id = ?");
     $stmt->execute([$user['id']]);
+
+    // Envoyer une notification de sécurité pour nouvelle connexion
+    try {
+        $notificationService = new NotificationService($pdo);
+        $loginTime = date('d/m/Y à H:i');
+        $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? 'Navigateur inconnu';
+        $ip = $_SERVER['REMOTE_ADDR'] ?? 'IP inconnue';
+
+        // Déterminer le type de navigateur simplement
+        $browser = 'Navigateur inconnu';
+        if (strpos($userAgent, 'Chrome') !== false) $browser = 'Chrome';
+        elseif (strpos($userAgent, 'Firefox') !== false) $browser = 'Firefox';
+        elseif (strpos($userAgent, 'Safari') !== false) $browser = 'Safari';
+        elseif (strpos($userAgent, 'Edge') !== false) $browser = 'Edge';
+
+        $notificationService->notifySecurityAlert(
+            $user['id'],
+            "Nouvelle connexion détectée le {$loginTime} depuis {$browser} (IP: {$ip}). Si ce n'était pas vous, changez immédiatement votre mot de passe."
+        );
+    } catch (Exception $e) {
+        error_log("Erreur notification de connexion: " . $e->getMessage());
+    }
 
     echo json_encode([
         'success' => true,

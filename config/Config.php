@@ -6,7 +6,7 @@ define('BASE_URL', '/Novatis/public');
 
 // Mode développement (affiche les codes de vérification pour tester sans SMS)
 // À mettre à false en production
-define('DEVELOPMENT_MODE', true); 
+define('DEVELOPMENT_MODE', true);
 
 
 $host = 'mysql-alex2pro.alwaysdata.net';
@@ -22,4 +22,14 @@ try {
 } catch (PDOException $e) {
     die("Erreur de connexion : " . $e->getMessage());
 }
+
+// Charger le système de langue
+require_once __DIR__ . '/../includes/Language.php';
+
+// Initialiser la langue
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+$userId = $_SESSION['user']['id'] ?? null;
+Language::init($pdo, $userId);
 ?>

@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../../../config/config.php';
 require_once __DIR__ . '/../../../includes/TwoFactorAuth.php';
+require_once __DIR__ . '/../../../includes/NotificationService.php';
 
 header('Content-Type: application/json');
 
@@ -124,6 +125,17 @@ function enableTwoFactor($twoFA, $pdo, $user, $input) {
         // Supprimer le secret temporaire
         unset($_SESSION['temp_2fa_secret']);
 
+        // Envoyer une notification de sécurité
+        try {
+            $notificationService = new NotificationService($pdo);
+            $notificationService->notifySecurityAlert(
+                $user['id'],
+                "L'authentification à deux facteurs (A2F) a été activée sur votre compte. Votre compte est maintenant plus sécurisé."
+            );
+        } catch (Exception $e) {
+            error_log("Erreur notification A2F activée: " . $e->getMessage());
+        }
+
         echo json_encode([
             'success' => true,
             'message' => 'A2F activée avec succès',
@@ -170,6 +182,17 @@ function disableTwoFactor($pdo, $user, $input) {
 
         // Mettre à jour la session
         $_SESSION['user']['two_factor_enabled'] = 0;
+
+        // Envoyer une notification de sécurité
+        try {
+            $notificationService = new NotificationService($pdo);
+            $notificationService->notifySecurityAlert(
+                $user['id'],
+                "⚠️ L'authentification à deux facteurs (A2F) a été désactivée sur votre compte. Si ce n'était pas vous, réactivez-la immédiatement et changez votre mot de passe."
+            );
+        } catch (Exception $e) {
+            error_log("Erreur notification A2F désactivée: " . $e->getMessage());
+        }
 
         echo json_encode(['success' => true, 'message' => 'A2F désactivée avec succès']);
 

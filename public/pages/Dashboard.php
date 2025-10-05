@@ -1322,6 +1322,11 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
 
             useEffect(() => {
                 loadConversations();
+
+                // Marquer tous les messages comme lus et réinitialiser le compteur
+                if (data.unreadMessages > 0) {
+                    setData(prev => ({ ...prev, unreadMessages: 0 }));
+                }
             }, []);
 
             const loadConversations = async () => {
@@ -1389,6 +1394,14 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
                                     className: "text-gray-500 hover:text-gray-700"
                                 }, "← Retour"),
                                 React.createElement('h3', { className: "font-medium" }, selectedConversation.title)
+                            ),
+                            React.createElement('a', {
+                                href: `<?= BASE_URL ?>/profil?id=${selectedConversation.other_user_id}`,
+                                className: "flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:text-red-600 hover:bg-gray-50 rounded-lg transition-colors",
+                                target: "_blank"
+                            },
+                                React.createElement('i', { className: "fas fa-user" }),
+                                "Voir le profil"
                             )
                         ),
 

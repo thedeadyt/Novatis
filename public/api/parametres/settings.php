@@ -361,15 +361,27 @@ function updateDisplay($pdo, $user) {
     try {
         $darkMode = isset($_POST['dark_mode']) ? 1 : 0;
         $currency = $_POST['currency'] ?? 'EUR';
+        $language = $_POST['language'] ?? 'fr';
+
+        // Valider la langue
+        $validLanguages = ['fr', 'en', 'es'];
+        if (!in_array($language, $validLanguages)) {
+            $language = 'fr';
+        }
 
         $stmt = $pdo->prepare("
-            INSERT INTO user_preferences (user_id, dark_mode, currency)
-            VALUES (?, ?, ?)
+            INSERT INTO user_preferences (user_id, dark_mode, currency, language)
+            VALUES (?, ?, ?, ?)
             ON DUPLICATE KEY UPDATE
             dark_mode = VALUES(dark_mode),
-            currency = VALUES(currency)
+            currency = VALUES(currency),
+            language = VALUES(language)
         ");
-        $stmt->execute([$user['id'], $darkMode, $currency]);
+        $stmt->execute([$user['id'], $darkMode, $currency, $language]);
+
+        // Mettre à jour la langue dans la session
+        require_once __DIR__ . '/../../../includes/Language.php';
+        Language::setLanguage($language);
 
         $_SESSION['success_message'] = 'Préférences d\'affichage mises à jour';
         header('Location: ' . BASE_URL . '/Parametres?section=display');

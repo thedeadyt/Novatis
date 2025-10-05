@@ -90,6 +90,9 @@ try {
                 ");
                 $stmt->execute([$user_id, $order_id]);
 
+                // Ajouter l'ID de l'autre utilisateur pour le lien vers le profil
+                $order['other_user_id'] = ($order['buyer_id'] == $user_id) ? $order['seller_id'] : $order['buyer_id'];
+
                 echo json_encode(['success' => true, 'messages' => $messages, 'order' => $order]);
             }
             break;

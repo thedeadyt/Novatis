@@ -200,6 +200,18 @@ if (isset($_SESSION['user'])) {
             const [show2FA, setShow2FA] = useState(false);
             const [twoFactorCode, setTwoFactorCode] = useState('');
 
+            // Vérifier l'URL pour ouvrir la bonne section
+            useEffect(() => {
+                const urlParams = new URLSearchParams(window.location.search);
+                const mode = urlParams.get('mode');
+
+                if (mode === 'register') {
+                    setIsLogin(false);
+                } else if (mode === 'login') {
+                    setIsLogin(true);
+                }
+            }, []);
+
             const switchMode = () => {
                 setIsTransitioning(true);
 

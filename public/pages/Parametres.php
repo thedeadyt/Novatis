@@ -439,11 +439,11 @@ try {
                 </div>
                 <div class="flex items-center space-x-4">
                     <span class="text-sm text-gray-600">
-                        Connecté en tant que <strong><?= htmlspecialchars($user['email']) ?></strong>
+                        <?= __('settings_connected_as') ?> <strong><?= htmlspecialchars($user['email']) ?></strong>
                     </span>
                     <a href="<?= BASE_URL ?>/logout" class="btn-secondary px-4 py-2 rounded-lg text-sm">
                         <i class="fas fa-sign-out-alt mr-1"></i>
-                        Déconnexion
+                        <?= __('nav_logout') ?>
                     </a>
                 </div>
             </div>
@@ -457,44 +457,44 @@ try {
             <div class="p-6">
                 <h1 class="text-2xl font-bold text-custom-black mb-6">
                     <i class="fas fa-cog mr-2"></i>
-                    Paramètres
+                    <?= __('settings_title') ?>
                 </h1>
 
                 <nav class="space-y-2">
                     <a href="?section=profile"
                        class="sidebar-item flex items-center px-4 py-3 text-sm font-medium <?= $activeSection === 'profile' ? 'active' : 'text-gray-700' ?>">
                         <i class="fas fa-user mr-3"></i>
-                        Profil
+                        <?= __('settings_profile') ?>
                     </a>
 
                     <a href="?section=security"
                        class="sidebar-item flex items-center px-4 py-3 text-sm font-medium <?= $activeSection === 'security' ? 'active' : 'text-gray-700' ?>">
                         <i class="fas fa-shield-alt mr-3"></i>
-                        Sécurité
+                        <?= __('settings_security') ?>
                     </a>
 
                     <a href="?section=notifications"
                        class="sidebar-item flex items-center px-4 py-3 text-sm font-medium <?= $activeSection === 'notifications' ? 'active' : 'text-gray-700' ?>">
                         <i class="fas fa-bell mr-3"></i>
-                        Notifications
+                        <?= __('settings_notifications') ?>
                     </a>
 
                     <a href="?section=privacy"
                        class="sidebar-item flex items-center px-4 py-3 text-sm font-medium <?= $activeSection === 'privacy' ? 'active' : 'text-gray-700' ?>">
                         <i class="fas fa-user-shield mr-3"></i>
-                        Confidentialité
+                        <?= __('settings_privacy') ?>
                     </a>
 
                     <a href="?section=display"
                        class="sidebar-item flex items-center px-4 py-3 text-sm font-medium <?= $activeSection === 'display' ? 'active' : 'text-gray-700' ?>">
                         <i class="fas fa-paint-brush mr-3"></i>
-                        Affichage
+                        <?= __('settings_display') ?>
                     </a>
 
                     <a href="?section=integrations"
                        class="sidebar-item flex items-center px-4 py-3 text-sm font-medium <?= $activeSection === 'integrations' ? 'active' : 'text-gray-700' ?>">
                         <i class="fas fa-plug mr-3"></i>
-                        Intégrations
+                        <?= __('settings_integrations') ?>
                     </a>
 
                     <a href="?section=support"
@@ -845,9 +845,8 @@ try {
                             <div>
                                 <label class="form-label">Visibilité du profil</label>
                                 <select name="profile_visibility" class="form-input">
-                                    <option value="public" <?= $privacy['profile_visibility'] === 'public' ? 'selected' : '' ?>>Public</option>
-                                    <option value="friends" <?= $privacy['profile_visibility'] === 'friends' ? 'selected' : '' ?>>Amis uniquement</option>
-                                    <option value="private" <?= $privacy['profile_visibility'] === 'private' ? 'selected' : '' ?>>Privé</option>
+                                    <option value="public" <?= $privacy['profile_visibility'] === 'public' ? 'selected' : '' ?>>Public - Tout le monde peut voir votre profil</option>
+                                    <option value="private" <?= $privacy['profile_visibility'] === 'private' ? 'selected' : '' ?>>Privé - Seul vous pouvez voir votre profil</option>
                                 </select>
                             </div>
 
@@ -918,30 +917,40 @@ try {
                     <div class="settings-header">
                         <h2 class="text-xl font-semibold text-custom-black">
                             <i class="fas fa-paint-brush mr-2"></i>
-                            Préférences d'affichage
+                            <?= __('display_title') ?>
                         </h2>
-                        <p class="text-sm text-gray-600 mt-1">Personnalisez l'apparence de l'interface</p>
+                        <p class="text-sm text-gray-600 mt-1"><?= __('display_subtitle') ?></p>
                     </div>
 
                     <form method="POST" action="<?= BASE_URL ?>/api/parametres/settings.php">
                         <input type="hidden" name="action" value="update_display">
 
                         <div class="space-y-4">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-language mr-2"></i><?= __('display_language') ?>
+                                </label>
+                                <select name="language" class="form-input" onchange="this.form.submit()">
+                                    <option value="fr" <?= $preferences['language'] === 'fr' ? 'selected' : '' ?>>🇫🇷 Français</option>
+                                    <option value="en" <?= $preferences['language'] === 'en' ? 'selected' : '' ?>>🇬🇧 English</option>
+                                    <option value="es" <?= $preferences['language'] === 'es' ? 'selected' : '' ?>>🇪🇸 Español</option>
+                                </select>
+                            </div>
+
                             <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                                 <div>
-                                    <div class="font-medium text-custom-black">Mode sombre</div>
-                                    <div class="text-sm text-gray-600">Utiliser le thème sombre</div>
+                                    <div class="font-medium text-custom-black"><?= __('display_dark_mode') ?></div>
+                                    <div class="text-sm text-gray-600"><?= __('display_dark_mode_desc') ?></div>
                                 </div>
                                 <label class="toggle-switch">
                                     <input type="checkbox" name="dark_mode"
-                                           <?= $preferences['dark_mode'] ? 'checked' : '' ?>
-                                           onchange="this.form.submit()">
+                                           <?= $preferences['dark_mode'] ? 'checked' : '' ?>>
                                     <span class="slider"></span>
                                 </label>
                             </div>
 
                             <div class="form-group">
-                                <label class="form-label">Monnaie par défaut</label>
+                                <label class="form-label"><?= __('display_currency') ?></label>
                                 <select name="currency" class="form-input">
                                     <option value="EUR" <?= $preferences['currency'] === 'EUR' ? 'selected' : '' ?>>Euro (€)</option>
                                     <option value="USD" <?= $preferences['currency'] === 'USD' ? 'selected' : '' ?>>Dollar US ($)</option>
@@ -952,7 +961,7 @@ try {
                             <div class="flex justify-end">
                                 <button type="submit" class="btn-primary px-6 py-2 rounded-lg">
                                     <i class="fas fa-save mr-2"></i>
-                                    Sauvegarder
+                                    <?= __('settings_save') ?>
                                 </button>
                             </div>
                         </div>
@@ -966,9 +975,9 @@ try {
                     <div class="settings-header">
                         <h2 class="text-xl font-semibold text-custom-black">
                             <i class="fas fa-plug mr-2"></i>
-                            Intégrations
+                            <?= __('integrations_title') ?>
                         </h2>
-                        <p class="text-sm text-gray-600 mt-1">Connectez vos services externes</p>
+                        <p class="text-sm text-gray-600 mt-1"><?= __('integrations_subtitle') ?></p>
                     </div>
 
                     <div class="space-y-4">
