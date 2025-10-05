@@ -98,6 +98,25 @@ try {
     $stmt->execute([$user['id']]);
     $privacy = $stmt->fetch(PDO::FETCH_ASSOC);
 
+    // Récupérer les informations complètes de l'utilisateur depuis la table users
+    $stmt = $pdo->prepare("
+        SELECT id, firstname, lastname, pseudo, email, phone, avatar, rating, bio, location, website,
+               is_verified, created_at, role
+        FROM users
+        WHERE id = ?
+    ");
+    $stmt->execute([$user['id']]);
+    $userDetails = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    // Mettre à jour les infos utilisateur en session avec les dernières données
+    if ($userDetails) {
+        // Fusionner en écrasant avec les nouvelles valeurs de la BDD
+        foreach ($userDetails as $key => $value) {
+            $user[$key] = $value;
+        }
+        $_SESSION['user'] = $user;
+    }
+
     // Valeurs par défaut si pas de données
     if (!$preferences) {
         $preferences = [
@@ -346,6 +365,28 @@ try {
             to { opacity: 1; transform: translateY(0); }
         }
 
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideOutRight {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+        }
+
         .danger-zone {
             border: 1px solid #ef4444;
             border-radius: 8px;
@@ -362,7 +403,27 @@ try {
         .btn-danger:hover {
             background: #dc2626;
         }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
+
+    <!-- Script A2F -->
+    <script src="<?= BASE_URL ?>/assets/js/2fa.js"></script>
+    <script>
+        // Initialiser le module A2F
+        document.addEventListener('DOMContentLoaded', function() {
+            TwoFactorAuth.init('<?= BASE_URL ?>');
+        });
+    </script>
 </head>
 
 <body class="bg-custom-bg min-h-screen">
@@ -471,25 +532,32 @@ try {
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="form-group">
-                                <label class="form-label">Nom</label>
-                                <input type="text" name="lastname" class="form-input"
-                                       value="<?= htmlspecialchars($user['lastname'] ?? '') ?>"
-                                       placeholder="Votre nom">
-                            </div>
-
-                            <div class="form-group">
                                 <label class="form-label">Prénom</label>
                                 <input type="text" name="firstname" class="form-input"
                                        value="<?= htmlspecialchars($user['firstname'] ?? '') ?>"
-                                       placeholder="Votre prénom">
+                                       placeholder="Votre prénom" required>
                             </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Nom</label>
+                                <input type="text" name="lastname" class="form-input"
+                                       value="<?= htmlspecialchars($user['lastname'] ?? '') ?>"
+                                       placeholder="Votre nom" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Pseudo</label>
+                            <input type="text" name="pseudo" class="form-input"
+                                   value="<?= htmlspecialchars($user['pseudo'] ?? '') ?>"
+                                   placeholder="Votre pseudo" required>
                         </div>
 
                         <div class="form-group">
                             <label class="form-label">Email</label>
                             <input type="email" name="email" class="form-input"
-                                   value="<?= htmlspecialchars($user['email']) ?>"
-                                   placeholder="votre@email.com">
+                                   value="<?= htmlspecialchars($user['email'] ?? '') ?>"
+                                   placeholder="votre@email.com" required>
                         </div>
 
                         <div class="form-group">
@@ -497,6 +565,28 @@ try {
                             <input type="tel" name="phone" class="form-input"
                                    value="<?= htmlspecialchars($user['phone'] ?? '') ?>"
                                    placeholder="+33 1 23 45 67 89">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Bio</label>
+                            <textarea name="bio" class="form-input" rows="4"
+                                      placeholder="Parlez-nous de vous..."><?= htmlspecialchars($user['bio'] ?? '') ?></textarea>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="form-group">
+                                <label class="form-label">Localisation</label>
+                                <input type="text" name="location" class="form-input"
+                                       value="<?= htmlspecialchars($user['location'] ?? '') ?>"
+                                       placeholder="Paris, France">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Site web</label>
+                                <input type="url" name="website" class="form-input"
+                                       value="<?= htmlspecialchars($user['website'] ?? '') ?>"
+                                       placeholder="https://votre-site.com">
+                            </div>
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -578,42 +668,75 @@ try {
                     <!-- Authentification à deux facteurs -->
                     <div class="border-t pt-6">
                         <h3 class="text-lg font-medium text-custom-black mb-3">
+                            <i class="fas fa-mobile-alt mr-2"></i>
                             Authentification à deux facteurs (A2F)
                         </h3>
                         <p class="text-sm text-gray-600 mb-4">
-                            Ajoutez une couche de sécurité supplémentaire à votre compte
+                            Ajoutez une couche de sécurité supplémentaire à votre compte en utilisant une application d'authentification
                         </p>
 
-                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                            <div>
-                                <div class="font-medium text-custom-black">
-                                    Authentification à deux facteurs
+                        <?php if (!$security['two_factor_enabled']): ?>
+                            <!-- A2F désactivée - Afficher le bouton d'activation -->
+                            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                                <div class="flex items-start">
+                                    <div class="flex-shrink-0">
+                                        <i class="fas fa-info-circle text-blue-500 text-xl"></i>
+                                    </div>
+                                    <div class="ml-3 flex-1">
+                                        <h4 class="text-sm font-medium text-blue-800 mb-2">
+                                            Pourquoi activer l'A2F ?
+                                        </h4>
+                                        <ul class="text-sm text-blue-700 space-y-1 mb-3">
+                                            <li>• Protégez votre compte contre les accès non autorisés</li>
+                                            <li>• Recevez une alerte en cas de tentative de connexion suspecte</li>
+                                            <li>• Ajoutez un code unique à 6 chiffres à votre connexion</li>
+                                        </ul>
+                                        <button type="button" onclick="TwoFactorAuth.showEnableModal()" class="btn-primary px-4 py-2 rounded-lg text-sm">
+                                            <i class="fas fa-shield-alt mr-2"></i>
+                                            Activer l'A2F
+                                        </button>
+                                    </div>
                                 </div>
-                                <div class="text-sm text-gray-600">
-                                    <?php if ($security['two_factor_enabled']): ?>
-                                        <span class="text-green-600">
-                                            <i class="fas fa-check-circle mr-1"></i>
-                                            Activée
-                                        </span>
-                                    <?php else: ?>
-                                        <span class="text-gray-500">
-                                            <i class="fas fa-times-circle mr-1"></i>
-                                            Désactivée
-                                        </span>
-                                    <?php endif; ?>
+                            </div>
+                        <?php else: ?>
+                            <!-- A2F activée - Afficher les informations -->
+                            <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <div class="flex-shrink-0">
+                                            <i class="fas fa-check-circle text-green-500 text-2xl"></i>
+                                        </div>
+                                        <div class="ml-3">
+                                            <h4 class="text-sm font-medium text-green-800">
+                                                L'authentification à deux facteurs est activée
+                                            </h4>
+                                            <p class="text-sm text-green-700">
+                                                Votre compte est protégé par un code de sécurité supplémentaire
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <button type="button" onclick="TwoFactorAuth.showDisableModal()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm">
+                                        <i class="fas fa-times mr-2"></i>
+                                        Désactiver
+                                    </button>
                                 </div>
                             </div>
 
-                            <form method="POST" action="<?= BASE_URL ?>/api/parametres/settings.php" class="inline">
-                                <input type="hidden" name="action" value="toggle_2fa">
-                                <label class="toggle-switch">
-                                    <input type="checkbox"
-                                           <?= $security['two_factor_enabled'] ? 'checked' : '' ?>
-                                           onchange="this.form.submit()">
-                                    <span class="slider"></span>
-                                </label>
-                            </form>
-                        </div>
+                            <!-- Codes de sauvegarde -->
+                            <div class="bg-gray-50 rounded-lg p-4">
+                                <h4 class="text-sm font-medium text-custom-black mb-2 flex items-center">
+                                    <i class="fas fa-key mr-2 text-gray-600"></i>
+                                    Codes de sauvegarde
+                                </h4>
+                                <p class="text-sm text-gray-600 mb-3">
+                                    Utilisez ces codes si vous perdez l'accès à votre application d'authentification
+                                </p>
+                                <button type="button" onclick="TwoFactorAuth.showBackupCodes()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition text-sm">
+                                    <i class="fas fa-eye mr-2"></i>
+                                    Voir les codes de sauvegarde
+                                </button>
+                            </div>
+                        <?php endif; ?>
 
                         <div class="mt-4 text-sm text-gray-600">
                             <p><strong>Dernier changement de mot de passe :</strong>
@@ -634,14 +757,29 @@ try {
                         <p class="text-sm text-gray-600 mt-1">Choisissez comment vous souhaitez être notifié</p>
                     </div>
 
-                    <form method="POST" action="<?= BASE_URL ?>/api/parametres/settings.php">
+                    <form method="POST" action="<?= BASE_URL ?>/api/parametres/settings.php" id="notifications-form">
                         <input type="hidden" name="action" value="update_notifications">
 
                         <div class="space-y-4">
+                            <!-- Notifications par email -->
                             <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                                <div>
-                                    <div class="font-medium text-custom-black">Notifications par email</div>
-                                    <div class="text-sm text-gray-600">Recevoir des notifications par email</div>
+                                <div class="flex-1">
+                                    <div class="font-medium text-custom-black flex items-center">
+                                        <i class="fas fa-envelope text-blue-600 mr-2"></i>
+                                        Notifications par email
+                                    </div>
+                                    <div class="text-sm text-gray-600">
+                                        Recevoir des notifications importantes par email
+                                        <?php if ($user['is_verified']): ?>
+                                            <span class="ml-2 text-green-600">
+                                                <i class="fas fa-check-circle"></i> Vérifié
+                                            </span>
+                                        <?php else: ?>
+                                            <span class="ml-2 text-orange-600">
+                                                <i class="fas fa-exclamation-triangle"></i> Non vérifié
+                                            </span>
+                                        <?php endif; ?>
+                                    </div>
                                 </div>
                                 <label class="toggle-switch">
                                     <input type="checkbox" name="email_notifications"
@@ -651,10 +789,16 @@ try {
                                 </label>
                             </div>
 
+                            <!-- Notifications push -->
                             <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                                <div>
-                                    <div class="font-medium text-custom-black">Notifications push</div>
-                                    <div class="text-sm text-gray-600">Recevoir des notifications dans le navigateur</div>
+                                <div class="flex-1">
+                                    <div class="font-medium text-custom-black flex items-center">
+                                        <i class="fas fa-desktop text-purple-600 mr-2"></i>
+                                        Notifications push
+                                    </div>
+                                    <div class="text-sm text-gray-600">
+                                        Recevoir des notifications dans le navigateur
+                                    </div>
                                 </div>
                                 <label class="toggle-switch">
                                     <input type="checkbox" name="push_notifications"
@@ -664,20 +808,22 @@ try {
                                 </label>
                             </div>
 
-                            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                                <div>
-                                    <div class="font-medium text-custom-black">Notifications SMS</div>
-                                    <div class="text-sm text-gray-600">Recevoir des notifications par SMS pour les alertes importantes</div>
-                                </div>
-                                <label class="toggle-switch">
-                                    <input type="checkbox" name="sms_notifications"
-                                           <?= $preferences['sms_notifications'] ? 'checked' : '' ?>
-                                           onchange="this.form.submit()">
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
                         </div>
                     </form>
+
+                    <!-- Informations supplémentaires -->
+                    <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                        <h4 class="font-medium text-blue-900 mb-2 flex items-center">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            Types de notifications
+                        </h4>
+                        <ul class="text-sm text-blue-800 space-y-1">
+                            <li>• Nouvelles commandes et messages</li>
+                            <li>• Mises à jour de vos services</li>
+                            <li>• Alertes de sécurité importantes</li>
+                            <li>• Rappels de paiements</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
 
@@ -1058,6 +1204,8 @@ try {
             alert('<?= addslashes($_SESSION['error_message']) ?>');
             <?php unset($_SESSION['error_message']); ?>
         <?php endif; ?>
+
+
     </script>
 </body>
 </html>

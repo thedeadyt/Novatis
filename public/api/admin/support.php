@@ -24,7 +24,7 @@ try {
                 // Admin voit tous les tickets
                 $stmt = $pdo->prepare("
                     SELECT st.*,
-                           u.name as user_name,
+                           COALESCE(NULLIF(CONCAT(u.firstname, ' ', u.lastname), ' '), u.pseudo) as user_name,
                            u.email as user_email,
                            u.avatar as user_avatar
                     FROM support_tickets st

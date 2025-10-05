@@ -8,9 +8,16 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // Récupérer les informations de l'utilisateur connecté
 $user = $_SESSION['user'] ?? null;
+$userName = 'Utilisateur';
+if ($user) {
+    $userName = trim(($user['firstname'] ?? '') . ' ' . ($user['lastname'] ?? ''));
+    if (empty($userName)) {
+        $userName = $user['pseudo'] ?? 'Utilisateur';
+    }
+}
 $userInfo = [
     'isLoggedIn' => $user !== null,
-    'name' => $user['name'] ?? 'Utilisateur',
+    'name' => $userName,
     'pseudo' => $user['pseudo'] ?? null,
     'email' => $user['email'] ?? '',
     'avatar' => $user['avatar'] ?? null,
@@ -56,6 +63,9 @@ $userInfo = [
   function Header() {
     const [open, setOpen] = useState(false); // mobile menu
     const [dropdownOpen, setDropdownOpen] = useState(false); // profil
+    const [notificationOpen, setNotificationOpen] = useState(false); // notifications
+    const [notifications, setNotifications] = useState([]);
+    const [unreadCount, setUnreadCount] = useState(0);
     const [activeIndex, setActiveIndex] = useState(0);
     const [highlight, setHighlight] = useState({ left: 0, width: 0 });
     const navRefs = useRef([]);
@@ -85,6 +95,84 @@ $userInfo = [
       }, 50);
       return () => clearTimeout(timeout);
     }, [activeIndex]);
+
+    // Charger les notifications si l'utilisateur est connecté
+    useEffect(() => {
+      if (userInfo.isLoggedIn) {
+        loadNotifications();
+        // Rafraîchir toutes les 30 secondes
+        const interval = setInterval(loadNotifications, 30000);
+        return () => clearInterval(interval);
+      }
+    }, []);
+
+    const loadNotifications = async () => {
+      try {
+        const response = await fetch('<?= BASE_URL ?>/api/notifications/get.php?action=list&unread=true&limit=5');
+        const data = await response.json();
+        if (data.success) {
+          setNotifications(data.notifications);
+          setUnreadCount(data.unread_count);
+        }
+      } catch (error) {
+        console.error('Erreur chargement notifications:', error);
+      }
+    };
+
+    const markAsRead = async (notificationId) => {
+      try {
+        const response = await fetch('<?= BASE_URL ?>/api/notifications/update.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'mark_read', notification_id: notificationId })
+        });
+        const data = await response.json();
+        if (data.success) {
+          loadNotifications(); // Recharger
+        }
+      } catch (error) {
+        console.error('Erreur marquage comme lu:', error);
+      }
+    };
+
+    const markAllAsRead = async () => {
+      try {
+        const response = await fetch('<?= BASE_URL ?>/api/notifications/update.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'mark_all_read' })
+        });
+        const data = await response.json();
+        if (data.success) {
+          loadNotifications();
+        }
+      } catch (error) {
+        console.error('Erreur marquage tout comme lu:', error);
+      }
+    };
+
+    const getNotificationIcon = (type) => {
+      switch(type) {
+        case 'order': return '🛍️';
+        case 'message': return '💬';
+        case 'security': return '🔒';
+        case 'payment': return '💰';
+        case 'service_update': return '✨';
+        default: return '🔔';
+      }
+    };
+
+    const formatTimeAgo = (dateString) => {
+      const date = new Date(dateString);
+      const now = new Date();
+      const seconds = Math.floor((now - date) / 1000);
+
+      if (seconds < 60) return 'À l\'instant';
+      if (seconds < 3600) return Math.floor(seconds / 60) + ' min';
+      if (seconds < 86400) return Math.floor(seconds / 3600) + ' h';
+      if (seconds < 2592000) return Math.floor(seconds / 86400) + ' j';
+      return date.toLocaleDateString('fr-FR');
+    };
 
     return (
       <nav className="bg-white shadow-md px-6 py-3 fixed top-0 left-0 right-0 z-50 overflow-visible">
@@ -138,15 +226,99 @@ $userInfo = [
 
           {/* Profil utilisateur */}
           {userInfo.isLoggedIn ? (
-            <div className="relative ml-4">
-              <button
-                onClick={() => {
-                  if (window.innerWidth >= 768) {
-                    setDropdownOpen(!dropdownOpen);
-                  }
-                }}
-                className="flex items-center space-x-2 focus:outline-none hover:bg-gray-50 rounded-lg px-2 py-1 transition-colors"
-              >
+            <div className="flex items-center space-x-2">
+              {/* Icône Notifications */}
+              <div className="relative">
+                <button
+                  onClick={() => setNotificationOpen(!notificationOpen)}
+                  className="relative p-2 hover:bg-gray-50 rounded-lg transition-colors focus:outline-none"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                  </svg>
+                  {unreadCount > 0 && (
+                    <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  )}
+                </button>
+
+                {/* Dropdown Notifications */}
+                {notificationOpen && (
+                  <div className="absolute right-0 mt-2 w-96 bg-white border rounded-lg shadow-lg z-50 max-h-[500px] overflow-hidden flex flex-col">
+                    {/* Header */}
+                    <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between bg-gray-50">
+                      <h3 className="font-semibold text-gray-900">Notifications</h3>
+                      {unreadCount > 0 && (
+                        <button onClick={markAllAsRead} className="text-xs text-blue-600 hover:text-blue-800 font-medium">
+                          Tout marquer comme lu
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Liste des notifications */}
+                    <div className="overflow-y-auto flex-1">
+                      {notifications.length === 0 ? (
+                        <div className="p-8 text-center text-gray-500">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto mb-3 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                          </svg>
+                          <p className="text-sm">Aucune notification</p>
+                        </div>
+                      ) : (
+                        notifications.map((notif) => (
+                          <div
+                            key={notif.id}
+                            className={`p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors ${!notif.is_read ? 'bg-blue-50' : ''}`}
+                            onClick={() => {
+                              if (!notif.is_read) markAsRead(notif.id);
+                              if (notif.link) window.location.href = notif.link;
+                            }}
+                          >
+                            <div className="flex items-start space-x-3">
+                              <span className="text-2xl">{getNotificationIcon(notif.type)}</span>
+                              <div className="flex-1 min-w-0">
+                                <p className={`text-sm font-medium text-gray-900 ${!notif.is_read ? 'font-semibold' : ''}`}>
+                                  {notif.title}
+                                </p>
+                                <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+                                  {notif.message}
+                                </p>
+                                <p className="text-xs text-gray-400 mt-1">
+                                  {formatTimeAgo(notif.created_at)}
+                                </p>
+                              </div>
+                              {!notif.is_read && (
+                                <div className="w-2 h-2 bg-blue-600 rounded-full flex-shrink-0 mt-2"></div>
+                              )}
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+
+                    {/* Footer */}
+                    {notifications.length > 0 && (
+                      <div className="px-4 py-3 border-t border-gray-200 bg-gray-50 text-center">
+                        <a href="<?= BASE_URL ?>/notifications" className="text-sm text-blue-600 hover:text-blue-800 font-medium">
+                          Voir toutes les notifications
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Menu Profil */}
+              <div className="relative ml-2">
+                <button
+                  onClick={() => {
+                    if (window.innerWidth >= 768) {
+                      setDropdownOpen(!dropdownOpen);
+                    }
+                  }}
+                  className="flex items-center space-x-2 focus:outline-none hover:bg-gray-50 rounded-lg px-2 py-1 transition-colors"
+                >
                 <div className="text-right hidden sm:block">
                   <span className="font-medium text-gray-700 block">{userInfo.pseudo || userInfo.name}</span>
                   {userInfo.role === 'admin' && (
@@ -200,7 +372,7 @@ $userInfo = [
 
                   {/* Menu items */}
                   <div className="py-2">
-                    <a href="<?= BASE_URL ?>/pages/Dashboard.php" className="flex items-center px-5 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors">
+                    <a href="<?= BASE_URL ?>/Dashboard" className="flex items-center px-5 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-3 text-gray-400" fill="none"
                            viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
@@ -208,7 +380,7 @@ $userInfo = [
                       </svg>
                       Dashboard
                     </a>
-                    <a href="<?= BASE_URL ?>/pages/Parametres.php?section=profile" className="flex items-center px-5 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors">
+                    <a href="<?= BASE_URL ?>/Parametres?section=profile" className="flex items-center px-5 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 2122 2122"
@@ -232,6 +404,7 @@ $userInfo = [
                   </div>
                 </div>
               )}
+              </div>
             </div>
           ) : (
             /* Boutons connexion/inscription pour utilisateurs non connectés */
@@ -297,7 +470,7 @@ $userInfo = [
                 </div>
 
                 {/* Menu liens */}
-                <a href="<?= BASE_URL ?>/pages/Dashboard.php" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded">
+                <a href="<?= BASE_URL ?>/pages/Dashboard" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none"
                        viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
@@ -305,7 +478,7 @@ $userInfo = [
                   </svg>
                   Dashboard
                 </a>
-                <a href="<?= BASE_URL ?>/pages/Parametres.php?section=profile" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded">
+                <a href="<?= BASE_URL ?>/Parametres?section=profile" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded">
                   <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 2122 2122"

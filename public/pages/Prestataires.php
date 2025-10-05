@@ -5,9 +5,12 @@ require_once __DIR__ . '/../../config/config.php'; // connexion à la BDD (PDO)
 $sql = "
     SELECT
         u.id AS user_id,
-        u.name,
+        u.firstname,
+        u.lastname,
+        u.pseudo,
         u.avatar,
         u.bio,
+        u.rating,
         GROUP_CONCAT(
             CONCAT(s.title, '|', s.price, '|', s.delivery_days)
             SEPARATOR ';;'
@@ -15,8 +18,8 @@ $sql = "
     FROM users u
     JOIN services s ON u.id = s.user_id
     WHERE s.status = 'active'
-    GROUP BY u.id, u.name, u.avatar, u.bio
-    ORDER BY u.name ASC
+    GROUP BY u.id, u.firstname, u.lastname, u.pseudo, u.avatar, u.bio, u.rating
+    ORDER BY u.pseudo ASC
 ";
 
 $stmt = $pdo->query($sql);
@@ -24,6 +27,12 @@ $prestataires = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Traitement des services pour chaque prestataire
 foreach ($prestataires as &$prestataire) {
+    // Calculer le nom complet
+    $prestataire['name'] = trim($prestataire['firstname'] . ' ' . $prestataire['lastname']);
+    if (empty($prestataire['name'])) {
+        $prestataire['name'] = $prestataire['pseudo'];
+    }
+
     $services = [];
     if (!empty($prestataire['services'])) {
         $servicesList = explode(';;', $prestataire['services']);
@@ -169,6 +178,13 @@ foreach ($prestataires as &$prestataire) {
                 </div>
 
                 <div class="card-actions">
+                    <a href="<?= BASE_URL ?>/profil?id=<?= $prestataire['user_id'] ?>"
+                       class="btn-profile">
+                       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                       </svg>
+                       Voir profil
+                    </a>
                     <a href="<?= BASE_URL ?>/contact?prestataire=<?= $prestataire['user_id'] ?>"
                        class="btn-contact">
                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

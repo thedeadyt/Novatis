@@ -188,7 +188,8 @@ if (isset($_SESSION['user'])) {
             const [isLogin, setIsLogin] = useState(true);
             const [isTransitioning, setIsTransitioning] = useState(false);
             const [formData, setFormData] = useState({
-                name: '',
+                firstname: '',
+                lastname: '',
                 pseudo: '',
                 email: '',
                 password: '',
@@ -196,13 +197,16 @@ if (isset($_SESSION['user'])) {
             });
             const [errors, setErrors] = useState({});
             const [loading, setLoading] = useState(false);
+            const [show2FA, setShow2FA] = useState(false);
+            const [twoFactorCode, setTwoFactorCode] = useState('');
 
             const switchMode = () => {
                 setIsTransitioning(true);
 
                 // Reset form immediately
                 setFormData({
-                    name: '',
+                    firstname: '',
+                    lastname: '',
                     pseudo: '',
                     email: '',
                     password: '',
@@ -231,7 +235,8 @@ if (isset($_SESSION['user'])) {
                 const newErrors = {};
 
                 if (!isLogin) {
-                    if (!formData.name.trim()) newErrors.name = 'Le nom est requis';
+                    if (!formData.firstname.trim()) newErrors.firstname = 'Le prénom est requis';
+                    if (!formData.lastname.trim()) newErrors.lastname = 'Le nom est requis';
                     if (!formData.pseudo.trim()) newErrors.pseudo = 'Le pseudo est requis';
                     if (formData.pseudo.length < 3) newErrors.pseudo = 'Le pseudo doit faire au moins 3 caractères';
                     if (formData.password !== formData.confirmPassword) {
@@ -269,9 +274,13 @@ if (isset($_SESSION['user'])) {
                     const result = await response.json();
 
                     if (result.success) {
-                        window.location.href = '<?= BASE_URL ?>/pages/Dashboard.php';
+                        window.location.href = '<?= BASE_URL ?>/Dashboard';
+                    } else if (result.require_2fa) {
+                        // A2F requis - afficher le modal
+                        setShow2FA(true);
+                        setLoading(false);
                     } else {
-                        setErrors({ general: result.error || 'Une erreur est survenue' });
+                        setErrors({ general: result.error || result.message || 'Une erreur est survenue' });
                     }
                 } catch (error) {
                     setErrors({ general: 'Erreur de connexion au serveur' });
@@ -280,9 +289,138 @@ if (isset($_SESSION['user'])) {
                 }
             };
 
+            const handleVerify2FA = async (e) => {
+                e.preventDefault();
+
+                if (twoFactorCode.length !== 6) {
+                    setErrors({ twoFactor: 'Le code doit contenir 6 chiffres' });
+                    return;
+                }
+
+                setLoading(true);
+                try {
+                    const twoFAResponse = await fetch(`<?= BASE_URL ?>/api/auth/login.php`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            ...formData,
+                            two_factor_code: twoFactorCode
+                        })
+                    });
+
+                    const twoFAResult = await twoFAResponse.json();
+
+                    if (twoFAResult.success) {
+                        window.location.href = '<?= BASE_URL ?>/Dashboard';
+                    } else {
+                        setErrors({ twoFactor: twoFAResult.error || 'Code incorrect' });
+                        setTwoFactorCode('');
+                    }
+                } catch (error) {
+                    setErrors({ twoFactor: 'Erreur de connexion au serveur' });
+                } finally {
+                    setLoading(false);
+                }
+            };
+
             return React.createElement('div', {
                 className: "w-full max-w-6xl mx-auto"
             },
+                // Modal A2F
+                show2FA && React.createElement('div', {
+                    className: "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4",
+                    onClick: (e) => {
+                        if (e.target === e.currentTarget) {
+                            setShow2FA(false);
+                            setTwoFactorCode('');
+                            setErrors({});
+                        }
+                    }
+                },
+                    React.createElement('div', {
+                        className: "bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 animate-fade-in"
+                    },
+                        // Header du modal
+                        React.createElement('div', {
+                            className: "text-center mb-6"
+                        },
+                            React.createElement('div', {
+                                className: "w-16 h-16 bg-gradient-to-br from-red-500 to-red-700 rounded-full flex items-center justify-center mx-auto mb-4"
+                            },
+                                React.createElement('svg', {
+                                    className: "w-8 h-8 text-white",
+                                    fill: "none",
+                                    stroke: "currentColor",
+                                    viewBox: "0 0 24 24"
+                                },
+                                    React.createElement('path', {
+                                        strokeLinecap: "round",
+                                        strokeLinejoin: "round",
+                                        strokeWidth: "2",
+                                        d: "M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                                    })
+                                )
+                            ),
+                            React.createElement('h3', {
+                                className: "text-2xl font-bold text-gray-900 mb-2"
+                            }, "Authentification à deux facteurs"),
+                            React.createElement('p', {
+                                className: "text-gray-600"
+                            }, "Entrez le code à 6 chiffres généré par votre application")
+                        ),
+
+                        // Formulaire A2F
+                        React.createElement('form', {
+                            onSubmit: handleVerify2FA,
+                            className: "space-y-6"
+                        },
+                            // Erreur
+                            errors.twoFactor && React.createElement('div', {
+                                className: "bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm text-center"
+                            }, errors.twoFactor),
+
+                            // Input code
+                            React.createElement('div', null,
+                                React.createElement('input', {
+                                    type: "text",
+                                    value: twoFactorCode,
+                                    onChange: (e) => {
+                                        const value = e.target.value.replace(/\D/g, '').slice(0, 6);
+                                        setTwoFactorCode(value);
+                                        if (errors.twoFactor) setErrors({});
+                                    },
+                                    placeholder: "000000",
+                                    maxLength: 6,
+                                    autoFocus: true,
+                                    className: "w-full px-6 py-4 text-center text-2xl font-mono tracking-widest rounded-lg border-2 border-gray-300 focus:border-red-500 focus:ring-4 focus:ring-red-100 outline-none transition-all"
+                                })
+                            ),
+
+                            // Boutons
+                            React.createElement('div', {
+                                className: "flex gap-3"
+                            },
+                                React.createElement('button', {
+                                    type: "button",
+                                    onClick: () => {
+                                        setShow2FA(false);
+                                        setTwoFactorCode('');
+                                        setErrors({});
+                                    },
+                                    className: "flex-1 px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition-all"
+                                }, "Annuler"),
+                                React.createElement('button', {
+                                    type: "submit",
+                                    disabled: loading || twoFactorCode.length !== 6,
+                                    className: "flex-1 px-6 py-3 bg-gradient-to-r from-red-500 to-red-700 text-white rounded-lg font-semibold hover:from-red-600 hover:to-red-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg"
+                                }, loading ? "Vérification..." : "Vérifier")
+                            )
+                        )
+                    )
+                ),
+
                 React.createElement('div', {
                     className: `auth-container grid grid-cols-1 lg:grid-cols-2 min-h-[600px] lg:h-[600px] relative overflow-hidden ${isTransitioning ? 'panel-transitioning content-transitioning' : ''}`
                 },
@@ -372,19 +510,38 @@ if (isset($_SESSION['user'])) {
                                 !isLogin && React.createElement('div', {
                                     className: "space-y-4"
                                 },
-                                    // Nom
-                                    React.createElement('div', null,
-                                        React.createElement('input', {
-                                            type: "text",
-                                            name: "name",
-                                            value: formData.name,
-                                            onChange: handleInputChange,
-                                            placeholder: "Nom complet",
-                                            className: `w-full px-4 py-3 rounded-lg input-field focus:outline-none ${errors.name ? 'border-red-500' : ''}`
-                                        }),
-                                        errors.name && React.createElement('p', {
-                                            className: "text-red-500 text-sm mt-1"
-                                        }, errors.name)
+                                    // Prénom et Nom (côte à côte)
+                                    React.createElement('div', {
+                                        className: "grid grid-cols-2 gap-3"
+                                    },
+                                        // Prénom
+                                        React.createElement('div', null,
+                                            React.createElement('input', {
+                                                type: "text",
+                                                name: "firstname",
+                                                value: formData.firstname,
+                                                onChange: handleInputChange,
+                                                placeholder: "Prénom",
+                                                className: `w-full px-4 py-3 rounded-lg input-field focus:outline-none ${errors.firstname ? 'border-red-500' : ''}`
+                                            }),
+                                            errors.firstname && React.createElement('p', {
+                                                className: "text-red-500 text-xs mt-1"
+                                            }, errors.firstname)
+                                        ),
+                                        // Nom
+                                        React.createElement('div', null,
+                                            React.createElement('input', {
+                                                type: "text",
+                                                name: "lastname",
+                                                value: formData.lastname,
+                                                onChange: handleInputChange,
+                                                placeholder: "Nom",
+                                                className: `w-full px-4 py-3 rounded-lg input-field focus:outline-none ${errors.lastname ? 'border-red-500' : ''}`
+                                            }),
+                                            errors.lastname && React.createElement('p', {
+                                                className: "text-red-500 text-xs mt-1"
+                                            }, errors.lastname)
+                                        )
                                     ),
                                     // Pseudo
                                     React.createElement('div', null,

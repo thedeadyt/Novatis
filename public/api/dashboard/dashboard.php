@@ -48,7 +48,9 @@ try {
     // Services récents
     if ($is_admin) {
         $stmt = $pdo->prepare("
-            SELECT s.*, u.name as user_name, c.name as category_name
+            SELECT s.*,
+                   COALESCE(NULLIF(CONCAT(u.firstname, ' ', u.lastname), ' '), u.pseudo) as user_name,
+                   c.name as category_name
             FROM services s
             JOIN users u ON u.id = s.user_id
             LEFT JOIN categories c ON c.id = s.category_id
@@ -74,8 +76,8 @@ try {
         $stmt = $pdo->prepare("
             SELECT o.*,
                    s.title as service_title,
-                   buyer.name as buyer_name,
-                   seller.name as seller_name
+                   COALESCE(NULLIF(CONCAT(buyer.firstname, ' ', buyer.lastname), ' '), buyer.pseudo) as buyer_name,
+                   COALESCE(NULLIF(CONCAT(seller.firstname, ' ', seller.lastname), ' '), seller.pseudo) as seller_name
             FROM orders o
             JOIN services s ON s.id = o.service_id
             JOIN users buyer ON buyer.id = o.buyer_id
@@ -88,8 +90,8 @@ try {
         $stmt = $pdo->prepare("
             SELECT o.*,
                    s.title as service_title,
-                   buyer.name as buyer_name,
-                   seller.name as seller_name,
+                   COALESCE(NULLIF(CONCAT(buyer.firstname, ' ', buyer.lastname), ' '), buyer.pseudo) as buyer_name,
+                   COALESCE(NULLIF(CONCAT(seller.firstname, ' ', seller.lastname), ' '), seller.pseudo) as seller_name,
                    CASE WHEN o.buyer_id = ? THEN 'buyer' ELSE 'seller' END as user_role
             FROM orders o
             JOIN services s ON s.id = o.service_id
@@ -117,14 +119,17 @@ try {
 
     // Anciens clients (utilisateurs ayant commandé mes services)
     $stmt = $pdo->prepare("
-        SELECT DISTINCT u.id, u.name, u.email, u.avatar,
+        SELECT DISTINCT u.id,
+               COALESCE(NULLIF(CONCAT(u.firstname, ' ', u.lastname), ' '), u.pseudo) as name,
+               u.email,
+               u.avatar,
                COUNT(o.id) as order_count,
                MAX(o.created_at) as last_order
         FROM users u
         JOIN orders o ON o.buyer_id = u.id
         JOIN services s ON s.id = o.service_id
         WHERE s.user_id = ?
-        GROUP BY u.id, u.name, u.email, u.avatar
+        GROUP BY u.id, u.firstname, u.lastname, u.pseudo, u.email, u.avatar
         ORDER BY last_order DESC
         LIMIT 10
     ");

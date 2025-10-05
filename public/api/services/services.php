@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../../../config/config.php';
+require_once __DIR__ . '/../../../includes/NotificationService.php';
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -23,7 +24,10 @@ try {
             if ($is_admin) {
                 // Admin voit tous les services
                 $stmt = $pdo->prepare("
-                    SELECT s.*, u.name as user_name, c.name as category_name
+                    SELECT s.*,
+                           CONCAT(u.firstname, ' ', u.lastname) as user_name,
+                           u.pseudo,
+                           c.name as category_name
                     FROM services s
                     JOIN users u ON u.id = s.user_id
                     LEFT JOIN categories c ON c.id = s.category_id
@@ -177,6 +181,33 @@ try {
             $sql = "UPDATE services SET " . implode(', ', $updates) . " WHERE id = ?";
             $stmt = $pdo->prepare($sql);
             $stmt->execute($params);
+
+            // Notifier les clients qui ont des commandes actives pour ce service
+            try {
+                $notificationService = new NotificationService($pdo);
+
+                // Récupérer les acheteurs ayant des commandes actives pour ce service
+                $stmt = $pdo->prepare("
+                    SELECT DISTINCT o.buyer_id
+                    FROM orders o
+                    WHERE o.service_id = ?
+                    AND o.status IN ('pending', 'in_progress')
+                    AND o.buyer_id != ?
+                ");
+                $stmt->execute([$service_id, $user_id]);
+                $buyers = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+                // Envoyer une notification à chaque acheteur
+                foreach ($buyers as $buyer_id) {
+                    $notificationService->notifyServiceUpdate(
+                        $buyer_id,
+                        $service['title'],
+                        "Le service \"{$service['title']}\" a été mis à jour par le prestataire."
+                    );
+                }
+            } catch (Exception $e) {
+                error_log("Erreur lors de l'envoi des notifications de mise à jour: " . $e->getMessage());
+            }
 
             echo json_encode(['success' => true, 'message' => 'Service mis à jour']);
             break;

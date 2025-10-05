@@ -25,7 +25,7 @@ try {
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch (PDOException $e) {
     $_SESSION['error_message'] = 'Erreur de connexion à la base de données';
-    header('Location: ' . BASE_URL . '/pages/Parametres?section=account');
+    header('Location: ' . BASE_URL . '/Parametres?section=account');
     exit;
 }
 
@@ -37,42 +37,58 @@ try {
     $stmt = $pdo->prepare("DELETE FROM user_preferences WHERE user_id = ?");
     $stmt->execute([$user['id']]);
 
-    // Supprimer les commandes (si table existe)
-    $stmt = $pdo->query("SHOW TABLES LIKE 'orders'");
-    if ($stmt->fetch()) {
-        $stmt = $pdo->prepare("DELETE FROM orders WHERE user_id = ?");
-        $stmt->execute([$user['id']]);
-    }
+    // Supprimer les paramètres de sécurité
+    $stmt = $pdo->prepare("DELETE FROM user_security WHERE user_id = ?");
+    $stmt->execute([$user['id']]);
 
-    // Supprimer les avis (si table existe)
-    $stmt = $pdo->query("SHOW TABLES LIKE 'reviews'");
-    if ($stmt->fetch()) {
-        $stmt = $pdo->prepare("DELETE FROM reviews WHERE user_id = ?");
-        $stmt->execute([$user['id']]);
-    }
+    // Supprimer les paramètres de confidentialité
+    $stmt = $pdo->prepare("DELETE FROM user_privacy WHERE user_id = ?");
+    $stmt->execute([$user['id']]);
 
-    // Supprimer les notifications (si table existe)
-    $stmt = $pdo->query("SHOW TABLES LIKE 'notifications'");
-    if ($stmt->fetch()) {
-        $stmt = $pdo->prepare("DELETE FROM notifications WHERE user_id = ?");
-        $stmt->execute([$user['id']]);
-    }
+    // Supprimer les services de l'utilisateur (cascade supprimera les commandes liées)
+    $stmt = $pdo->prepare("DELETE FROM services WHERE user_id = ?");
+    $stmt->execute([$user['id']]);
 
-    // Supprimer l'utilisateur
+    // Supprimer les commandes comme acheteur
+    $stmt = $pdo->prepare("DELETE FROM orders WHERE buyer_id = ?");
+    $stmt->execute([$user['id']]);
+
+    // Supprimer les messages
+    $stmt = $pdo->prepare("DELETE FROM messages WHERE sender_id = ?");
+    $stmt->execute([$user['id']]);
+
+    // Supprimer les notifications
+    $stmt = $pdo->prepare("DELETE FROM notifications WHERE user_id = ?");
+    $stmt->execute([$user['id']]);
+
+    // Supprimer le portfolio
+    $stmt = $pdo->prepare("DELETE FROM portfolio WHERE user_id = ?");
+    $stmt->execute([$user['id']]);
+
+    // Supprimer l'utilisateur (cela déclenchera les cascades pour les autres tables)
     $stmt = $pdo->prepare("DELETE FROM users WHERE id = ?");
     $stmt->execute([$user['id']]);
 
     $pdo->commit();
 
-    // Détruire la session
+    // Détruire complètement la session
+    $_SESSION = array();
+    if (ini_get("session.use_cookies")) {
+        $params = session_get_cookie_params();
+        setcookie(session_name(), '', time() - 42000,
+            $params["path"], $params["domain"],
+            $params["secure"], $params["httponly"]
+        );
+    }
     session_destroy();
 
-    // Rediriger vers la page d'accueil avec un message
-    header('Location: ' . BASE_URL . '/?message=account_deleted');
+    // Rediriger vers la page d'accueil
+    header('Location: ' . BASE_URL . '/index.php');
+    exit;
 
 } catch (Exception $e) {
     $pdo->rollback();
     $_SESSION['error_message'] = 'Erreur lors de la suppression du compte : ' . $e->getMessage();
-    header('Location: ' . BASE_URL . '/pages/Parametres?section=account');
+    header('Location: ' . BASE_URL . '/Parametres?section=account');
 }
 ?>

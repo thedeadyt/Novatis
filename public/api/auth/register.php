@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../../../config/config.php';
+require_once __DIR__ . '/../../../includes/EmailService.php';
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -22,12 +23,13 @@ try {
     }
 
     // Valider les données requises
-    $name = trim($data['name'] ?? '');
+    $firstname = trim($data['firstname'] ?? '');
+    $lastname = trim($data['lastname'] ?? '');
     $pseudo = trim($data['pseudo'] ?? '');
     $email = trim($data['email'] ?? '');
     $password = $data['password'] ?? '';
 
-    if (empty($name) || empty($pseudo) || empty($email) || empty($password)) {
+    if (empty($firstname) || empty($lastname) || empty($pseudo) || empty($email) || empty($password)) {
         throw new Exception('Tous les champs sont requis');
     }
 
@@ -65,25 +67,44 @@ try {
 
     // Insérer l'utilisateur
     $stmt = $pdo->prepare("
-        INSERT INTO users (name, pseudo, email, password, role, created_at)
-        VALUES (?, ?, ?, ?, 'user', NOW())
+        INSERT INTO users (firstname, lastname, pseudo, email, password, role, created_at)
+        VALUES (?, ?, ?, ?, ?, 'user', NOW())
     ");
 
-    $stmt->execute([$name, $pseudo, $email, $hashedPassword]);
+    $stmt->execute([$firstname, $lastname, $pseudo, $email, $hashedPassword]);
     $userId = $pdo->lastInsertId();
 
+    // Générer un token de vérification unique
+    $token = bin2hex(random_bytes(32));
+    $expiresAt = date('Y-m-d H:i:s', strtotime('+24 hours'));
+
+    // Insérer le token dans la table de vérification
+    $stmt = $pdo->prepare("
+        INSERT INTO email_verification_tokens (user_id, token, expires_at)
+        VALUES (?, ?, ?)
+    ");
+    $stmt->execute([$userId, $token, $expiresAt]);
+
+    // Envoyer l'email de vérification
+    $emailSent = EmailService::sendVerificationEmail($email, $firstname, $lastname, $token);
+
+    if (!$emailSent) {
+        error_log("Échec d'envoi de l'email de vérification pour l'utilisateur $userId");
+    }
+
     // Récupérer les données de l'utilisateur créé
-    $stmt = $pdo->prepare("SELECT id, name, pseudo, email, role, avatar, rating FROM users WHERE id = ?");
+    $stmt = $pdo->prepare("SELECT id, firstname, lastname, pseudo, email, role, avatar, rating, is_verified FROM users WHERE id = ?");
     $stmt->execute([$userId]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    // Créer la session
-    $_SESSION['user'] = $user;
+    // Ne PAS créer de session - l'utilisateur doit d'abord vérifier son email
+    // $_SESSION['user'] = $user;
 
     echo json_encode([
         'success' => true,
-        'message' => 'Compte créé avec succès',
-        'user' => $user
+        'message' => 'Compte créé avec succès. Un email de vérification a été envoyé à ' . $email,
+        'email_sent' => $emailSent,
+        'verification_required' => true
     ]);
 
 } catch (Exception $e) {

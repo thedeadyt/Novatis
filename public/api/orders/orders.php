@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/../../../config/config.php';
-require_once __DIR__ . '/../notifications/create_notification.php';
+require_once __DIR__ . '/../../../includes/NotificationService.php';
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -26,8 +26,8 @@ try {
                 $stmt = $pdo->prepare("
                     SELECT o.*,
                            s.title as service_title,
-                           buyer.name as buyer_name,
-                           seller.name as seller_name,
+                           COALESCE(NULLIF(CONCAT(buyer.firstname, ' ', buyer.lastname), ' '), buyer.pseudo) as buyer_name,
+                           COALESCE(NULLIF(CONCAT(seller.firstname, ' ', seller.lastname), ' '), seller.pseudo) as seller_name,
                            buyer.avatar as buyer_avatar,
                            seller.avatar as seller_avatar
                     FROM orders o
@@ -42,8 +42,8 @@ try {
                 $stmt = $pdo->prepare("
                     SELECT o.*,
                            s.title as service_title,
-                           buyer.name as buyer_name,
-                           seller.name as seller_name,
+                           COALESCE(NULLIF(CONCAT(buyer.firstname, ' ', buyer.lastname), ' '), buyer.pseudo) as buyer_name,
+                           COALESCE(NULLIF(CONCAT(seller.firstname, ' ', seller.lastname), ' '), seller.pseudo) as seller_name,
                            buyer.avatar as buyer_avatar,
                            seller.avatar as seller_avatar,
                            CASE WHEN o.buyer_id = ? THEN 'buyer' ELSE 'seller' END as user_role
@@ -105,30 +105,24 @@ try {
             $order_id = $pdo->lastInsertId();
 
             // Créer des notifications pour la nouvelle commande
+            $notificationService = new NotificationService($pdo);
+
             // Notification pour le vendeur
-            createNotification(
-                $seller_id,
-                'order',
-                'Nouvelle commande',
-                "Vous avez reçu une nouvelle commande pour \"{$service['title']}\"",
-                '/dashboard?tab=orders',
-                ['order_id' => $order_id, 'service_id' => $service_id]
-            );
+            $notificationService->notifyNewOrder($seller_id, $order_id, $price);
 
             // Notification pour l'acheteur
-            createNotification(
+            $notificationService->create(
                 $buyer_id,
                 'order',
                 'Commande créée',
                 "Votre commande pour \"{$service['title']}\" a été créée avec succès",
-                '/dashboard?tab=orders',
-                ['order_id' => $order_id, 'service_id' => $service_id]
+                "/Novatis/public/pages/Dashboard?tab=purchases"
             );
 
             // Si un message a été fourni, l'envoyer automatiquement
             if (!empty($message)) {
                 // Récupérer le nom de l'utilisateur pour personnaliser le message
-                $stmt = $pdo->prepare("SELECT name FROM users WHERE id = ?");
+                $stmt = $pdo->prepare("SELECT CONCAT(firstname, ' ', lastname) as name FROM users WHERE id = ?");
                 $stmt->execute([$buyer_id]);
                 $buyer_name = $stmt->fetchColumn();
 
@@ -205,23 +199,25 @@ try {
                 ];
 
                 if (isset($status_messages[$new_status])) {
+                    $notificationService = new NotificationService($pdo);
+
                     // Notification pour l'acheteur
-                    createNotification(
+                    $notificationService->create(
                         $order_details['buyer_id'],
                         'order',
                         'Mise à jour de commande',
                         $status_messages[$new_status]['buyer'],
-                        '/dashboard?tab=orders'
+                        '/Novatis/public/pages/Dashboard?tab=purchases'
                     );
 
                     // Notification pour le vendeur (sauf si c'est lui qui fait l'action)
                     if ($order_details['seller_id'] != $user_id) {
-                        createNotification(
+                        $notificationService->create(
                             $order_details['seller_id'],
                             'order',
                             'Mise à jour de commande',
                             $status_messages[$new_status]['seller'],
-                            '/dashboard?tab=orders'
+                            '/Novatis/public/pages/Dashboard?tab=orders'
                         );
                     }
                 }
@@ -245,16 +241,14 @@ try {
                         $stmt->execute([$order_id, $order_details['seller_id'], $rating_message]);
 
                         // Créer une notification pour ce nouveau message
-                        if (function_exists('createNotification')) {
-                            createNotification(
-                                $order_details['buyer_id'],
-                                'message',
-                                'Demande d\'évaluation',
-                                "Votre commande a été livrée ! Laissez une évaluation pour aider les autres utilisateurs.",
-                                '/dashboard?tab=messages',
-                                ['order_id' => $order_id, 'type' => 'rating_request']
-                            );
-                        }
+                        $notificationService = new NotificationService($pdo);
+                        $notificationService->create(
+                            $order_details['buyer_id'],
+                            'message',
+                            'Demande d\'évaluation',
+                            "Votre commande a été livrée ! Laissez une évaluation pour aider les autres utilisateurs.",
+                            '/Novatis/public/pages/Dashboard?tab=messages'
+                        );
                     } catch (Exception $e) {
                         // Ne pas faire échouer la mise à jour du statut si le message automatique échoue
                         error_log("Erreur lors de l'envoi du message d'évaluation: " . $e->getMessage());

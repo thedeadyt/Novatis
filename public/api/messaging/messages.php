@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/../../../config/config.php';
-require_once __DIR__ . '/../notifications/create_notification.php';
+require_once __DIR__ . '/../../../includes/NotificationService.php';
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -17,6 +17,9 @@ if (!isset($_SESSION['user'])) {
 $user_id = $_SESSION['user']['id'];
 $method = $_SERVER['REQUEST_METHOD'];
 
+// Initialiser le service de notifications
+$notificationService = new NotificationService($pdo);
+
 try {
     switch($method) {
         case 'GET':
@@ -28,7 +31,7 @@ try {
                             WHEN o.buyer_id = ? THEN o.seller_id
                             ELSE o.buyer_id
                         END as contact_id,
-                        u.name as contact_name,
+                        COALESCE(NULLIF(CONCAT(u.firstname, ' ', u.lastname), ' '), u.pseudo) as contact_name,
                         u.avatar as contact_avatar,
                         o.id as order_id,
                         o.title as order_title,
@@ -62,7 +65,9 @@ try {
 
                 // Récupérer les messages
                 $stmt = $pdo->prepare("
-                    SELECT m.*, u.name as sender_name, u.avatar as sender_avatar
+                    SELECT m.*,
+                           COALESCE(NULLIF(CONCAT(u.firstname, ' ', u.lastname), ' '), u.pseudo) as sender_name,
+                           u.avatar as sender_avatar
                     FROM messages m
                     JOIN users u ON u.id = m.sender_id
                     WHERE m.order_id = ?
@@ -120,7 +125,8 @@ try {
                 try {
                     // Récupérer les détails pour la notification
                     $stmt = $pdo->prepare("
-                        SELECT o.*, s.title as service_title, sender.name as sender_name,
+                        SELECT o.*, s.title as service_title,
+                               COALESCE(NULLIF(CONCAT(sender.firstname, ' ', sender.lastname), ' '), sender.pseudo) as sender_name,
                                CASE WHEN o.buyer_id = ? THEN o.seller_id ELSE o.buyer_id END as recipient_id
                         FROM orders o
                         JOIN services s ON s.id = o.service_id
@@ -128,16 +134,13 @@ try {
                         WHERE o.id = ?
                     ");
                     $stmt->execute([$user_id, $user_id, $order_id]);
-                    $order_details = $stmt->fetch();
+                    $order_details = $stmt->fetch(PDO::FETCH_ASSOC);
 
-                    if ($order_details && $order_details['recipient_id'] && function_exists('createNotification')) {
-                        createNotification(
+                    if ($order_details && $order_details['recipient_id']) {
+                        $notificationService->notifyNewMessage(
                             $order_details['recipient_id'],
-                            'message',
-                            'Nouveau message',
-                            "Vous avez reçu un nouveau message de {$order_details['sender_name']} concernant \"{$order_details['service_title']}\"",
-                            '/dashboard?tab=messages',
-                            ['order_id' => $order_id, 'sender_id' => $user_id]
+                            $order_details['sender_name'],
+                            $order_id
                         );
                     }
                 } catch (Exception $e) {

@@ -2,7 +2,11 @@
 // config/config.php
 
 // Exemple : chemin relatif à la racine du serveur web (à adapter si ton projet n'est pas à la racine)
-define('BASE_URL', '/Novatis/public'); 
+define('BASE_URL', '/Novatis/public');
+
+// Mode développement (affiche les codes de vérification pour tester sans SMS)
+// À mettre à false en production
+define('DEVELOPMENT_MODE', true); 
 
 
 $host = 'mysql-alex2pro.alwaysdata.net';

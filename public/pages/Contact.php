@@ -22,8 +22,14 @@ if ($prestataire_id) {
     $stmt->execute([$prestataire_id]);
     $prestataire = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    // Récupérer les services du prestataire
+    // Calculer le nom complet
     if ($prestataire) {
+        $prestataire['name'] = trim($prestataire['firstname'] . ' ' . $prestataire['lastname']);
+        if (empty($prestataire['name'])) {
+            $prestataire['name'] = $prestataire['pseudo'];
+        }
+
+        // Récupérer les services du prestataire
         $stmt = $pdo->prepare("SELECT * FROM services WHERE user_id = ? AND status = 'active' ORDER BY price ASC");
         $stmt->execute([$prestataire_id]);
         $services = $stmt->fetchAll(PDO::FETCH_ASSOC);

@@ -230,7 +230,9 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
         // Données utilisateur depuis PHP
         const userData = {
             id: <?= json_encode($user['id'] ?? 0) ?>,
-            name: <?= json_encode($user['name'] ?? 'Utilisateur') ?>,
+            name: <?= json_encode(trim(($user['firstname'] ?? '') . ' ' . ($user['lastname'] ?? '')) ?: ($user['pseudo'] ?? 'Utilisateur')) ?>,
+            firstname: <?= json_encode($user['firstname'] ?? '') ?>,
+            lastname: <?= json_encode($user['lastname'] ?? '') ?>,
             email: <?= json_encode($user['email'] ?? '') ?>,
             role: <?= json_encode($user['role'] ?? 'user') ?>,
             avatar: <?= json_encode($user['avatar'] ?? null) ?>,
@@ -736,7 +738,7 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
             const loadReviews = async () => {
                 setLoading(true);
                 try {
-                    const result = await apiCall('reviews.php');
+                    const result = await apiCall('orders/reviews.php');
                     if (result.success) {
                         setReviews(result.reviews);
                     }
@@ -918,7 +920,7 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
                 setLoading(true);
 
                 try {
-                    const result = await apiCall('dashboard.php');
+                    const result = await apiCall('dashboard/dashboard.php');
                     if (result.success) {
                         setData(prevData => ({
                             ...prevData,
@@ -940,7 +942,7 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
 
             const loadNotifications = async () => {
                 try {
-                    const result = await apiCall('notifications.php');
+                    const result = await apiCall('notifications/get.php?action=list');
                     if (result.success) {
                         setNotifications(result.notifications);
                         setUnreadCount(result.unread_count);
@@ -952,7 +954,7 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
 
             const markNotificationAsRead = async (notificationId) => {
                 try {
-                    const result = await apiCall('notifications.php', 'PUT', { notification_id: notificationId });
+                    const result = await apiCall('notifications/update.php', 'POST', { action: 'mark_read', notification_id: notificationId });
                     if (result.success) {
                         loadNotifications(); // Recharger les notifications
                     }
@@ -963,7 +965,7 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
 
             const markAllAsRead = async () => {
                 try {
-                    const result = await apiCall('notifications.php', 'PUT', { mark_all_read: true });
+                    const result = await apiCall('notifications/update.php', 'POST', { action: 'mark_all_read' });
                     if (result.success) {
                         loadNotifications(); // Recharger les notifications
                     }
@@ -974,7 +976,7 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
 
             const deleteNotification = async (notificationId) => {
                 try {
-                    const result = await apiCall('notifications.php', 'DELETE', { notification_id: notificationId });
+                    const result = await apiCall('notifications/update.php', 'POST', { action: 'delete', notification_id: notificationId });
                     if (result.success) {
                         loadNotifications(); // Recharger les notifications
                     }
@@ -985,7 +987,7 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
 
             const submitRating = async (orderId, rating, comment) => {
                 try {
-                    const result = await apiCall('reviews.php', 'POST', {
+                    const result = await apiCall('orders/reviews.php', 'POST', {
                         order_id: orderId,
                         rating: rating,
                         comment: comment
@@ -1031,6 +1033,7 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
                     case 'messages': return React.createElement(MessagesTab, { data, setData, loadNotifications });
                     case 'services': return React.createElement(ServicesTab, { data, loadData: loadDashboardData });
                     case 'orders': return React.createElement(OrdersTab, { data, openRatingModal });
+                    case 'purchases': return React.createElement(PurchasesTab, { data, openRatingModal });
                     case 'reviews': return React.createElement(ReviewsTab, { userData });
                     case 'portfolio': return React.createElement(PortfolioTab, { data, loadData: loadDashboardData });
                     case 'former-clients': return React.createElement(FormerClientsTab, { data });
@@ -1048,7 +1051,8 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
                     case 'messages': return 'Messages';
                     case 'reviews': return 'Mes Évaluations';
                     case 'services': return isAdmin ? 'Tous les Services' : 'Mes Services';
-                    case 'orders': return 'Commandes';
+                    case 'orders': return 'Mes Ventes';
+                    case 'purchases': return 'Mes Achats';
                     case 'portfolio': return 'Portfolio';
                     case 'former-clients': return 'Anciens Clients';
                     case 'admin-users': return 'Gestion Utilisateurs';
@@ -1150,7 +1154,8 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
                 { id: 'notifications', icon: 'fas fa-bell', label: 'Notifications', badge: unreadCount },
                 { id: 'messages', icon: 'fas fa-envelope', label: 'Messages', badge: data.unreadMessages || 0 },
                 { id: 'services', icon: 'fas fa-cog', label: 'Mes Services' },
-                { id: 'orders', icon: 'fas fa-briefcase', label: 'Commandes' },
+                { id: 'orders', icon: 'fas fa-briefcase', label: 'Mes Ventes' },
+                { id: 'purchases', icon: 'fas fa-shopping-cart', label: 'Mes Achats' },
                 { id: 'reviews', icon: 'fas fa-star', label: 'Évaluations' },
                 { id: 'portfolio', icon: 'fas fa-images', label: 'Portfolio' },
                 { id: 'former-clients', icon: 'fas fa-users', label: 'Anciens Clients' }
@@ -1321,7 +1326,7 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
 
             const loadConversations = async () => {
                 setLoading(true);
-                const result = await apiCall('messages.php?conversations=1');
+                const result = await apiCall('messaging/messages.php?conversations=1');
                 if (result.success) {
                     setConversations(result.conversations);
                 }
@@ -1330,7 +1335,7 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
 
 
             const loadMessages = async (orderId) => {
-                const result = await apiCall(`messages.php?order_id=${orderId}`);
+                const result = await apiCall(`messaging/messages.php?order_id=${orderId}`);
                 if (result.success) {
                     setMessages(result.messages);
                     setSelectedConversation(result.order);
@@ -1342,7 +1347,7 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
 
                 setSending(true);
                 try {
-                    const result = await apiCall('messages.php', 'POST', {
+                    const result = await apiCall('messaging/messages.php', 'POST', {
                         order_id: selectedConversation.id,
                         content: newMessage
                     });
@@ -1518,7 +1523,7 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
                             className: "w-full p-3 border rounded-lg"
                         },
                             React.createElement('option', { value: "" }, "Sélectionner une catégorie"),
-                            categories.map(cat =>
+                            (categories || []).map(cat =>
                                 React.createElement('option', { key: cat.id, value: cat.id }, cat.name)
                             )
                         ),
@@ -1585,7 +1590,7 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
                     ? { ...serviceFormData, id: editingService.id }
                     : serviceFormData;
 
-                const result = await apiCall('services.php', method, payload);
+                const result = await apiCall('services/services.php', method, payload);
 
                 if (result.success) {
                     handleCloseModal();
@@ -1616,7 +1621,7 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
 
             const handleDelete = async (serviceId) => {
                 if (confirm('Êtes-vous sûr de vouloir supprimer ce service ?')) {
-                    const result = await apiCall('services.php', 'DELETE', { id: serviceId });
+                    const result = await apiCall('services/services.php', 'DELETE', { id: serviceId });
                     if (result.success) {
                         loadData();
                     } else {
@@ -1686,7 +1691,7 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
             );
         };
 
-        // Orders Tab
+        // Orders Tab (Mes Ventes - only orders where user is seller)
         const OrdersTab = ({ data, openRatingModal }) => {
             const [orders, setOrders] = useState([]);
             const [loading, setLoading] = useState(true);
@@ -1697,15 +1702,17 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
 
             const loadOrders = async () => {
                 setLoading(true);
-                const result = await apiCall('orders.php');
+                const result = await apiCall('orders/orders.php');
                 if (result.success) {
-                    setOrders(result.orders);
+                    // Filter only orders where user is seller (or all for admin)
+                    const filteredOrders = isAdmin ? result.orders : result.orders.filter(o => o.user_role === 'seller');
+                    setOrders(filteredOrders);
                 }
                 setLoading(false);
             };
 
             const updateOrderStatus = async (orderId, newStatus) => {
-                const result = await apiCall('orders.php', 'PUT', {
+                const result = await apiCall('orders/orders.php', 'PUT', {
                     order_id: orderId,
                     status: newStatus
                 });
@@ -1733,15 +1740,15 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
             }
 
             return React.createElement('div', { className: "bg-white rounded-lg p-6", style: {boxShadow: 'var(--shadow-md)'} },
-                React.createElement('h3', { className: "text-lg font-bold mb-6" }, "Commandes"),
+                React.createElement('h3', { className: "text-lg font-bold mb-6" }, isAdmin ? "Toutes les Commandes" : "Mes Ventes"),
 
                 orders.length === 0
-                    ? React.createElement('div', { className: "text-center py-8 text-gray-500" }, "Aucune commande")
+                    ? React.createElement('div', { className: "text-center py-8 text-gray-500" }, isAdmin ? "Aucune commande" : "Aucune vente")
                     : React.createElement('div', { className: "space-y-4" },
                         orders.map(order =>
                             React.createElement('div', { key: order.id, className: "border rounded-lg p-4" },
                                 React.createElement('div', { className: "flex items-center justify-between mb-3" },
-                                    React.createElement('h4', { className: "font-medium" }, order.title),
+                                    React.createElement('h4', { className: "font-medium" }, order.service_title),
                                     React.createElement('span', {
                                         className: `px-3 py-1 text-sm rounded-full status-${order.status}`
                                     }, formatStatus(order.status))
@@ -1808,6 +1815,126 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
             );
         };
 
+        // Purchases Tab (Mes Achats - only orders where user is buyer)
+        const PurchasesTab = ({ data, openRatingModal }) => {
+            const [orders, setOrders] = useState([]);
+            const [loading, setLoading] = useState(true);
+
+            useEffect(() => {
+                loadOrders();
+            }, []);
+
+            const loadOrders = async () => {
+                setLoading(true);
+                const result = await apiCall('orders/orders.php');
+                if (result.success) {
+                    // Filter only orders where user is buyer
+                    const filteredOrders = result.orders.filter(o => o.user_role === 'buyer');
+                    setOrders(filteredOrders);
+                }
+                setLoading(false);
+            };
+
+            const formatStatus = (status) => {
+                const statusLabels = {
+                    pending: 'En attente',
+                    in_progress: 'En cours',
+                    delivered: 'Livré',
+                    completed: 'Terminé',
+                    cancelled: 'Annulé'
+                };
+                return statusLabels[status] || status;
+            };
+
+            if (loading) {
+                return React.createElement('div', { className: "flex items-center justify-center h-64" },
+                    React.createElement('div', { className: "text-lg" }, "Chargement...")
+                );
+            }
+
+            return React.createElement('div', { className: "bg-white rounded-lg p-6", style: {boxShadow: 'var(--shadow-md)'} },
+                React.createElement('h3', { className: "text-lg font-bold mb-6" }, "Mes Achats"),
+
+                orders.length === 0
+                    ? React.createElement('div', { className: "text-center py-8 text-gray-500" }, "Aucun achat")
+                    : React.createElement('div', { className: "space-y-4" },
+                        orders.map(order =>
+                            React.createElement('div', { key: order.id, className: "border rounded-lg p-4" },
+                                React.createElement('div', { className: "flex items-center justify-between mb-3" },
+                                    React.createElement('h4', { className: "font-medium" }, order.service_title),
+                                    React.createElement('span', {
+                                        className: `px-3 py-1 text-sm rounded-full status-${order.status}`
+                                    }, formatStatus(order.status))
+                                ),
+                                React.createElement('div', { className: "grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600" },
+                                    React.createElement('div', null,
+                                        React.createElement('span', { className: "font-medium" }, "Prix: "),
+                                        React.createElement('span', null, `${order.price}€`)
+                                    ),
+                                    React.createElement('div', null,
+                                        React.createElement('span', { className: "font-medium" }, "Vendeur: "),
+                                        React.createElement('span', null, order.seller_name)
+                                    ),
+                                    order.deadline && React.createElement('div', null,
+                                        React.createElement('span', { className: "font-medium" }, "Échéance: "),
+                                        React.createElement('span', null, new Date(order.deadline).toLocaleDateString())
+                                    )
+                                ),
+                                order.description && React.createElement('p', { className: "text-sm text-gray-600 mt-3" }, order.description),
+
+                                // Bouton d'évaluation pour l'acheteur quand la commande est livrée
+                                order.status === 'delivered' &&
+                                React.createElement('div', { className: "mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg" },
+                                    React.createElement('div', { className: "flex items-center justify-between" },
+                                        React.createElement('div', null,
+                                            React.createElement('p', { className: "text-sm font-medium text-yellow-800" },
+                                                "📦 Commande livrée ! Évaluez votre prestataire"
+                                            ),
+                                            React.createElement('p', { className: "text-xs text-yellow-600 mt-1" },
+                                                "Votre avis aidera les autres utilisateurs"
+                                            )
+                                        ),
+                                        React.createElement('button', {
+                                            onClick: () => openRatingModal(order),
+                                            className: "bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                                        }, "⭐ Évaluer")
+                                    )
+                                ),
+
+                                // Informations sur le statut de la commande
+                                order.status === 'pending' &&
+                                React.createElement('div', { className: "mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg" },
+                                    React.createElement('p', { className: "text-sm text-blue-800" },
+                                        "⏳ Votre commande est en attente de validation par le vendeur"
+                                    )
+                                ),
+
+                                order.status === 'in_progress' &&
+                                React.createElement('div', { className: "mt-4 p-3 bg-green-50 border border-green-200 rounded-lg" },
+                                    React.createElement('p', { className: "text-sm text-green-800" },
+                                        "🚀 Votre commande est en cours de traitement"
+                                    )
+                                ),
+
+                                order.status === 'completed' &&
+                                React.createElement('div', { className: "mt-4 p-3 bg-gray-50 border border-gray-200 rounded-lg" },
+                                    React.createElement('p', { className: "text-sm text-gray-800" },
+                                        "✅ Commande terminée"
+                                    )
+                                ),
+
+                                order.status === 'cancelled' &&
+                                React.createElement('div', { className: "mt-4 p-3 bg-red-50 border border-red-200 rounded-lg" },
+                                    React.createElement('p', { className: "text-sm text-red-800" },
+                                        "❌ Commande annulée"
+                                    )
+                                )
+                            )
+                        )
+                    )
+            );
+        };
+
         // Portfolio Modal Component
         const PortfolioModal = ({ isOpen, onClose, editingProject, formData, setFormData, onSubmit, categories }) => {
             if (!isOpen) return null;
@@ -1840,7 +1967,7 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
                             className: "w-full p-3 border rounded-lg"
                         },
                             React.createElement('option', { value: "" }, "Sélectionner une catégorie"),
-                            categories.map(cat =>
+                            (data.categories || []).map(cat =>
                                 React.createElement('option', { key: cat.id, value: cat.id }, cat.name)
                             )
                         ),
@@ -1886,7 +2013,7 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
                     ? { ...formData, id: editingProject.id }
                     : formData;
 
-                const result = await apiCall('portfolio.php', method, payload);
+                const result = await apiCall('services/portfolio.php', method, payload);
 
                 if (result.success) {
                     handleCloseModal();
@@ -1913,7 +2040,7 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
 
             const handleDelete = async (projectId) => {
                 if (confirm('Êtes-vous sûr de vouloir supprimer ce projet ?')) {
-                    const result = await apiCall('portfolio.php', 'DELETE', { id: projectId });
+                    const result = await apiCall('services/portfolio.php', 'DELETE', { id: projectId });
                     if (result.success) {
                         loadData();
                     }
@@ -2034,7 +2161,7 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
 
             const loadUsers = async () => {
                 setLoading(true);
-                const result = await apiCall('users.php');
+                const result = await apiCall('admin/users.php');
                 if (result.success) {
                     setUsers(result.users);
                 }
@@ -2042,7 +2169,7 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
             };
 
             const updateUser = async (userId, updates) => {
-                const result = await apiCall('users.php', 'PUT', {
+                const result = await apiCall('admin/users.php', 'PUT', {
                     user_id: userId,
                     ...updates
                 });
@@ -2054,7 +2181,7 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
 
             const deleteUser = async (userId) => {
                 if (confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) {
-                    const result = await apiCall('users.php', 'DELETE', { user_id: userId });
+                    const result = await apiCall('admin/users.php', 'DELETE', { user_id: userId });
                     if (result.success) {
                         loadUsers();
                     }
@@ -2161,7 +2288,7 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
 
             const loadTickets = async () => {
                 setLoading(true);
-                const result = await apiCall('support.php');
+                const result = await apiCall('admin/support.php');
                 if (result.success) {
                     setTickets(result.tickets);
                 }
@@ -2169,7 +2296,7 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
             };
 
             const updateTicket = async (ticketId, updates) => {
-                const result = await apiCall('support.php', 'PUT', {
+                const result = await apiCall('admin/support.php', 'PUT', {
                     ticket_id: ticketId,
                     ...updates
                 });
@@ -2364,7 +2491,7 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
 
             const loadCategories = async () => {
                 setLoading(true);
-                const result = await apiCall('categories.php');
+                const result = await apiCall('services/categories.php');
                 if (result.success) {
                     setCategories(result.categories);
                 }
@@ -2379,7 +2506,7 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
                     ? { ...formData, id: editingCategory.id }
                     : formData;
 
-                const result = await apiCall('categories.php', method, payload);
+                const result = await apiCall('services/categories.php', method, payload);
 
                 if (result.success) {
                     handleCloseModal();
@@ -2407,7 +2534,7 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
 
             const handleDelete = async (categoryId) => {
                 if (confirm('Êtes-vous sûr de vouloir supprimer cette catégorie ?')) {
-                    const result = await apiCall('categories.php', 'DELETE', { id: categoryId });
+                    const result = await apiCall('services/categories.php', 'DELETE', { id: categoryId });
                     if (result.success) {
                         loadCategories();
                         loadData();

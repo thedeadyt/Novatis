@@ -121,7 +121,7 @@ try {
 
             // Créer une notification pour la personne évaluée
             try {
-                $stmt = $pdo->prepare("SELECT name FROM users WHERE id = ?");
+                $stmt = $pdo->prepare("SELECT CONCAT(firstname, ' ', lastname) as name FROM users WHERE id = ?");
                 $stmt->execute([$reviewer_id]);
                 $reviewer_name = $stmt->fetchColumn();
 
