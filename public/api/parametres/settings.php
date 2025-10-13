@@ -68,7 +68,6 @@ function createTablesIfNotExist($pdo) {
             push_notifications BOOLEAN DEFAULT FALSE,
             sms_notifications BOOLEAN DEFAULT FALSE,
             dark_mode BOOLEAN DEFAULT FALSE,
-            language VARCHAR(10) DEFAULT 'fr',
             timezone VARCHAR(50) DEFAULT 'Europe/Paris',
             currency VARCHAR(3) DEFAULT 'EUR',
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -340,23 +339,15 @@ function updateDisplay($pdo, $user) {
     try {
         $darkMode = isset($_POST['dark_mode']) ? 1 : 0;
         $currency = $_POST['currency'] ?? 'EUR';
-        $language = $_POST['language'] ?? 'fr';
-
-        // Valider la langue
-        $validLanguages = ['fr', 'en', 'es'];
-        if (!in_array($language, $validLanguages)) {
-            $language = 'fr';
-        }
 
         $stmt = $pdo->prepare("
-            INSERT INTO user_preferences (user_id, dark_mode, currency, language)
-            VALUES (?, ?, ?, ?)
+            INSERT INTO user_preferences (user_id, dark_mode, currency)
+            VALUES (?, ?, ?)
             ON DUPLICATE KEY UPDATE
             dark_mode = VALUES(dark_mode),
-            currency = VALUES(currency),
-            language = VALUES(language)
+            currency = VALUES(currency)
         ");
-        $stmt->execute([$user['id'], $darkMode, $currency, $language]);
+        $stmt->execute([$user['id'], $darkMode, $currency]);
 
         $_SESSION['success_message'] = 'Préférences d\'affichage mises à jour';
         header('Location: ' . BASE_URL . '/Parametres?section=display');

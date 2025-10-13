@@ -271,12 +271,18 @@ if (isUserLoggedIn()) {
 
                 try {
                     const endpoint = isLogin ? 'auth/login.php' : 'auth/register.php';
+
+                    // Préparer les données selon le mode
+                    const requestData = isLogin
+                        ? { email: formData.email, password: formData.password }
+                        : formData;
+
                     const response = await fetch(`<?= BASE_URL ?>/api/${endpoint}`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify(formData)
+                        body: JSON.stringify(requestData)
                     });
 
                     const result = await response.json();

@@ -25,7 +25,6 @@ try {
             push_notifications BOOLEAN DEFAULT FALSE,
             sms_notifications BOOLEAN DEFAULT FALSE,
             dark_mode BOOLEAN DEFAULT FALSE,
-            language VARCHAR(10) DEFAULT 'fr',
             timezone VARCHAR(50) DEFAULT 'Europe/Paris',
             currency VARCHAR(3) DEFAULT 'EUR',
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -114,7 +113,6 @@ try {
             'push_notifications' => 0,
             'sms_notifications' => 0,
             'dark_mode' => 0,
-            'language' => 'fr',
             'timezone' => 'Europe/Paris',
             'currency' => 'EUR'
         ];
@@ -147,7 +145,6 @@ try {
         'push_notifications' => 0,
         'sms_notifications' => 0,
         'dark_mode' => 0,
-        'language' => 'fr',
         'timezone' => 'Europe/Paris',
         'currency' => 'EUR'
     ];
@@ -905,22 +902,10 @@ try {
                         <input type="hidden" name="action" value="update_display">
 
                         <div class="space-y-4">
-                            <div class="form-group">
-                                <label class="form-label">
-                                    <i class="fas fa-language mr-2"></i>
-                                    Langue / Language / Idioma
-                                </label>
-                                <select name="language" class="form-input">
-                                    <option value="fr" <?= ($preferences['language'] ?? 'fr') === 'fr' ? 'selected' : '' ?>>🇫🇷 Français</option>
-                                    <option value="en" <?= ($preferences['language'] ?? 'fr') === 'en' ? 'selected' : '' ?>>🇬🇧 English</option>
-                                    <option value="es" <?= ($preferences['language'] ?? 'fr') === 'es' ? 'selected' : '' ?>>🇪🇸 Español</option>
-                                </select>
-                            </div>
-
                             <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                                 <div>
                                     <div class="font-medium text-custom-black">Mode sombre</div>
-                                    <div class="text-sm text-gray-600">Utiliser le thème sombre</div>
+                                    <div class="text-sm text-gray-600">Activer le thème sombre de l'interface</div>
                                 </div>
                                 <label class="toggle-switch">
                                     <input type="checkbox" name="dark_mode"
