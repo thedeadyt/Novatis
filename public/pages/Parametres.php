@@ -87,6 +87,17 @@ try {
     $stmt->execute([$user['id']]);
     $privacy = $stmt->fetch(PDO::FETCH_ASSOC);
 
+    // Récupérer les connexions OAuth de l'utilisateur
+    $stmt = $pdo->prepare("SELECT provider, email, name, created_at FROM oauth_connections WHERE user_id = ?");
+    $stmt->execute([$user['id']]);
+    $oauthConnections = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Créer un tableau pour accès facile
+    $connectedProviders = [];
+    foreach ($oauthConnections as $connection) {
+        $connectedProviders[$connection['provider']] = $connection;
+    }
+
     // Récupérer les informations complètes de l'utilisateur depuis la table users
     $stmt = $pdo->prepare("
         SELECT id, firstname, lastname, pseudo, email, phone, avatar, rating, bio, location, website,
@@ -887,52 +898,122 @@ try {
                 </div>
             </div>
 
-            <!-- Section Affichage -->
-            <div id="display-section" class="section-content <?= $activeSection === 'display' ? 'active' : '' ?>">
-                <div class="settings-card">
-                    <div class="settings-header">
-                        <h2 class="text-xl font-semibold text-custom-black">
-                            <i class="fas fa-paint-brush mr-2"></i>
-                            Préférences d'affichage
-                        </h2>
-                        <p class="text-sm text-gray-600 mt-1">Personnalisez l'apparence de l'application</p>
+<!-- Section Affichage -->
+<div id="display-section" class="section-content <?= $activeSection === 'display' ? 'active' : '' ?>">
+    <div class="settings-card">
+        <div class="settings-header">
+            <h2 class="text-xl font-semibold text-custom-black">
+                <i class="fas fa-paint-brush mr-2"></i>
+                Préférences d'affichage
+            </h2>
+            <p class="text-sm text-gray-600 mt-1">Personnalisez l'apparence de l'application</p>
+        </div>
+
+        <form id="display-settings-form">
+            <div class="space-y-4">
+
+                <!-- === Mode sombre / clair === -->
+                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div>
+                        <div class="font-medium text-custom-black">Mode sombre</div>
+                        <div class="text-sm text-gray-600">Activez le thème sombre de l'interface</div>
                     </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="darkModeToggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
 
-                    <form method="POST" action="<?= BASE_URL ?>/api/parametres/settings.php">
-                        <input type="hidden" name="action" value="update_display">
-
-                        <div class="space-y-4">
-                            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                                <div>
-                                    <div class="font-medium text-custom-black">Mode sombre</div>
-                                    <div class="text-sm text-gray-600">Activer le thème sombre de l'interface</div>
-                                </div>
-                                <label class="toggle-switch">
-                                    <input type="checkbox" name="dark_mode"
-                                           <?= $preferences['dark_mode'] ? 'checked' : '' ?>>
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label">Monnaie par défaut</label>
-                                <select name="currency" class="form-input">
-                                    <option value="EUR" <?= $preferences['currency'] === 'EUR' ? 'selected' : '' ?>>Euro (€)</option>
-                                    <option value="USD" <?= $preferences['currency'] === 'USD' ? 'selected' : '' ?>>Dollar US ($)</option>
-                                    <option value="GBP" <?= $preferences['currency'] === 'GBP' ? 'selected' : '' ?>>Livre Sterling (£)</option>
-                                </select>
-                            </div>
-
-                            <div class="flex justify-end">
-                                <button type="submit" class="btn-primary px-6 py-2 rounded-lg">
-                                    <i class="fas fa-save mr-2"></i>
-                                    Sauvegarder
-                                </button>
-                            </div>
-                        </div>
-                    </form>
+                <div class="flex justify-end">
+                    <button type="button" id="saveThemeBtn" class="btn-primary px-6 py-2 rounded-lg">
+                        <i class="fas fa-save mr-2"></i>
+                        Sauvegarder
+                    </button>
                 </div>
             </div>
+        </form>
+    </div>
+</div>
+
+<!-- Script de gestion du thème -->
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const toggle = document.getElementById("darkModeToggle");
+    const saveBtn = document.getElementById("saveThemeBtn");
+    const html = document.documentElement;
+
+    // Charger la préférence depuis localStorage
+    const isDark = localStorage.getItem("theme") === "dark";
+    toggle.checked = isDark;
+    html.classList.toggle("dark", isDark);
+
+    // Basculer le thème quand on clique sur le switch
+    toggle.addEventListener("change", () => {
+        const dark = toggle.checked;
+        html.classList.toggle("dark", dark);
+    });
+
+    // Sauvegarder la préférence
+    saveBtn.addEventListener("click", () => {
+        const dark = toggle.checked;
+        localStorage.setItem("theme", dark ? "dark" : "light");
+        alert("Préférences enregistrées !");
+    });
+});
+</script>
+
+<!-- Styles spécifiques (si tu n’as pas déjà les classes pour le switch) -->
+<style>
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+}
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 24px;
+}
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+input:checked + .slider {
+    background-color: #111827; /* gris foncé */
+}
+input:checked + .slider:before {
+    transform: translateX(26px);
+}
+
+/* Mode sombre global (si tu utilises Tailwind, il détectera la classe .dark) */
+html.dark {
+    background-color: #111827;
+    color: #f9fafb;
+}
+html.dark .settings-card {
+    background-color: #1f2937;
+}
+html.dark .text-custom-black {
+    color: #f9fafb;
+}
+</style>
+
 
             <!-- Section Intégrations -->
             <div id="integrations-section" class="section-content <?= $activeSection === 'integrations' ? 'active' : '' ?>">
@@ -946,44 +1027,133 @@ try {
                     </div>
 
                     <div class="space-y-4">
-                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                            <div class="flex items-center">
+                        <!-- Google OAuth -->
+                        <div class="flex items-center justify-between p-4 <?= isset($connectedProviders['google']) ? 'bg-green-50 border-2 border-green-200' : 'bg-gray-50' ?> rounded-lg hover:bg-gray-100 transition">
+                            <div class="flex items-center flex-1">
                                 <i class="fab fa-google text-2xl mr-4 text-red-500"></i>
-                                <div>
-                                    <div class="font-medium text-custom-black">Google</div>
-                                    <div class="text-sm text-gray-600">Synchroniser avec Google Drive et Gmail</div>
+                                <div class="flex-1">
+                                    <div class="font-medium text-custom-black flex items-center">
+                                        Google
+                                        <?php if (isset($connectedProviders['google'])): ?>
+                                            <span class="ml-2 px-2 py-1 bg-green-500 text-white text-xs rounded-full flex items-center">
+                                                <i class="fas fa-check-circle mr-1"></i>
+                                                Connecté
+                                            </span>
+                                        <?php endif; ?>
+                                    </div>
+                                    <?php if (isset($connectedProviders['google'])): ?>
+                                        <div class="text-sm text-gray-600 mt-1">
+                                            <?= htmlspecialchars($connectedProviders['google']['email']) ?>
+                                        </div>
+                                        <div class="text-xs text-gray-500 mt-1">
+                                            Connecté le <?= date('d/m/Y', strtotime($connectedProviders['google']['created_at'])) ?>
+                                        </div>
+                                    <?php else: ?>
+                                        <div class="text-sm text-gray-600">Se connecter avec votre compte Google</div>
+                                    <?php endif; ?>
                                 </div>
                             </div>
-                            <button class="btn-secondary px-4 py-2 rounded-lg text-sm">
-                                Connecter
-                            </button>
+                            <?php if (isset($connectedProviders['google'])): ?>
+                                <button onclick="disconnectOAuth('google')" class="px-4 py-2 bg-red-100 text-red-600 hover:bg-red-200 rounded-lg text-sm transition">
+                                    <i class="fas fa-unlink mr-2"></i>
+                                    Déconnecter
+                                </button>
+                            <?php else: ?>
+                                <button onclick="connectOAuth('google')" class="btn-secondary px-4 py-2 rounded-lg text-sm hover:shadow-md transition">
+                                    <i class="fas fa-link mr-2"></i>
+                                    Connecter
+                                </button>
+                            <?php endif; ?>
                         </div>
 
-                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                            <div class="flex items-center">
+                        <!-- Microsoft OAuth -->
+                        <div class="flex items-center justify-between p-4 <?= isset($connectedProviders['microsoft']) ? 'bg-green-50 border-2 border-green-200' : 'bg-gray-50' ?> rounded-lg hover:bg-gray-100 transition">
+                            <div class="flex items-center flex-1">
                                 <i class="fab fa-microsoft text-2xl mr-4 text-blue-500"></i>
-                                <div>
-                                    <div class="font-medium text-custom-black">Microsoft</div>
-                                    <div class="text-sm text-gray-600">Synchroniser avec OneDrive et Outlook</div>
+                                <div class="flex-1">
+                                    <div class="font-medium text-custom-black flex items-center">
+                                        Microsoft
+                                        <?php if (isset($connectedProviders['microsoft'])): ?>
+                                            <span class="ml-2 px-2 py-1 bg-green-500 text-white text-xs rounded-full flex items-center">
+                                                <i class="fas fa-check-circle mr-1"></i>
+                                                Connecté
+                                            </span>
+                                        <?php endif; ?>
+                                    </div>
+                                    <?php if (isset($connectedProviders['microsoft'])): ?>
+                                        <div class="text-sm text-gray-600 mt-1">
+                                            <?= htmlspecialchars($connectedProviders['microsoft']['email']) ?>
+                                        </div>
+                                        <div class="text-xs text-gray-500 mt-1">
+                                            Connecté le <?= date('d/m/Y', strtotime($connectedProviders['microsoft']['created_at'])) ?>
+                                        </div>
+                                    <?php else: ?>
+                                        <div class="text-sm text-gray-600">Se connecter avec votre compte Microsoft</div>
+                                    <?php endif; ?>
                                 </div>
                             </div>
-                            <button class="btn-secondary px-4 py-2 rounded-lg text-sm">
-                                Connecter
-                            </button>
+                            <?php if (isset($connectedProviders['microsoft'])): ?>
+                                <button onclick="disconnectOAuth('microsoft')" class="px-4 py-2 bg-red-100 text-red-600 hover:bg-red-200 rounded-lg text-sm transition">
+                                    <i class="fas fa-unlink mr-2"></i>
+                                    Déconnecter
+                                </button>
+                            <?php else: ?>
+                                <button onclick="connectOAuth('microsoft')" class="btn-secondary px-4 py-2 rounded-lg text-sm hover:shadow-md transition">
+                                    <i class="fas fa-link mr-2"></i>
+                                    Connecter
+                                </button>
+                            <?php endif; ?>
                         </div>
 
-                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                            <div class="flex items-center">
-                                <i class="fab fa-slack text-2xl mr-4 text-purple-500"></i>
-                                <div>
-                                    <div class="font-medium text-custom-black">Slack</div>
-                                    <div class="text-sm text-gray-600">Recevoir des notifications dans Slack</div>
+                        <!-- GitHub OAuth -->
+                        <div class="flex items-center justify-between p-4 <?= isset($connectedProviders['github']) ? 'bg-green-50 border-2 border-green-200' : 'bg-gray-50' ?> rounded-lg hover:bg-gray-100 transition">
+                            <div class="flex items-center flex-1">
+                                <i class="fab fa-github text-2xl mr-4 text-gray-800"></i>
+                                <div class="flex-1">
+                                    <div class="font-medium text-custom-black flex items-center">
+                                        GitHub
+                                        <?php if (isset($connectedProviders['github'])): ?>
+                                            <span class="ml-2 px-2 py-1 bg-green-500 text-white text-xs rounded-full flex items-center">
+                                                <i class="fas fa-check-circle mr-1"></i>
+                                                Connecté
+                                            </span>
+                                        <?php endif; ?>
+                                    </div>
+                                    <?php if (isset($connectedProviders['github'])): ?>
+                                        <div class="text-sm text-gray-600 mt-1">
+                                            <?= htmlspecialchars($connectedProviders['github']['email']) ?>
+                                        </div>
+                                        <div class="text-xs text-gray-500 mt-1">
+                                            Connecté le <?= date('d/m/Y', strtotime($connectedProviders['github']['created_at'])) ?>
+                                        </div>
+                                    <?php else: ?>
+                                        <div class="text-sm text-gray-600">Se connecter avec votre compte GitHub</div>
+                                    <?php endif; ?>
                                 </div>
                             </div>
-                            <button class="btn-secondary px-4 py-2 rounded-lg text-sm">
-                                Connecter
-                            </button>
+                            <?php if (isset($connectedProviders['github'])): ?>
+                                <button onclick="disconnectOAuth('github')" class="px-4 py-2 bg-red-100 text-red-600 hover:bg-red-200 rounded-lg text-sm transition">
+                                    <i class="fas fa-unlink mr-2"></i>
+                                    Déconnecter
+                                </button>
+                            <?php else: ?>
+                                <button onclick="connectOAuth('github')" class="btn-secondary px-4 py-2 rounded-lg text-sm hover:shadow-md transition">
+                                    <i class="fas fa-link mr-2"></i>
+                                    Connecter
+                                </button>
+                            <?php endif; ?>
                         </div>
+                    </div>
+
+                    <!-- Note d'information -->
+                    <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                        <h4 class="font-medium text-blue-900 mb-2 flex items-center">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            Connexion simplifiée
+                        </h4>
+                        <p class="text-sm text-blue-800">
+                            Connectez votre compte Novatis avec Google, Microsoft ou GitHub pour vous connecter rapidement sans saisir votre mot de passe.
+                        </p>
                     </div>
                 </div>
             </div>
@@ -1135,6 +1305,34 @@ try {
 
     <!-- Scripts -->
     <script>
+        // Fonction pour connecter via OAuth
+        function connectOAuth(provider) {
+            const width = 600;
+            const height = 700;
+            const left = (screen.width - width) / 2;
+            const top = (screen.height - height) / 2;
+
+            const popup = window.open(
+                '<?= BASE_URL ?>/api/oauth/authorize.php?provider=' + provider,
+                'oauth_' + provider,
+                `width=${width},height=${height},left=${left},top=${top},scrollbars=yes`
+            );
+
+            // Écouter les messages du popup
+            window.addEventListener('message', function(event) {
+                if (event.origin !== window.location.origin) return;
+
+                if (event.data.type === 'oauth_success') {
+                    popup.close();
+                    alert('Connexion réussie avec ' + provider + ' !');
+                    location.reload();
+                } else if (event.data.type === 'oauth_error') {
+                    popup.close();
+                    alert('Erreur lors de la connexion: ' + event.data.message);
+                }
+            });
+        }
+
         function confirmDeleteAccount() {
             if (confirm('Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.')) {
                 if (confirm('Dernière confirmation : toutes vos données seront définitivement perdues. Continuer ?')) {

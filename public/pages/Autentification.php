@@ -18,6 +18,9 @@ if (isUserLoggedIn()) {
     <!-- Variables CSS -->
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/variables.css">
 
+    <!-- Font Awesome pour les icônes OAuth -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
     <!-- Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -339,6 +342,42 @@ if (isUserLoggedIn()) {
                 }
             };
 
+            const handleOAuthLogin = (provider) => {
+                const width = 600;
+                const height = 700;
+                const left = (screen.width - width) / 2;
+                const top = (screen.height - height) / 2;
+
+                const popup = window.open(
+                    `<?= BASE_URL ?>/api/oauth/authorize.php?provider=${provider}`,
+                    `oauth_${provider}`,
+                    `width=${width},height=${height},left=${left},top=${top},scrollbars=yes`
+                );
+
+                // Écouter les messages du popup
+                const messageHandler = (event) => {
+                    if (event.origin !== window.location.origin) return;
+
+                    if (event.data.type === 'oauth_success') {
+                        popup.close();
+                        window.location.href = '<?= BASE_URL ?>/Dashboard';
+                    } else if (event.data.type === 'oauth_error') {
+                        popup.close();
+                        setErrors({ general: event.data.message || 'Erreur lors de la connexion OAuth' });
+                    }
+                };
+
+                window.addEventListener('message', messageHandler);
+
+                // Nettoyer l'écouteur si le popup est fermé manuellement
+                const checkPopup = setInterval(() => {
+                    if (popup.closed) {
+                        clearInterval(checkPopup);
+                        window.removeEventListener('message', messageHandler);
+                    }
+                }, 500);
+            };
+
             return React.createElement('div', {
                 className: "w-full max-w-6xl mx-auto"
             },
@@ -623,7 +662,66 @@ if (isUserLoggedIn()) {
                                     type: "submit",
                                     disabled: loading,
                                     className: "w-full btn-primary font-semibold py-3 px-6 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                                }, loading ? (isLogin ? "Connexion..." : "Inscription...") : (isLogin ? "Se connecter" : "S'inscrire"))
+                                }, loading ? (isLogin ? "Connexion..." : "Inscription...") : (isLogin ? "Se connecter" : "S'inscrire")),
+
+                                // Séparateur OU
+                                React.createElement('div', {
+                                    className: "relative my-6"
+                                },
+                                    React.createElement('div', {
+                                        className: "absolute inset-0 flex items-center"
+                                    },
+                                        React.createElement('div', {
+                                            className: "w-full border-t border-gray-300"
+                                        })
+                                    ),
+                                    React.createElement('div', {
+                                        className: "relative flex justify-center text-sm"
+                                    },
+                                        React.createElement('span', {
+                                            className: "px-4 bg-white text-gray-500 font-medium"
+                                        }, "Ou continuer avec")
+                                    )
+                                ),
+
+                                // Boutons OAuth
+                                React.createElement('div', {
+                                    className: "grid grid-cols-3 gap-3"
+                                },
+                                    // Google
+                                    React.createElement('button', {
+                                        type: "button",
+                                        onClick: () => handleOAuthLogin('google'),
+                                        disabled: loading,
+                                        className: "flex items-center justify-center px-4 py-3 border-2 border-gray-300 rounded-lg hover:border-red-400 hover:bg-red-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed group"
+                                    },
+                                        React.createElement('i', {
+                                            className: "fab fa-google text-xl text-red-500 group-hover:scale-110 transition-transform"
+                                        })
+                                    ),
+                                    // Microsoft
+                                    React.createElement('button', {
+                                        type: "button",
+                                        onClick: () => handleOAuthLogin('microsoft'),
+                                        disabled: loading,
+                                        className: "flex items-center justify-center px-4 py-3 border-2 border-gray-300 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed group"
+                                    },
+                                        React.createElement('i', {
+                                            className: "fab fa-microsoft text-xl text-blue-500 group-hover:scale-110 transition-transform"
+                                        })
+                                    ),
+                                    // GitHub
+                                    React.createElement('button', {
+                                        type: "button",
+                                        onClick: () => handleOAuthLogin('github'),
+                                        disabled: loading,
+                                        className: "flex items-center justify-center px-4 py-3 border-2 border-gray-300 rounded-lg hover:border-gray-700 hover:bg-gray-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed group"
+                                    },
+                                        React.createElement('i', {
+                                            className: "fab fa-github text-xl text-gray-800 group-hover:scale-110 transition-transform"
+                                        })
+                                    )
+                                )
                             )
                         )
                     )
