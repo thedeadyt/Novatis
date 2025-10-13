@@ -41,18 +41,18 @@ $userInfo = [
 
   // Traductions
   const t = {
-    home: "<?= __('nav_home') ?>",
-    findProvider: "<?= __('nav_find_provider') ?>",
-    dashboard: "<?= __('nav_dashboard') ?>",
-    profile: "<?= __('nav_profile') ?>",
-    settings: "<?= __('nav_settings') ?>",
-    logout: "<?= __('nav_logout') ?>",
-    login: "<?= __('nav_login') ?>",
-    register: "<?= __('nav_register') ?>",
-    notifications: "<?= __('nav_notifications') ?>",
-    markAllRead: "<?= __('nav_mark_all_read') ?>",
-    viewAll: "<?= __('nav_view_all') ?>",
-    noNotifications: "<?= __('nav_no_notifications') ?>"
+    home: "Accueil",
+    findProvider: "Trouver un prestataire",
+    dashboard: "Dashboard",
+    profile: "Profil",
+    settings: "Paramètres",
+    logout: "Déconnexion",
+    login: "Connexion",
+    register: "S'inscrire",
+    notifications: "Notifications",
+    markAllRead: "Tout marquer comme lu",
+    viewAll: "Tout voir",
+    noNotifications: "Aucune notification"
   };
 
   // SVG Avatar anonyme

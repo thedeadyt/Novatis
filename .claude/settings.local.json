@@ -1,19 +1,7 @@
 {
   "permissions": {
     "allow": [
-      "Bash(php:*)",
-      "Bash(find:*)",
-      "Bash(dir)",
-      "Bash(del \"setup_settings.php\" \"insert_sample_data.php\" \"check_triggers.php\" \"create_settings_tables.sql\")",
-      "Bash(dir:*)",
-      "Read(//c/xampp/htdocs/Alex2/**)",
-      "Bash(grep:*)",
-      "Bash(composer require:*)",
-      "Read(//c/xampp/apache/logs/**)",
-      "Bash(curl:*)",
-      "Bash(del:*)",
-      "Bash(rm:*)",
-      "Bash(git add:*)"
+      "Bash(/c/xampp/php/php.exe check_categories.php)"
     ],
     "deny": [],
     "ask": []

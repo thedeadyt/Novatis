@@ -23,13 +23,8 @@ try {
     die("Erreur de connexion : " . $e->getMessage());
 }
 
-// Charger le système de langue
-require_once __DIR__ . '/../includes/Language.php';
-
-// Initialiser la langue
+// Démarrer la session si nécessaire
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-$userId = $_SESSION['user']['id'] ?? null;
-Language::init($pdo, $userId);
 ?>

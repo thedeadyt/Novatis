@@ -59,11 +59,6 @@ $message = $_GET['message'] ?? null;
          }, 5000);
      </script>
      <?php endif; ?>
-
-     <div class="content" id="content">
-         <!-- Contenu principal de la page -->
-
-     </div>
      <?php include __DIR__ . '/../includes/footer.php';?>
 </body>
 </html>

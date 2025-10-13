@@ -901,6 +901,7 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
                 conversations: [],
                 supportTickets: []
             });
+            const [predefinedServices, setPredefinedServices] = useState({ services: [], grouped: {}, categories: [] });
             const [notifications, setNotifications] = useState([]);
             const [unreadCount, setUnreadCount] = useState(0);
             const [showNotifications, setShowNotifications] = useState(false);
@@ -911,6 +912,7 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
             useEffect(() => {
                 loadDashboardData();
                 loadNotifications();
+                loadPredefinedServices();
                 // Rafraîchir les notifications toutes les 30 secondes
                 const interval = setInterval(loadNotifications, 30000);
                 return () => clearInterval(interval);
@@ -949,6 +951,21 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
                     }
                 } catch (error) {
                     console.error('Erreur chargement notifications:', error);
+                }
+            };
+
+            const loadPredefinedServices = async () => {
+                try {
+                    const result = await apiCall('services/predefined_services.php');
+                    if (result.success) {
+                        setPredefinedServices({
+                            services: result.services || [],
+                            grouped: result.grouped || {},
+                            categories: result.categories || []
+                        });
+                    }
+                } catch (error) {
+                    console.error('Erreur chargement services prédéfinis:', error);
                 }
             };
 
@@ -1031,7 +1048,7 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
                     case 'overview': return React.createElement(OverviewTab, { data, loadData: loadDashboardData });
                     case 'notifications': return React.createElement(NotificationsTab, { notifications, unreadCount, onMarkAsRead: markNotificationAsRead, onMarkAllAsRead: markAllAsRead, onDelete: deleteNotification, onNavigate: setActiveTab });
                     case 'messages': return React.createElement(MessagesTab, { data, setData, loadNotifications });
-                    case 'services': return React.createElement(ServicesTab, { data, loadData: loadDashboardData });
+                    case 'services': return React.createElement(ServicesTab, { data, loadData: loadDashboardData, predefinedServices });
                     case 'orders': return React.createElement(OrdersTab, { data, openRatingModal });
                     case 'purchases': return React.createElement(PurchasesTab, { data, openRatingModal });
                     case 'reviews': return React.createElement(ReviewsTab, { userData });
@@ -1505,15 +1522,60 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
         };
 
         // Service Modal Component
-        const ServiceModal = ({ isOpen, onClose, editingService, serviceFormData, setServiceFormData, onSubmit, categories }) => {
+        const ServiceModal = ({ isOpen, onClose, editingService, serviceFormData, setServiceFormData, onSubmit, categories, predefinedServices }) => {
             if (!isOpen) return null;
 
+            const [selectedPredefinedId, setSelectedPredefinedId] = useState('');
+
+            const handlePredefinedServiceChange = (e) => {
+                const serviceId = e.target.value;
+                setSelectedPredefinedId(serviceId);
+                if (serviceId) {
+                    const selectedService = predefinedServices.services?.find(s => s.id === parseInt(serviceId));
+                    if (selectedService) {
+                        setServiceFormData({
+                            ...serviceFormData,
+                            title: selectedService.name,
+                            description: selectedService.description,
+                            category_id: selectedService.category_id || ''
+                        });
+                    }
+                } else {
+                    // Reset quand on désélectionne
+                    setServiceFormData({
+                        ...serviceFormData,
+                        title: '',
+                        description: '',
+                        category_id: ''
+                    });
+                }
+            };
+
+            const selectedCategory = categories?.find(c => c.id === parseInt(serviceFormData.category_id));
+
             return React.createElement('div', { className: "fixed inset-0 z-50 flex items-center justify-center modal-overlay" },
-                React.createElement('div', { className: "bg-white rounded-lg p-6 w-full max-w-md mx-4" },
+                React.createElement('div', { className: "bg-white rounded-lg p-6 w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto" },
                     React.createElement('h3', { className: "text-lg font-bold mb-4" },
                         editingService ? 'Modifier le service' : 'Nouveau service'
                     ),
                     React.createElement('form', { onSubmit: onSubmit, className: "space-y-4" },
+                        !editingService && React.createElement('div', { className: "bg-blue-50 p-4 rounded-lg border border-blue-200" },
+                            React.createElement('label', { className: "block text-sm font-medium text-gray-700 mb-2" }, "🎯 Service prédéfini (optionnel)"),
+                            React.createElement('select', {
+                                onChange: handlePredefinedServiceChange,
+                                className: "w-full p-3 border rounded-lg bg-white"
+                            },
+                                React.createElement('option', { value: "" }, "Choisir un service prédéfini..."),
+                                (predefinedServices?.grouped ? Object.keys(predefinedServices.grouped).map(category =>
+                                    React.createElement('optgroup', { key: category, label: category },
+                                        predefinedServices.grouped[category].map(service =>
+                                            React.createElement('option', { key: service.id, value: service.id }, service.name)
+                                        )
+                                    )
+                                ) : [])
+                            ),
+                            React.createElement('p', { className: "text-xs text-gray-500 mt-2" }, "Sélectionnez un service pour remplir automatiquement le titre et la description")
+                        ),
                         React.createElement('input', {
                             type: "text",
                             value: serviceFormData.title,
@@ -1527,19 +1589,24 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
                             onChange: (e) => setServiceFormData({...serviceFormData, description: e.target.value}),
                             placeholder: "Description du service",
                             className: "w-full p-3 border rounded-lg",
-                            rows: 3,
+                            rows: 4,
                             required: true
                         }),
-                        React.createElement('select', {
-                            value: serviceFormData.category_id,
-                            onChange: (e) => setServiceFormData({...serviceFormData, category_id: e.target.value}),
-                            className: "w-full p-3 border rounded-lg"
-                        },
-                            React.createElement('option', { value: "" }, "Sélectionner une catégorie"),
-                            (categories || []).map(cat =>
-                                React.createElement('option', { key: cat.id, value: cat.id }, cat.name)
-                            )
-                        ),
+                        selectedPredefinedId && selectedCategory ?
+                            React.createElement('div', { className: "bg-gray-50 p-3 border rounded-lg" },
+                                React.createElement('label', { className: "block text-sm font-medium text-gray-600 mb-1" }, "Catégorie"),
+                                React.createElement('p', { className: "text-gray-800 font-medium" }, selectedCategory.name)
+                            ) :
+                            React.createElement('select', {
+                                value: serviceFormData.category_id,
+                                onChange: (e) => setServiceFormData({...serviceFormData, category_id: e.target.value}),
+                                className: "w-full p-3 border rounded-lg"
+                            },
+                                React.createElement('option', { value: "" }, "Sélectionner une catégorie"),
+                                (categories || []).map(cat =>
+                                    React.createElement('option', { key: cat.id, value: cat.id }, cat.name)
+                                )
+                            ),
                         React.createElement('input', {
                             type: "number",
                             value: serviceFormData.price,
@@ -1583,7 +1650,7 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
         };
 
         // Services Tab
-        const ServicesTab = ({ data, loadData }) => {
+        const ServicesTab = ({ data, loadData, predefinedServices }) => {
             const [showServiceModal, setShowServiceModal] = useState(false);
             const [editingService, setEditingService] = useState(null);
             const [serviceFormData, setServiceFormData] = useState({
@@ -1699,7 +1766,8 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
                     serviceFormData,
                     setServiceFormData,
                     onSubmit: handleServiceSubmit,
-                    categories: data.categories || []
+                    categories: data.categories || [],
+                    predefinedServices: predefinedServices
                 })
             );
         };
@@ -1980,7 +2048,7 @@ $isAdmin = isset($user['role']) && $user['role'] === 'admin';
                             className: "w-full p-3 border rounded-lg"
                         },
                             React.createElement('option', { value: "" }, "Sélectionner une catégorie"),
-                            (data.categories || []).map(cat =>
+                            (categories || []).map(cat =>
                                 React.createElement('option', { key: cat.id, value: cat.id }, cat.name)
                             )
                         ),
