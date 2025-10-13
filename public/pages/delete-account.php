@@ -1,33 +1,11 @@
 <?php
 require_once __DIR__ . '/../../config/config.php';
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
 // Vérifie si l'utilisateur est connecté
-if (!isset($_SESSION['user'])) {
-    header('Location: ' . BASE_URL . '/pages/Autentification.php');
-    exit;
-}
+isUserLoggedIn(true);
 
-$user = $_SESSION['user'];
-
-// Connexion à la base de données
-try {
-    $host = 'mysql-alex2pro.alwaysdata.net';
-    $db   = 'alex2pro_movatis';
-    $user_db = 'alex2pro_alex';
-    $pass = 'Alex.2005';
-    $charset = 'utf8mb4';
-
-    $pdo = new PDO("mysql:host=$host;dbname=$db;charset=$charset", $user_db, $pass);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    $_SESSION['error_message'] = 'Erreur de connexion à la base de données';
-    header('Location: ' . BASE_URL . '/Parametres?section=account');
-    exit;
-}
+$user = getCurrentUser();
+$pdo = getDBConnection();
 
 try {
     // Supprimer toutes les données liées à l'utilisateur

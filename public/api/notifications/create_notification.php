@@ -46,14 +46,13 @@ function createNotification($user_id, $type, $title, $message, $action_url = nul
 
 // Si appelé directement via HTTP (pour tests ou usage externe)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && basename($_SERVER['SCRIPT_NAME']) === 'create_notification.php') {
-    if (session_status() === PHP_SESSION_NONE) {
-        session_start();
-    }
+    requireAuth();
 
     header('Content-Type: application/json');
 
     // Vérifier si l'utilisateur est admin
-    if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
+    $user = getCurrentUser();
+    if ($user['role'] !== 'admin') {
         http_response_code(401);
         echo json_encode(['success' => false, 'error' => 'Non autorisé - Admin requis']);
         exit;

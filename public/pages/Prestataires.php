@@ -1,5 +1,7 @@
 <?php
-require_once __DIR__ . '/../../config/config.php'; // connexion à la BDD (PDO)
+require_once __DIR__ . '/../../config/config.php';
+
+$pdo = getDBConnection();
 
 // Requête pour récupérer les prestataires avec leurs services groupés
 $sql = "

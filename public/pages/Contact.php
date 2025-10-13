@@ -1,17 +1,11 @@
 <?php
 require_once __DIR__ . '/../../config/config.php';
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
 // Vérifier si l'utilisateur est connecté
-if (!isset($_SESSION['user'])) {
-    header('Location: ' . BASE_URL . '/pages/Autentification.php');
-    exit;
-}
+isUserLoggedIn(true);
 
-$user = $_SESSION['user'];
+$user = getCurrentUser();
+$pdo = getDBConnection();
 $prestataire_id = $_GET['prestataire'] ?? null;
 
 // Récupérer les informations du prestataire et ses services

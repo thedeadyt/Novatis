@@ -1,13 +1,8 @@
 <?php
 $currentPage = basename($_SERVER['PHP_SELF']);
 
-// Démarrer la session si ce n'est pas déjà fait
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
 // Récupérer les informations de l'utilisateur connecté
-$user = $_SESSION['user'] ?? null;
+$user = getCurrentUser();
 $userName = 'Utilisateur';
 if ($user) {
     $userName = trim(($user['firstname'] ?? '') . ' ' . ($user['lastname'] ?? ''));
@@ -41,18 +36,18 @@ $userInfo = [
 
   // Traductions
   const t = {
-    home: "<?= __('nav_home') ?>",
-    findProvider: "<?= __('nav_find_provider') ?>",
-    dashboard: "<?= __('nav_dashboard') ?>",
-    profile: "<?= __('nav_profile') ?>",
-    settings: "<?= __('nav_settings') ?>",
-    logout: "<?= __('nav_logout') ?>",
-    login: "<?= __('nav_login') ?>",
-    register: "<?= __('nav_register') ?>",
-    notifications: "<?= __('nav_notifications') ?>",
-    markAllRead: "<?= __('nav_mark_all_read') ?>",
-    viewAll: "<?= __('nav_view_all') ?>",
-    noNotifications: "<?= __('nav_no_notifications') ?>"
+    home: "Accueil",
+    findProvider: "Trouver un prestataire",
+    dashboard: "Dashboard",
+    profile: "Voir mon profil",
+    settings: "Paramètres",
+    logout: "Déconnexion",
+    login: "Connexion",
+    register: "S'inscrire",
+    notifications: "Notifications",
+    markAllRead: "Tout marquer comme lu",
+    viewAll: "Voir tout",
+    noNotifications: "Aucune notification"
   };
 
   // SVG Avatar anonyme
@@ -404,6 +399,14 @@ $userInfo = [
                       </svg>
                       Voir mon profil
                     </a>
+                    <a href="<?= BASE_URL ?>/Favoris" className="flex items-center px-5 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-3 text-gray-400" fill="none"
+                           viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                              d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                      </svg>
+                      Mes Favoris
+                    </a>
                     <a href="<?= BASE_URL ?>/Parametres?section=profile" className="flex items-center px-5 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -501,6 +504,14 @@ $userInfo = [
                           d="M3 3h7v7H3V3zM14 3h7v4h-7V3zM3 14h7v7H3v-7zM14 14h7v7h-7v-7z"/>
                   </svg>
                   Dashboard
+                </a>
+                <a href="<?= BASE_URL ?>/Favoris" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none"
+                       viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                          d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                  </svg>
+                  Mes Favoris
                 </a>
                 <a href="<?= BASE_URL ?>/Parametres?section=profile" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded">
                   <svg

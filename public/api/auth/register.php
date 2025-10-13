@@ -2,9 +2,12 @@
 require_once __DIR__ . '/../../../config/config.php';
 require_once __DIR__ . '/../../../includes/EmailService.php';
 
+// Note: Ne pas utiliser requireAuth() ici car c'est la page d'inscription
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+
+$pdo = getDBConnection();
 
 header('Content-Type: application/json');
 

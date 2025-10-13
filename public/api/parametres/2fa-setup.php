@@ -5,35 +5,12 @@ require_once __DIR__ . '/../../../includes/NotificationService.php';
 
 header('Content-Type: application/json');
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
 // Vérifie si l'utilisateur est connecté
-if (!isset($_SESSION['user'])) {
-    http_response_code(401);
-    echo json_encode(['success' => false, 'message' => 'Non autorisé']);
-    exit;
-}
+requireAuth();
 
-$user = $_SESSION['user'];
+$user = getCurrentUser();
 $twoFA = new TwoFactorAuth();
-
-// Connexion à la base de données
-try {
-    $host = 'mysql-alex2pro.alwaysdata.net';
-    $db   = 'alex2pro_movatis';
-    $user_db = 'alex2pro_alex';
-    $pass = 'Alex.2005';
-    $charset = 'utf8mb4';
-
-    $pdo = new PDO("mysql:host=$host;dbname=$db;charset=$charset", $user_db, $pass);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    http_response_code(500);
-    echo json_encode(['success' => false, 'message' => 'Erreur de connexion à la base de données']);
-    exit;
-}
+$pdo = getDBConnection();
 
 // Récupérer les données JSON
 $input = json_decode(file_get_contents('php://input'), true);

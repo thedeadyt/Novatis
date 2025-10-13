@@ -1,32 +1,13 @@
 <?php
 require_once __DIR__ . '/../../../config/config.php';
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
 // Vérifie si l'utilisateur est connecté
-if (!isset($_SESSION['user'])) {
-    http_response_code(401);
-    echo json_encode(['error' => 'Non autorisé']);
-    exit;
-}
+requireAuth();
 
-// Connexion aux bases de données
+// Connexion à la base de données
 try {
-    $host = 'mysql-alex2pro.alwaysdata.net';
-    $db   = 'alex2pro_movatis';
-    $user_db = 'alex2pro_alex';
-    $pass = 'Alex.2005';
-    $charset = 'utf8mb4';
-
-    // Base principale
-    $pdo = new PDO("mysql:host=$host;dbname=$db;charset=$charset", $user_db, $pass);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-    // Base des paramètres (même base pour l'instant)
-    $pdo_settings = new PDO("mysql:host=$host;dbname=$db;charset=$charset", $user_db, $pass);
-    $pdo_settings->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $pdo = getDBConnection();
+    $pdo_settings = $pdo; // Même connexion
 
     // Créer les tables si elles n'existent pas
     createTablesIfNotExist($pdo_settings);
@@ -37,7 +18,7 @@ try {
     exit;
 }
 
-$user = $_SESSION['user'];
+$user = getCurrentUser();
 $method = $_SERVER['REQUEST_METHOD'];
 
 if ($method === 'POST') {
@@ -141,7 +122,6 @@ function updateProfile($pdo, $pdo_settings, $user) {
         $bio = trim($_POST['bio'] ?? '');
         $location = trim($_POST['location'] ?? '');
         $website = trim($_POST['website'] ?? '');
-        $language = $_POST['language'] ?? 'fr';
         $timezone = $_POST['timezone'] ?? 'Europe/Paris';
 
         // Validation
@@ -181,13 +161,12 @@ function updateProfile($pdo, $pdo_settings, $user) {
 
         // Mise à jour des préférences
         $stmt = $pdo_settings->prepare("
-            INSERT INTO user_preferences (user_id, language, timezone)
-            VALUES (?, ?, ?)
+            INSERT INTO user_preferences (user_id, timezone)
+            VALUES (?, ?)
             ON DUPLICATE KEY UPDATE
-            language = VALUES(language),
             timezone = VALUES(timezone)
         ");
-        $stmt->execute([$user['id'], $language, $timezone]);
+        $stmt->execute([$user['id'], $timezone]);
 
         // Mettre à jour la session
         // Mettre à jour la session avec toutes les nouvelles données
@@ -378,10 +357,6 @@ function updateDisplay($pdo, $user) {
             language = VALUES(language)
         ");
         $stmt->execute([$user['id'], $darkMode, $currency, $language]);
-
-        // Mettre à jour la langue dans la session
-        require_once __DIR__ . '/../../../includes/Language.php';
-        Language::setLanguage($language);
 
         $_SESSION['success_message'] = 'Préférences d\'affichage mises à jour';
         header('Location: ' . BASE_URL . '/Parametres?section=display');

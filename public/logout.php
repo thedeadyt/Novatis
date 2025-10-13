@@ -1,10 +1,6 @@
 <?php
 require_once __DIR__ . '/../config/config.php';
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
 // Détruire toutes les données de session
 $_SESSION = array();
 

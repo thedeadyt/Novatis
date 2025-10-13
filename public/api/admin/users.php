@@ -1,13 +1,13 @@
 <?php
 require_once __DIR__ . '/../../../config/config.php';
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+requireAuth();
+$pdo = getDBConnection();
 
 header('Content-Type: application/json');
 
-if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
+$user = getCurrentUser();
+if ($user['role'] !== 'admin') {
     http_response_code(401);
     echo json_encode(['success' => false, 'error' => 'Accès administrateur requis']);
     exit;
@@ -81,7 +81,7 @@ try {
                 $user_id = $data['user_id'];
 
                 // Empêcher la suppression de son propre compte
-                if ($user_id == $_SESSION['user']['id']) {
+                if ($user_id == $user['id']) {
                     echo json_encode(['success' => false, 'error' => 'Impossible de supprimer votre propre compte']);
                     exit;
                 }

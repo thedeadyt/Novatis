@@ -1,19 +1,12 @@
 <?php
 require_once __DIR__ . '/../../config/config.php';
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
 // Vérifie si l'utilisateur est connecté
-if (!isset($_SESSION['user'])) {
-    header('Location: ' . BASE_URL . '/pages/Autentification.php');
-    exit;
-}
+isUserLoggedIn(true);
 
 // Récupération des données utilisateur
-$user = $_SESSION['user'];
-$isAdmin = isset($user['role']) && $user['role'] === 'admin';
+$user = getCurrentUser();
+$isAdmin = isAdmin();
 ?>
 <!DOCTYPE html>
 <html lang="fr">

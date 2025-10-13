@@ -2,20 +2,13 @@
 require_once __DIR__ . '/../../../config/config.php';
 require_once __DIR__ . '/../../../includes/NotificationService.php';
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
 header('Content-Type: application/json');
 
 // Vérifie si l'utilisateur est connecté
-if (!isset($_SESSION['user'])) {
-    http_response_code(401);
-    echo json_encode(['success' => false, 'message' => 'Non autorisé']);
-    exit;
-}
+requireAuth();
 
-$user = $_SESSION['user'];
+$user = getCurrentUser();
+$pdo = getDBConnection();
 $notificationService = new NotificationService($pdo);
 
 $action = $_GET['action'] ?? 'list';

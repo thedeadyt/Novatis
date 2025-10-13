@@ -2,17 +2,11 @@
 require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../includes/NotificationService.php';
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
 // Vérifie si l'utilisateur est connecté
-if (!isset($_SESSION['user'])) {
-    header('Location: ' . BASE_URL . '/pages/Autentification.php');
-    exit;
-}
+isUserLoggedIn(true);
 
-$user = $_SESSION['user'];
+$user = getCurrentUser();
+$pdo = getDBConnection();
 $currentPage = 'notifications.php';
 
 // Inclure le header

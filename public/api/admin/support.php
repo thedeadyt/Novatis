@@ -1,20 +1,14 @@
 <?php
 require_once __DIR__ . '/../../../config/config.php';
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+requireAuth();
+$pdo = getDBConnection();
 
 header('Content-Type: application/json');
 
-if (!isset($_SESSION['user'])) {
-    http_response_code(401);
-    echo json_encode(['success' => false, 'error' => 'Non autorisé']);
-    exit;
-}
-
-$user_id = $_SESSION['user']['id'];
-$is_admin = $_SESSION['user']['role'] === 'admin';
+$user = getCurrentUser();
+$user_id = $user['id'];
+$is_admin = $user['role'] === 'admin';
 $method = $_SERVER['REQUEST_METHOD'];
 
 try {

@@ -1,12 +1,8 @@
 <?php
 require_once __DIR__ . '/../../config/config.php';
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
 // Si l'utilisateur est déjà connecté, rediriger vers le dashboard
-if (isset($_SESSION['user'])) {
+if (isUserLoggedIn()) {
     header('Location: ' . BASE_URL . '/pages/Dashboard.php');
     exit;
 }

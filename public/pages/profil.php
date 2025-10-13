@@ -38,12 +38,8 @@ if (!$prestataire) {
     exit;
 }
 
-// Démarrer la session si pas déjà démarrée
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
 // Récupérer les paramètres de confidentialité
+$pdo = getDBConnection();
 $stmt = $pdo->prepare("SELECT * FROM user_privacy WHERE user_id = ?");
 $stmt->execute([$userId]);
 $privacy = $stmt->fetch(PDO::FETCH_ASSOC);
