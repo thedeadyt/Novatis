@@ -19,6 +19,9 @@ if (isUserLoggedIn()) {
     <!-- Variables CSS -->
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/variables.css">
 
+    <!-- Thème Global CSS -->
+    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/theme.css">
+
     <!-- Font Awesome pour les icônes OAuth -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
@@ -33,6 +36,7 @@ if (isUserLoggedIn()) {
     <!-- Tailwind Config -->
     <script>
         tailwind.config = {
+            darkMode: 'class', // Active le mode dark par classe
             theme: {
                 extend: {
                     colors: {
@@ -74,6 +78,9 @@ if (isUserLoggedIn()) {
             }
         }
     </script>
+
+    <!-- Script de thème global -->
+    <script src="<?= BASE_URL ?>/assets/js/theme.js"></script>
 
     <style>
         body {
@@ -179,6 +186,13 @@ if (isUserLoggedIn()) {
 </head>
 
 <body class="min-h-screen flex items-center justify-center p-4">
+    <!-- Theme toggle button (fixed top-right) -->
+    <button data-theme-toggle="true" class="fixed top-4 right-4 p-3 bg-white border-2 border-gray-300 rounded-full hover:bg-gray-50 transition-all shadow-lg z-50" aria-label="Changer le thème">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+    </button>
+
     <div id="auth-root"></div>
 
     <script type="text/babel">
@@ -476,7 +490,7 @@ if (isUserLoggedIn()) {
                 ),
 
                 React.createElement('div', {
-                    className: `auth-container grid grid-cols-1 lg:grid-cols-2 min-h-[600px] lg:h-[600px] relative overflow-hidden ${isTransitioning ? 'panel-transitioning content-transitioning' : ''}`
+                    className: `auth-container grid grid-cols-1 lg:grid-cols-2 min-h-[600px] lg:min-h-[650px] relative ${isTransitioning ? 'panel-transitioning content-transitioning' : ''}`
                 },
                     // Panel de switch (côté rouge avec bouton)
                     React.createElement('div', {
@@ -530,7 +544,7 @@ if (isUserLoggedIn()) {
 
                     // Panel de formulaire
                     React.createElement('div', {
-                        className: `form-panel flex items-center justify-center p-6 lg:p-12 ${
+                        className: `form-panel flex items-center justify-center p-6 lg:p-12 overflow-y-auto ${
                             isLogin ? 'lg:order-1' : 'lg:order-2'
                         }`
                     },
@@ -550,10 +564,82 @@ if (isUserLoggedIn()) {
                                 }, isLogin ? "Accédez à votre espace" : "Créez votre compte")
                             ),
 
+                            // Boutons OAuth EN HAUT
+                            React.createElement('div', {
+                                className: "mb-6"
+                            },
+                                React.createElement('div', {
+                                    className: "grid grid-cols-3 gap-3 mb-4"
+                                },
+                                    // Google
+                                    React.createElement('button', {
+                                        type: "button",
+                                        onClick: () => handleOAuthLogin('google'),
+                                        disabled: loading,
+                                        className: "flex flex-col items-center justify-center px-4 py-3 border-2 border-gray-300 rounded-lg hover:border-red-400 hover:bg-red-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed group"
+                                    },
+                                        React.createElement('i', {
+                                            className: "fab fa-google text-2xl text-red-500 group-hover:scale-110 transition-transform mb-1"
+                                        }),
+                                        React.createElement('span', {
+                                            className: "text-xs text-gray-600 group-hover:text-red-600 font-medium"
+                                        }, "Google")
+                                    ),
+                                    // Microsoft
+                                    React.createElement('button', {
+                                        type: "button",
+                                        onClick: () => handleOAuthLogin('microsoft'),
+                                        disabled: loading,
+                                        className: "flex flex-col items-center justify-center px-4 py-3 border-2 border-gray-300 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed group"
+                                    },
+                                        React.createElement('i', {
+                                            className: "fab fa-microsoft text-2xl text-blue-500 group-hover:scale-110 transition-transform mb-1"
+                                        }),
+                                        React.createElement('span', {
+                                            className: "text-xs text-gray-600 group-hover:text-blue-600 font-medium"
+                                        }, "Microsoft")
+                                    ),
+                                    // GitHub
+                                    React.createElement('button', {
+                                        type: "button",
+                                        onClick: () => handleOAuthLogin('github'),
+                                        disabled: loading,
+                                        className: "flex flex-col items-center justify-center px-4 py-3 border-2 border-gray-300 rounded-lg hover:border-gray-700 hover:bg-gray-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed group"
+                                    },
+                                        React.createElement('i', {
+                                            className: "fab fa-github text-2xl text-gray-800 group-hover:scale-110 transition-transform mb-1"
+                                        }),
+                                        React.createElement('span', {
+                                            className: "text-xs text-gray-600 group-hover:text-gray-800 font-medium"
+                                        }, "GitHub")
+                                    )
+                                ),
+
+                                // Séparateur
+                                React.createElement('div', {
+                                    className: "relative"
+                                },
+                                    React.createElement('div', {
+                                        className: "absolute inset-0 flex items-center"
+                                    },
+                                        React.createElement('div', {
+                                            className: "w-full border-t border-gray-300"
+                                        })
+                                    ),
+                                    React.createElement('div', {
+                                        className: "relative flex justify-center text-sm"
+                                    },
+                                        React.createElement('span', {
+                                            className: "px-4 bg-white text-gray-500 font-medium"
+                                        }, "Ou avec email")
+                                    )
+                                )
+                            ),
+
                             // Formulaire
                             React.createElement('form', {
                                 onSubmit: handleSubmit,
-                                className: "space-y-4 lg:space-y-6"
+                                className: "space-y-4"
                             },
                                 // Erreur générale
                                 errors.general && React.createElement('div', {
@@ -663,66 +749,7 @@ if (isUserLoggedIn()) {
                                     type: "submit",
                                     disabled: loading,
                                     className: "w-full btn-primary font-semibold py-3 px-6 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                                }, loading ? (isLogin ? "Connexion..." : "Inscription...") : (isLogin ? "Se connecter" : "S'inscrire")),
-
-                                // Séparateur OU
-                                React.createElement('div', {
-                                    className: "relative my-6"
-                                },
-                                    React.createElement('div', {
-                                        className: "absolute inset-0 flex items-center"
-                                    },
-                                        React.createElement('div', {
-                                            className: "w-full border-t border-gray-300"
-                                        })
-                                    ),
-                                    React.createElement('div', {
-                                        className: "relative flex justify-center text-sm"
-                                    },
-                                        React.createElement('span', {
-                                            className: "px-4 bg-white text-gray-500 font-medium"
-                                        }, "Ou continuer avec")
-                                    )
-                                ),
-
-                                // Boutons OAuth
-                                React.createElement('div', {
-                                    className: "grid grid-cols-3 gap-3"
-                                },
-                                    // Google
-                                    React.createElement('button', {
-                                        type: "button",
-                                        onClick: () => handleOAuthLogin('google'),
-                                        disabled: loading,
-                                        className: "flex items-center justify-center px-4 py-3 border-2 border-gray-300 rounded-lg hover:border-red-400 hover:bg-red-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed group"
-                                    },
-                                        React.createElement('i', {
-                                            className: "fab fa-google text-xl text-red-500 group-hover:scale-110 transition-transform"
-                                        })
-                                    ),
-                                    // Microsoft
-                                    React.createElement('button', {
-                                        type: "button",
-                                        onClick: () => handleOAuthLogin('microsoft'),
-                                        disabled: loading,
-                                        className: "flex items-center justify-center px-4 py-3 border-2 border-gray-300 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed group"
-                                    },
-                                        React.createElement('i', {
-                                            className: "fab fa-microsoft text-xl text-blue-500 group-hover:scale-110 transition-transform"
-                                        })
-                                    ),
-                                    // GitHub
-                                    React.createElement('button', {
-                                        type: "button",
-                                        onClick: () => handleOAuthLogin('github'),
-                                        disabled: loading,
-                                        className: "flex items-center justify-center px-4 py-3 border-2 border-gray-300 rounded-lg hover:border-gray-700 hover:bg-gray-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed group"
-                                    },
-                                        React.createElement('i', {
-                                            className: "fab fa-github text-xl text-gray-800 group-hover:scale-110 transition-transform"
-                                        })
-                                    )
-                                )
+                                }, loading ? (isLogin ? "Connexion..." : "Inscription...") : (isLogin ? "Se connecter" : "S'inscrire"))
                             )
                         )
                     )

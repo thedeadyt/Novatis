@@ -69,7 +69,14 @@ if ($privacy['profile_visibility'] === 'private' && $currentUserId != $userId) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Novatis | Profil privé</title>
         <link rel='stylesheet' type='text/css' href='<?= BASE_URL ?>/assets/css/Variables.css'>
+        <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/theme.css">
         <script src="https://cdn.tailwindcss.com"></script>
+        <script>
+            tailwind.config = {
+                darkMode: 'class'
+            }
+        </script>
+        <script src="<?= BASE_URL ?>/assets/js/theme.js"></script>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     </head>
     <body class="bg-gray-100">
@@ -139,7 +146,14 @@ $avgRating = count($reviews) > 0 ? array_sum(array_column($reviews, 'rating')) /
     <?php endif; ?>
     <link rel='stylesheet' type='text/css' href='<?= BASE_URL ?>/assets/css/Variables.css'>
     <link rel='stylesheet' type='text/css' href='<?= BASE_URL ?>/assets/css/Footer.css'>
+    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/theme.css">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class'
+        }
+    </script>
+    <script src="<?= BASE_URL ?>/assets/js/theme.js"></script>
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>

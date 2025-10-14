@@ -69,6 +69,9 @@ $currentPage = 'Favoris.php';
     <!-- Variables CSS -->
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/variables.css">
 
+    <!-- Thème Global CSS -->
+    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/theme.css">
+
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
@@ -83,6 +86,7 @@ $currentPage = 'Favoris.php';
     <!-- Tailwind Config -->
     <script>
         tailwind.config = {
+            darkMode: 'class', // Active le mode dark par classe
             theme: {
                 extend: {
                     colors: {
@@ -99,6 +103,9 @@ $currentPage = 'Favoris.php';
             }
         }
     </script>
+
+    <!-- Script de thème global -->
+    <script src="<?= BASE_URL ?>/assets/js/theme.js"></script>
 
     <style>
         body {

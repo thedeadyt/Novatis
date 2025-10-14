@@ -43,38 +43,105 @@ try {
     // Connexion à la base de données
     $pdo = getDBConnection();
 
-    // Vérifier si l'utilisateur existe déjà avec cet email
-    $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ?");
-    $stmt->execute([$userInfo['email']]);
-    $existingUser = $stmt->fetch(PDO::FETCH_ASSOC);
+    // PRIORITÉ 1 : Vérifier si l'utilisateur est DÉJÀ CONNECTÉ ET VALIDE
+    // Si oui, on lie simplement le nouveau provider au compte existant
+    $isUserLoggedIn = false;
+    $currentUserId = null;
 
-    if ($existingUser) {
-        // L'utilisateur existe déjà - on lie le compte OAuth
-        $userId = $existingUser['id'];
-        linkOAuthAccount($pdo, $userId, $provider, $userInfo, $tokenData);
+    if (isset($_SESSION['user_id']) && !empty($_SESSION['user_id'])) {
+        // Vérifier que l'utilisateur existe vraiment en BDD
+        $stmt = $pdo->prepare("SELECT id FROM users WHERE id = ?");
+        $stmt->execute([$_SESSION['user_id']]);
+        $validUser = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        // Connecter l'utilisateur
-        $_SESSION['user'] = $existingUser;
-        $_SESSION['user_id'] = $userId;
+        if ($validUser) {
+            $isUserLoggedIn = true;
+            $currentUserId = $validUser['id'];
+        }
+    }
 
-        showSuccess("Connexion réussie avec " . ucfirst($provider) . " !");
-    } else {
-        // Créer un nouveau compte utilisateur
-        $userId = createUserFromOAuth($pdo, $userInfo, $provider);
+    // ÉTAPE 1 : Vérifier si cette connexion OAuth existe déjà en BDD
+    $stmt = $pdo->prepare("SELECT user_id FROM oauth_connections WHERE provider = ? AND provider_user_id = ?");
+    $stmt->execute([$provider, $userInfo['provider_user_id']]);
+    $existingOAuth = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        // Lier le compte OAuth
-        linkOAuthAccount($pdo, $userId, $provider, $userInfo, $tokenData);
+    if ($existingOAuth) {
+        // Cette connexion OAuth existe déjà
+        $userId = $existingOAuth['user_id'];
 
-        // Récupérer les infos complètes de l'utilisateur
-        $stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
-        $stmt->execute([$userId]);
-        $newUser = $stmt->fetch(PDO::FETCH_ASSOC);
+        // CAS A : L'utilisateur est connecté ET c'est le même compte
+        if ($isUserLoggedIn && $currentUserId == $userId) {
+            // Déjà lié au bon compte, juste mettre à jour les tokens
+            linkOAuthAccount($pdo, $userId, $provider, $userInfo, $tokenData);
+            showSuccess("Connexion réussie avec " . ucfirst($provider) . " !");
+        }
+        // CAS B : L'utilisateur est connecté MAIS c'est un compte différent
+        else if ($isUserLoggedIn && $currentUserId != $userId) {
+            // Le compte OAuth est lié à un autre compte Novatis
+            showError("Ce compte " . ucfirst($provider) . " est déjà lié à un autre compte Novatis. Déconnectez-vous d'abord pour vous connecter avec ce compte.");
+        }
+        // CAS C : L'utilisateur N'est PAS connecté → Connexion normale
+        else {
+            // Mettre à jour les tokens
+            linkOAuthAccount($pdo, $userId, $provider, $userInfo, $tokenData);
 
-        // Connecter l'utilisateur
-        $_SESSION['user'] = $newUser;
-        $_SESSION['user_id'] = $userId;
+            // Récupérer les infos de l'utilisateur
+            $stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
+            $stmt->execute([$userId]);
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        showSuccess("Compte créé avec succès via " . ucfirst($provider) . " !");
+            // Connecter l'utilisateur
+            $_SESSION['user'] = $user;
+            $_SESSION['user_id'] = $userId;
+
+            showSuccess("Connexion réussie avec " . ucfirst($provider) . " !");
+        }
+    }
+    // ÉTAPE 2 : La connexion OAuth n'existe pas encore
+    else {
+        // CAS A : L'utilisateur est déjà connecté → Liaison de compte
+        if ($isUserLoggedIn) {
+            // Lier le nouveau provider au compte actuel
+            $userId = $currentUserId;
+            linkOAuthAccount($pdo, $userId, $provider, $userInfo, $tokenData);
+
+            showSuccess("Compte " . ucfirst($provider) . " lié avec succès à votre profil !");
+        }
+        // CAS B : Vérifier si un utilisateur existe avec cet email
+        else {
+            $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ?");
+            $stmt->execute([$userInfo['email']]);
+            $existingUser = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($existingUser) {
+                // L'utilisateur existe avec cet email - on lie le compte OAuth et on connecte
+                $userId = $existingUser['id'];
+                linkOAuthAccount($pdo, $userId, $provider, $userInfo, $tokenData);
+
+                // Connecter l'utilisateur
+                $_SESSION['user'] = $existingUser;
+                $_SESSION['user_id'] = $userId;
+
+                showSuccess("Connexion réussie avec " . ucfirst($provider) . " !");
+            } else {
+                // Créer un nouveau compte utilisateur
+                $userId = createUserFromOAuth($pdo, $userInfo, $provider);
+
+                // Lier le compte OAuth
+                linkOAuthAccount($pdo, $userId, $provider, $userInfo, $tokenData);
+
+                // Récupérer les infos complètes de l'utilisateur
+                $stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
+                $stmt->execute([$userId]);
+                $newUser = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                // Connecter l'utilisateur
+                $_SESSION['user'] = $newUser;
+                $_SESSION['user_id'] = $userId;
+
+                showSuccess("Compte créé avec succès via " . ucfirst($provider) . " !");
+            }
+        }
     }
 
 } catch (Exception $e) {

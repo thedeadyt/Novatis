@@ -187,6 +187,9 @@ try {
     <!-- Variables CSS -->
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/variables.css">
 
+    <!-- Thème Global CSS -->
+    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/theme.css">
+
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
@@ -196,6 +199,7 @@ try {
     <!-- Tailwind Config -->
     <script>
         tailwind.config = {
+            darkMode: 'class', // Active le mode dark par classe
             theme: {
                 extend: {
                     colors: {
@@ -212,6 +216,9 @@ try {
             }
         }
     </script>
+
+    <!-- Script de thème global -->
+    <script src="<?= BASE_URL ?>/assets/js/theme.js"></script>
 
     <style>
         body {
@@ -1331,6 +1338,35 @@ html.dark .text-custom-black {
                     popup.close();
                     alert('Erreur lors de la connexion: ' + event.data.message);
                 }
+            });
+        }
+
+        // Fonction pour déconnecter un compte OAuth
+        function disconnectOAuth(provider) {
+            if (!confirm('Êtes-vous sûr de vouloir déconnecter votre compte ' + provider.toUpperCase() + ' ?')) {
+                return;
+            }
+
+            // Envoyer la requête de déconnexion
+            fetch('<?= BASE_URL ?>/api/oauth/disconnect.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'provider=' + encodeURIComponent(provider)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    location.reload();
+                } else {
+                    alert('Erreur: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Erreur lors de la déconnexion du compte OAuth');
             });
         }
 

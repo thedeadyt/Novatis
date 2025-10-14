@@ -20,6 +20,9 @@ $isAdmin = isAdmin();
     <!-- Variables CSS -->
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/variables.css">
 
+    <!-- Thème Global CSS -->
+    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/theme.css">
+
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
@@ -29,6 +32,7 @@ $isAdmin = isAdmin();
     <!-- Tailwind Config pour utiliser vos variables CSS -->
     <script>
         tailwind.config = {
+            darkMode: 'class', // Active le mode dark par classe
             theme: {
                 extend: {
                     colors: {
@@ -45,6 +49,9 @@ $isAdmin = isAdmin();
             }
         }
     </script>
+
+    <!-- Script de thème global -->
+    <script src="<?= BASE_URL ?>/assets/js/theme.js"></script>
 
     <!-- React & ReactDOM -->
     <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
