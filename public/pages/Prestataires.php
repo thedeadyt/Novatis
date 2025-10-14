@@ -61,8 +61,15 @@ foreach ($prestataires as &$prestataire) {
     <link rel='stylesheet' type='text/css' media='screen' href='<?= BASE_URL ?>/assets/css/Variables.css'>
     <link rel='stylesheet' type='text/css' media='screen' href='<?= BASE_URL ?>/assets/css/prestataires.css'>
     <link rel='stylesheet' type='text/css' media='screen' href='<?= BASE_URL ?>/assets/css/Footer.css'>
+    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/theme.css">
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class'
+        }
+    </script>
+    <script src="<?= BASE_URL ?>/assets/js/theme.js"></script>
 
     <!-- React & ReactDOM CDN -->
     <script script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>

@@ -198,7 +198,7 @@ $userInfo = [
           {/* Menu desktop */}
           <div className="hidden md:flex items-center space-x-6 relative">
             <div
-              className="absolute rounded transition-all duration-500 ease-out"
+              className="absolute rounded transition-all duration-500 ease-out nav-highlight-slider"
               style={{
                 width: `${highlight.width}px`,
                 left: `${highlight.left}px`,
@@ -238,6 +238,18 @@ $userInfo = [
           {/* Profil utilisateur */}
           {userInfo.isLoggedIn ? (
             <div className="flex items-center space-x-2">
+              {/* Toggle de thème */}
+              <button
+                onClick={() => window.ThemeManager && window.ThemeManager.toggle()}
+                className="p-2 hover:bg-gray-50 rounded-lg transition-colors focus:outline-none"
+                aria-label="Changer le thème"
+                data-theme-toggle="true"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+              </button>
+
               {/* Icône Notifications */}
               <div className="relative">
                 <button
@@ -436,6 +448,18 @@ $userInfo = [
           ) : (
             /* Boutons connexion/inscription pour utilisateurs non connectés */
             <div className="flex items-center space-x-3">
+              {/* Toggle de thème pour utilisateurs non connectés */}
+              <button
+                onClick={() => window.ThemeManager && window.ThemeManager.toggle()}
+                className="p-2 hover:bg-gray-50 rounded-lg transition-colors focus:outline-none"
+                aria-label="Changer le thème"
+                data-theme-toggle="true"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+              </button>
+
               <a
                 href="<?= BASE_URL ?>/Autentification?mode=login"
                 className="text-gray-700 hover:text-gray-900 font-medium px-3 py-2 rounded-md transition-colors"

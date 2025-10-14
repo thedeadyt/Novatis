@@ -1,0 +1,1103 @@
+/**
+ * Système de thème global - Mode Clair / Sombre
+ * Ce fichier gère les transitions et styles pour le mode sombre
+ */
+
+/* Transition fluide pour tous les changements de couleur */
+*,
+*::before,
+*::after {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* ========================================
+   MODE CLAIR (par défaut)
+   ======================================== */
+
+html {
+    background-color: #e8e8e8;
+    color: #1f2020;
+}
+
+body {
+    background-color: #e8e8e8;
+    color: #1f2020;
+}
+
+/* ========================================
+   MODE SOMBRE
+   ======================================== */
+
+html.dark {
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%) !important;
+    color: #ffffff;
+    min-height: 100vh;
+}
+
+html.dark body {
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%) !important;
+    color: #ffffff;
+    min-height: 100vh;
+}
+
+/* RÈGLE UNIVERSELLE - Éliminer tout le blanc */
+html.dark * {
+    /* Force tous les backgrounds blancs à devenir sombres */
+    background-color: transparent;
+}
+
+html.dark *[style*="background-color: white"],
+html.dark *[style*="background-color:#fff"],
+html.dark *[style*="background-color: #ffffff"],
+html.dark *[style*="background: white"],
+html.dark *[style*="background:#fff"],
+html.dark *[style*="background: #ffffff"] {
+    background-color: #1e293b !important;
+}
+
+/* Cartes et conteneurs */
+html.dark .bg-white,
+html.dark [class*="bg-white"],
+html.dark [style*="background-color: white"],
+html.dark [style*="background-color: #fff"],
+html.dark [style*="background-color: #ffffff"],
+html.dark [style*="background: white"],
+html.dark [style*="background: #fff"],
+html.dark [style*="background: #ffffff"] {
+    background-color: #1e293b !important;
+}
+
+html.dark .bg-gray-50 {
+    background-color: #1e293b !important;
+}
+
+html.dark .bg-gray-100 {
+    background-color: #334155 !important;
+}
+
+html.dark .bg-gray-200 {
+    background-color: #475569 !important;
+}
+
+html.dark .bg-gray-300 {
+    background-color: #64748b !important;
+}
+
+html.dark .bg-custom-bg {
+    background-color: #0f172a !important;
+}
+
+html.dark .bg-custom-white {
+    background-color: #1e293b !important;
+}
+
+/* Textes - TOUT EN BLANC */
+html.dark,
+html.dark *:not(.btn-primary):not([class*="bg-red"]):not([class*="text-red"]):not(.text-blue):not(.text-green):not(.text-yellow):not(.text-purple) {
+    color: #ffffff !important;
+}
+
+html.dark .text-black,
+html.dark .text-gray-900,
+html.dark .text-gray-800,
+html.dark .text-gray-700,
+html.dark .text-gray-600,
+html.dark .text-gray-500,
+html.dark .text-gray-400,
+html.dark .text-gray-300,
+html.dark .text-custom-black {
+    color: #ffffff !important;
+}
+
+/* Titres en blanc */
+html.dark h1,
+html.dark h2,
+html.dark h3,
+html.dark h4,
+html.dark h5,
+html.dark h6 {
+    color: #ffffff !important;
+}
+
+/* Paragraphes en blanc */
+html.dark p,
+html.dark span:not([class*="bg-"]),
+html.dark div:not([class*="bg-"]) {
+    color: #ffffff !important;
+}
+
+/* Bordures */
+html.dark .border-gray-200 {
+    border-color: #334155 !important;
+}
+
+html.dark .border-gray-300 {
+    border-color: #475569 !important;
+}
+
+/* Cartes de paramètres */
+html.dark .settings-card {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+}
+
+html.dark .settings-header {
+    border-bottom-color: #334155 !important;
+}
+
+/* Formulaires */
+html.dark input,
+html.dark .form-input,
+html.dark input[type="text"],
+html.dark input[type="email"],
+html.dark input[type="password"],
+html.dark input[type="number"],
+html.dark input[type="tel"],
+html.dark input[type="url"],
+html.dark input[type="search"],
+html.dark input[type="date"],
+html.dark input[type="time"],
+html.dark input[type="datetime-local"] {
+    background-color: #0f172a !important;
+    border-color: #334155 !important;
+    color: #f1f5f9 !important;
+}
+
+html.dark input:focus,
+html.dark .form-input:focus {
+    background-color: #1e293b !important;
+    border-color: #B41200 !important;
+}
+
+html.dark label,
+html.dark .form-label {
+    color: #f1f5f9 !important;
+}
+
+/* Inputs select */
+html.dark select,
+html.dark select.form-input {
+    background-color: #0f172a !important;
+    color: #f1f5f9 !important;
+    border-color: #334155 !important;
+}
+
+html.dark select option,
+html.dark select.form-input option {
+    background-color: #1e293b;
+    color: #f1f5f9;
+}
+
+/* Textarea */
+html.dark textarea,
+html.dark textarea.form-input {
+    background-color: #0f172a !important;
+    color: #f1f5f9 !important;
+    border-color: #334155 !important;
+}
+
+/* Checkbox et Radio */
+html.dark input[type="checkbox"],
+html.dark input[type="radio"] {
+    border-color: #334155 !important;
+    background-color: #0f172a !important;
+}
+
+html.dark input[type="checkbox"]:checked,
+html.dark input[type="radio"]:checked {
+    background-color: #B41200 !important;
+    border-color: #B41200 !important;
+}
+
+/* Sidebar */
+html.dark .sidebar-item {
+    color: #cbd5e1 !important;
+}
+
+html.dark .sidebar-item:hover {
+    background: rgba(180, 18, 0, 0.2) !important;
+}
+
+html.dark .sidebar-item.active {
+    background: #B41200 !important;
+    color: white !important;
+}
+
+/* Header et Navigation */
+html.dark header,
+html.dark nav,
+html.dark .header,
+html.dark .navbar {
+    background-color: #1e293b !important;
+    border-bottom-color: #334155 !important;
+}
+
+html.dark header *:not(.btn-primary):not([class*="bg-red"]):not([class*="text-red"]),
+html.dark nav *:not(.btn-primary):not([class*="bg-red"]):not([class*="text-red"]) {
+    border-color: #334155 !important;
+}
+
+/* Dropdown menus */
+html.dark .dropdown,
+html.dark [class*="dropdown"],
+html.dark .menu-dropdown {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+}
+
+/* Dropdown menus - fond et bordures */
+html.dark .dropdown > div,
+html.dark [class*="dropdown"] > div {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+}
+
+/* Dropdown items (sous-menu profil) - hover bleu foncé */
+html.dark .dropdown a,
+html.dark [class*="dropdown"] a,
+html.dark .menu-dropdown a {
+    color: #ffffff !important;
+}
+
+html.dark .dropdown a:hover,
+html.dark [class*="dropdown"] a:hover,
+html.dark .menu-dropdown a:hover {
+    background-color: #1e40af !important; /* Bleu très foncé */
+    color: #ffffff !important;
+}
+
+/* Enlever l'effet gris hover - remplacer par bleu foncé */
+html.dark [class*="hover:bg-gray"]:hover {
+    background-color: #1e40af !important;
+    color: #ffffff !important;
+}
+
+/* Header notifications dropdown */
+html.dark header .bg-gray-50,
+html.dark nav .bg-gray-50 {
+    background-color: #1e293b !important;
+}
+
+html.dark header .hover\:bg-gray-50:hover,
+html.dark nav .hover\:bg-gray-50:hover {
+    background-color: #1e40af !important;
+}
+
+/* Navigation items */
+html.dark .nav-item,
+html.dark .menu-item {
+    color: #ffffff !important;
+}
+
+html.dark .nav-item:hover,
+html.dark .menu-item:hover {
+    background-color: #1e3a8a !important; /* Bleu foncé au hover */
+    color: #ffffff !important;
+}
+
+/* Menu de sélection de page (header avec highlight) - Contour rouge en mode sombre */
+html.dark .nav-highlight-slider {
+    background-color: transparent !important; /* Transparent au lieu de noir */
+    border: 2px solid #B41200 !important; /* Contour rouge */
+    box-sizing: border-box;
+}
+
+html.dark nav [style*="backgroundColor: black"],
+html.dark nav [style*="backgroundColor:black"] {
+    background-color: transparent !important;
+    border: 2px solid #B41200 !important;
+    border-radius: 0.5rem;
+}
+
+html.dark nav a,
+html.dark nav span {
+    color: #ffffff !important;
+}
+
+/* Hover général - BLEU FONCÉ (seulement sur éléments cliquables) */
+html.dark a:hover:not(.btn-primary):not([class*="bg-red"]) {
+    color: #60a5fa !important; /* Bleu clair pour les liens */
+    text-decoration: underline;
+}
+
+html.dark button:hover:not(.btn-primary):not([class*="bg-red"]) {
+    background-color: #1e3a8a !important; /* Bleu foncé pour les boutons */
+    color: #ffffff !important;
+}
+
+/* Shadow */
+html.dark .shadow,
+html.dark .shadow-sm,
+html.dark .shadow-md,
+html.dark .shadow-lg {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Boutons secondaires */
+html.dark .btn-secondary {
+    background-color: #1e293b !important;
+    color: #B41200 !important;
+    border-color: #B41200 !important;
+}
+
+html.dark .btn-secondary:hover {
+    background-color: #B41200 !important;
+    color: white !important;
+}
+
+/* Notifications et alertes */
+html.dark .bg-blue-50 {
+    background-color: #1e3a5f !important;
+}
+
+html.dark .bg-green-50 {
+    background-color: #1e3a2f !important;
+}
+
+html.dark .bg-yellow-50,
+html.dark .bg-orange-50 {
+    background-color: #3a2e1e !important;
+}
+
+html.dark .bg-red-50 {
+    background-color: #3a1e1e !important;
+}
+
+html.dark .border-blue-200 {
+    border-color: #1e40af !important;
+}
+
+html.dark .border-green-200 {
+    border-color: #166534 !important;
+}
+
+html.dark .border-red-200 {
+    border-color: #991b1b !important;
+}
+
+html.dark .text-blue-800,
+html.dark .text-blue-900 {
+    color: #93c5fd !important;
+}
+
+html.dark .text-blue-700 {
+    color: #bfdbfe !important;
+}
+
+html.dark .text-green-800 {
+    color: #86efac !important;
+}
+
+html.dark .text-green-700 {
+    color: #bbf7d0 !important;
+}
+
+html.dark .text-red-800 {
+    color: #fca5a5 !important;
+}
+
+html.dark .text-red-600 {
+    color: #f87171 !important;
+}
+
+/* Zone de danger */
+html.dark .danger-zone {
+    background-color: #3a1e1e !important;
+    border-color: #991b1b !important;
+}
+
+/* Modals et popups */
+html.dark .modal,
+html.dark .popup {
+    background-color: #1e293b !important;
+}
+
+/* Tables */
+html.dark table {
+    background-color: #1e293b;
+}
+
+html.dark th {
+    background-color: #0f172a !important;
+    color: #f1f5f9 !important;
+}
+
+html.dark td {
+    border-bottom-color: #334155 !important;
+    color: #cbd5e1 !important;
+}
+
+/* Links */
+html.dark a:not(.btn-primary):not(.btn-secondary):not(.sidebar-item) {
+    color: #f87171;
+}
+
+html.dark a:not(.btn-primary):not(.btn-secondary):not(.sidebar-item):hover {
+    color: #fca5a5;
+}
+
+/* Cards spécifiques */
+html.dark .card,
+html.dark .panel,
+html.dark .box {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+}
+
+/* Disabled states */
+html.dark .disabled,
+html.dark :disabled {
+    opacity: 0.5;
+}
+
+/* Placeholders */
+html.dark ::placeholder {
+    color: #64748b !important;
+}
+
+html.dark :-ms-input-placeholder {
+    color: #64748b !important;
+}
+
+html.dark ::-ms-input-placeholder {
+    color: #64748b !important;
+}
+
+/* Scrollbar (Webkit) */
+html.dark ::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+
+html.dark ::-webkit-scrollbar-track {
+    background: #0f172a;
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+    background: #475569;
+    border-radius: 6px;
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover {
+    background: #64748b;
+}
+
+/* Details/Summary */
+html.dark details {
+    background-color: #1e293b !important;
+}
+
+html.dark summary {
+    color: #f1f5f9 !important;
+}
+
+/* HR */
+html.dark hr {
+    border-color: #334155 !important;
+}
+
+/* Code blocks */
+html.dark code,
+html.dark pre {
+    background-color: #0f172a !important;
+    color: #f1f5f9 !important;
+}
+
+/* Badges */
+html.dark .badge {
+    background-color: #334155 !important;
+}
+
+/* Dividers */
+html.dark .divider {
+    border-color: #334155 !important;
+}
+
+/* Icons colorés - garder leurs couleurs d'origine */
+html.dark .text-red-500,
+html.dark .text-blue-500,
+html.dark .text-green-500,
+html.dark .text-yellow-500,
+html.dark .text-purple-500 {
+    /* Garder les couleurs d'origine pour les icônes */
+    filter: brightness(1.2);
+}
+
+/* Images et avatars */
+html.dark img {
+    opacity: 0.9;
+}
+
+html.dark img:hover {
+    opacity: 1;
+}
+
+/* ========================================
+   RÈGLES GLOBALES POUR TOUT ÉLÉMENT BLANC
+   ======================================== */
+
+/* Tous les divs avec background blanc */
+html.dark div[style*="background"],
+html.dark span[style*="background"],
+html.dark section[style*="background"],
+html.dark article[style*="background"],
+html.dark aside[style*="background"],
+html.dark main[style*="background"] {
+    filter: brightness(0.85) contrast(1.1);
+}
+
+/* Containers génériques */
+html.dark .container,
+html.dark .wrapper,
+html.dark .content,
+html.dark .main,
+html.dark .section {
+    background-color: #1e293b !important;
+    color: #f1f5f9 !important;
+}
+
+/* Tous les boutons (sauf primaires et rouges) */
+html.dark button:not(.btn-primary):not([class*="bg-red"]):not([class*="text-red"]),
+html.dark .button:not(.btn-primary):not([class*="bg-red"]):not([class*="text-red"]) {
+    background-color: #334155 !important;
+    color: #f1f5f9 !important;
+    border-color: #475569 !important;
+}
+
+html.dark button:hover:not(.btn-primary):not([class*="bg-red"]),
+html.dark .button:hover:not(.btn-primary):not([class*="bg-red"]) {
+    background-color: #475569 !important;
+}
+
+/* Panels et sections */
+html.dark .panel,
+html.dark .panel-body,
+html.dark .panel-header,
+html.dark .section-content,
+html.dark .widget {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+}
+
+/* Lists */
+html.dark ul,
+html.dark ol,
+html.dark li {
+    color: #ffffff !important;
+}
+
+html.dark .list-group-item {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+    color: #ffffff !important;
+}
+
+html.dark .list-group-item:hover,
+html.dark .list-group-item[role="button"]:hover,
+html.dark .list-group-item.clickable:hover {
+    background-color: #1e3a8a !important; /* Bleu foncé au hover */
+    color: #ffffff !important;
+    cursor: pointer;
+}
+
+/* Pagination */
+html.dark .pagination,
+html.dark .page-item {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+}
+
+html.dark .page-link {
+    background-color: #1e293b !important;
+    color: #ffffff !important;
+    border-color: #334155 !important;
+}
+
+html.dark .page-link:hover {
+    background-color: #1e3a8a !important; /* Bleu foncé au hover */
+    color: #ffffff !important;
+}
+
+/* Tooltips */
+html.dark .tooltip,
+html.dark [class*="tooltip"] {
+    background-color: #0f172a !important;
+    color: #ffffff !important;
+    border-color: #334155 !important;
+}
+
+/* Breadcrumb */
+html.dark .breadcrumb {
+    background-color: #1e293b !important;
+}
+
+html.dark .breadcrumb-item {
+    color: #ffffff !important;
+}
+
+html.dark .breadcrumb-item a:hover {
+    background-color: #1e3a8a !important; /* Bleu foncé au hover */
+    color: #ffffff !important;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+/* Progress bars */
+html.dark .progress {
+    background-color: #334155 !important;
+}
+
+/* Accordions */
+html.dark .accordion,
+html.dark .accordion-item,
+html.dark .accordion-header,
+html.dark .accordion-body {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+    color: #ffffff !important;
+}
+
+html.dark .accordion-button:hover,
+html.dark .accordion-header button:hover {
+    background-color: #1e3a8a !important; /* Bleu foncé au hover */
+    cursor: pointer;
+}
+
+/* Tabs */
+html.dark .tab,
+html.dark .tab-content,
+html.dark .tab-pane {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+}
+
+html.dark .nav-tabs,
+html.dark .nav-pills {
+    border-color: #334155 !important;
+}
+
+html.dark .nav-tabs .nav-link,
+html.dark .nav-pills .nav-link {
+    color: #ffffff !important;
+}
+
+html.dark .nav-tabs .nav-link:hover,
+html.dark .nav-pills .nav-link:hover {
+    background-color: #1e3a8a !important; /* Bleu foncé au hover */
+    color: #ffffff !important;
+}
+
+html.dark .nav-tabs .nav-link.active,
+html.dark .nav-pills .nav-link.active {
+    background-color: #B41200 !important;
+    color: white !important;
+}
+
+/* Alerts */
+html.dark .alert {
+    border-color: #334155 !important;
+}
+
+/* Popovers */
+html.dark .popover {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+}
+
+html.dark .popover-header {
+    background-color: #0f172a !important;
+    border-bottom-color: #334155 !important;
+    color: #ffffff !important;
+}
+
+html.dark .popover-body {
+    color: #ffffff !important;
+}
+
+/* Spinners et loaders */
+html.dark .spinner,
+html.dark .loader {
+    border-color: #334155 !important;
+}
+
+/* Footer */
+html.dark footer,
+html.dark .footer {
+    background-color: #0f172a !important;
+    border-top-color: #334155 !important;
+    color: #ffffff !important;
+}
+
+html.dark footer a,
+html.dark .footer a {
+    color: #ffffff !important;
+}
+
+html.dark footer a:hover,
+html.dark .footer a:hover {
+    background-color: #1e3a8a !important; /* Bleu foncé au hover */
+    color: #ffffff !important;
+}
+
+/* Auth containers */
+html.dark .auth-container,
+html.dark .login-container,
+html.dark .register-container {
+    background-color: #1e293b !important;
+}
+
+/* Filters container */
+html.dark .filters-container,
+html.dark .search-container {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+}
+
+html.dark .filters-container label,
+html.dark .filters-container input,
+html.dark .filters-container select {
+    color: #ffffff !important;
+    border-color: #334155 !important;
+}
+
+html.dark .filters-container input::placeholder {
+    color: #64748b !important;
+}
+
+/* Prestataires cards */
+html.dark .prestataire-card,
+html.dark .service-card,
+html.dark .provider-card {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+    color: #ffffff !important;
+}
+
+html.dark .prestataire-card .prestataire-header,
+html.dark .prestataire-card .prestataire-info,
+html.dark .prestataire-card .services-section,
+html.dark .prestataire-card .card-actions {
+    background-color: transparent !important;
+    color: #ffffff !important;
+}
+
+html.dark .prestataire-card h2,
+html.dark .prestataire-card h3,
+html.dark .prestataire-card p,
+html.dark .prestataire-card span {
+    color: #ffffff !important;
+}
+
+html.dark .prestataire-card .bio {
+    color: #cbd5e1 !important;
+}
+
+html.dark .service-item {
+    background-color: #0f172a !important;
+    border-color: #334155 !important;
+}
+
+html.dark .service-item:hover {
+    background-color: #1e3a8a !important;
+    transform: translateX(4px) !important;
+}
+
+html.dark .service-title,
+html.dark .service-price,
+html.dark .service-delivery {
+    color: #ffffff !important;
+    background-color: #334155 !important;
+    border-color: #475569 !important;
+}
+
+html.dark .btn-profile,
+html.dark .btn-contact {
+    color: #ffffff !important;
+}
+
+html.dark .btn-profile:hover,
+html.dark .btn-contact:hover {
+    background-color: #1e3a8a !important;
+    color: #ffffff !important;
+}
+
+html.dark .btn-favorite {
+    background-color: #334155 !important;
+    color: #ffffff !important;
+    border-color: #475569 !important;
+}
+
+html.dark .btn-favorite:hover {
+    background-color: #1e3a8a !important;
+    color: #ffffff !important;
+    border-color: #1e3a8a !important;
+}
+
+html.dark .btn-favorite.favorited {
+    background-color: #B41200 !important;
+    border-color: #B41200 !important;
+    color: #ffffff !important;
+}
+
+/* Hover uniquement si la card est cliquable (avec lien ou onclick) */
+html.dark a .prestataire-card:hover,
+html.dark a .service-card:hover,
+html.dark a .provider-card:hover,
+html.dark .prestataire-card[onclick]:hover,
+html.dark .service-card[onclick]:hover,
+html.dark .provider-card[onclick]:hover,
+html.dark .prestataire-card.clickable:hover,
+html.dark .service-card.clickable:hover,
+html.dark .provider-card.clickable:hover {
+    background-color: #1e3a8a !important; /* Bleu foncé au hover */
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(30, 58, 138, 0.3) !important;
+    cursor: pointer;
+}
+
+/* Chat et messages */
+html.dark .message,
+html.dark .chat-message,
+html.dark .message-item {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+    color: #ffffff !important;
+}
+
+html.dark .message[onclick]:hover,
+html.dark .chat-message[onclick]:hover,
+html.dark .message-item[onclick]:hover,
+html.dark .message.clickable:hover,
+html.dark .chat-message.clickable:hover,
+html.dark .message-item.clickable:hover {
+    background-color: #1e3a8a !important; /* Bleu foncé au hover */
+    cursor: pointer;
+}
+
+html.dark .message-input,
+html.dark .chat-input {
+    background-color: #0f172a !important;
+    border-color: #334155 !important;
+    color: #ffffff !important;
+}
+
+/* SVG icons */
+html.dark svg:not([fill="none"]) {
+    filter: brightness(1.2);
+}
+
+/* Compteur et messages "no results" */
+html.dark #resultsCount,
+html.dark #no-results {
+    color: #ffffff !important;
+}
+
+html.dark #no-results h3,
+html.dark #no-results p {
+    color: #ffffff !important;
+}
+
+/* Container Prestataires */
+html.dark .Prestataires {
+    background-color: transparent !important;
+}
+
+html.dark .Prestataires h1,
+html.dark .Prestataires p {
+    color: #ffffff !important;
+}
+
+/* Dashboard - fond bleu foncé PARTOUT */
+html.dark #dashboard-root {
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%) !important;
+}
+
+html.dark #dashboard-root * {
+    background-color: transparent;
+}
+
+/* Forcer le fond bleu sur le contenu principal */
+html.dark #dashboard-root > div,
+html.dark #dashboard-root main,
+html.dark #dashboard-root .main-content {
+    background: transparent !important;
+}
+
+/* Cards et containers */
+html.dark #dashboard-root .bg-white,
+html.dark #dashboard-root [class*="bg-white"] {
+    background-color: rgba(30, 58, 95, 0.5) !important;
+    backdrop-filter: blur(10px);
+}
+
+html.dark #dashboard-root .bg-gray-50,
+html.dark #dashboard-root .bg-gray-100,
+html.dark #dashboard-root .bg-gray-200 {
+    background-color: rgba(30, 58, 95, 0.3) !important;
+}
+
+/* Éliminer tous les fonds gris clairs */
+html.dark #dashboard-root [style*="background-color: rgb(243"],
+html.dark #dashboard-root [style*="background-color: rgb(229"],
+html.dark #dashboard-root [style*="background-color: rgb(209"],
+html.dark #dashboard-root [style*="background-color: #f3"],
+html.dark #dashboard-root [style*="background-color: #e5"],
+html.dark #dashboard-root [style*="background-color: #d1"] {
+    background-color: rgba(30, 58, 95, 0.3) !important;
+}
+
+/* Cacher l'icône de notification dans le dashboard */
+html.dark #dashboard-root header .fa-bell {
+    display: none !important;
+}
+
+html.dark #dashboard-root header button:has(.fa-bell) {
+    display: none !important;
+}
+
+/* ========================================
+   RÈGLE FINALE - ÉLIMINER TOUT LE BLANC RESTANT
+   ======================================== */
+
+/* Force absolue pour éliminer TOUT le blanc */
+html.dark div:not([class*="bg-red"]):not(.btn-primary),
+html.dark section:not([class*="bg-red"]),
+html.dark article:not([class*="bg-red"]),
+html.dark aside:not([class*="bg-red"]),
+html.dark main:not([class*="bg-red"]) {
+    background-color: transparent;
+}
+
+/* Forcer le texte blanc partout */
+html.dark p,
+html.dark span,
+html.dark div,
+html.dark a,
+html.dark li,
+html.dark td,
+html.dark th,
+html.dark label,
+html.dark button:not(.btn-primary) {
+    color: #ffffff !important;
+}
+
+/* Tables - texte blanc */
+html.dark table,
+html.dark thead,
+html.dark tbody,
+html.dark tr,
+html.dark td,
+html.dark th {
+    background-color: #1e293b !important;
+    color: #ffffff !important;
+    border-color: #334155 !important;
+}
+
+html.dark tbody tr:hover {
+    background-color: #1e3a8a !important; /* Bleu foncé au hover */
+    cursor: pointer;
+}
+
+/* Ne pas mettre de hover sur les thead */
+html.dark thead tr:hover {
+    background-color: #0f172a !important;
+    cursor: default;
+}
+
+/* ========================================
+   TOGGLE SWITCH (bouton de thème)
+   ======================================== */
+
+.theme-toggle {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.theme-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.theme-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.theme-slider:before {
+    position: absolute;
+    content: "☀️";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+}
+
+input:checked + .theme-slider {
+    background-color: #1e293b;
+}
+
+input:checked + .theme-slider:before {
+    transform: translateX(26px);
+    content: "🌙";
+}
+
+/* ========================================
+   ANIMATIONS
+   ======================================== */
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-in;
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 768px) {
+    html.dark .sidebar-item {
+        font-size: 0.9rem;
+    }
+}
+
+/* ========================================
+   PRINT (désactiver le mode sombre pour l'impression)
+   ======================================== */
+
+@media print {
+    html.dark {
+        background-color: white !important;
+        color: black !important;
+    }
+
+    html.dark * {
+        background-color: white !important;
+        color: black !important;
+        border-color: black !important;
+    }
+}
