@@ -6,7 +6,8 @@ require_once __DIR__ . '/../../config/config.php';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>À propos - Novatis</title>
+    <title>Novatis | À propos</title>
+    <link rel="icon" type="image/png" href="<?= BASE_URL ?>/assets/img/logos/Logo_Novatis.png">
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/Apropos.css">
 
     <!-- Tailwind CSS CDN -->

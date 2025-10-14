@@ -21,7 +21,8 @@ $notificationService = new NotificationService($pdo);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Notifications - Novatis</title>
+    <title>Novatis | Notifications</title>
+    <link rel="icon" type="image/png" href="<?= BASE_URL ?>/assets/img/logos/Logo_Novatis.png">
 
     <!-- Variables CSS -->
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/variables.css">

@@ -13,6 +13,7 @@ $redirectUrl = BASE_URL . '/index.php';
 <head>
     <meta charset="UTF-8">
     <title>Novatis | Déconnexion</title>
+    <link rel="icon" type="image/png" href="<?= BASE_URL ?>/assets/img/logos/Logo_Novatis.png">
     <link rel='stylesheet' type='text/css' media='screen' href='<?= BASE_URL ?>/assets/css/Variables.css'>
     <link rel='stylesheet' type='text/css' media='screen' href='<?= BASE_URL ?>/assets/css/logout.css'>
     <meta http-equiv="refresh" content="2;url=<?= $redirectUrl ?>">

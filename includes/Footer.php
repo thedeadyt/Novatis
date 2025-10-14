@@ -21,7 +21,7 @@
           {/* Logo + description */}
           <div>
             <a href="<?= BASE_URL ?>" className="flex items-center space-x-2 mb-4">
-              <img src="<?= BASE_URL ?>/asset/img/logo.svg" alt="Logo" className="w-12 h-12 rounded-full" />
+              <img src="<?= BASE_URL ?>/assets/img/logos/Logo_Novatis_nobg_white.png" alt="Logo" className="w-12 h-12 rounded-full" />
               <span className="text-xl font-bold">Novatis</span>
             </a>
             <p className="text-sm text-gray-400">

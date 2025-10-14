@@ -62,7 +62,8 @@ require_once __DIR__ . '/../../includes/Header.php';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vérification d'email - Novatis</title>
+    <title>Novatis | Vérification d'email</title>
+    <link rel="icon" type="image/png" href="<?= BASE_URL ?>/assets/img/logos/Logo_Novatis.png">
     <link href="<?= BASE_URL ?>/assets/css/Variables.css" rel="stylesheet">
     <style>
         * {

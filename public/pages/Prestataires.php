@@ -57,7 +57,8 @@ foreach ($prestataires as &$prestataire) {
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Prestataires</title>
+    <title>Novatis |Prestataires</title>
+    <link rel="icon" type="image/png" href="<?= BASE_URL ?>/assets/img/logos/Logo_Novatis.png">
     <link rel='stylesheet' type='text/css' media='screen' href='<?= BASE_URL ?>/assets/css/Variables.css'>
     <link rel='stylesheet' type='text/css' media='screen' href='<?= BASE_URL ?>/assets/css/prestataires.css'>
     <link rel='stylesheet' type='text/css' media='screen' href='<?= BASE_URL ?>/assets/css/Footer.css'>
