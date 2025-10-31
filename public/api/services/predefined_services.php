@@ -13,6 +13,7 @@ if (!isset($_SESSION['user'])) {
     exit;
 }
 
+$pdo = getDBConnection();
 $method = $_SERVER['REQUEST_METHOD'];
 
 try {

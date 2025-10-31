@@ -313,6 +313,15 @@ $isAdmin = isAdmin();
                 }
 
                 const response = await fetch(`${userData.baseUrl}/api/${endpoint}`, options);
+
+                // Vérifier le type de contenu de la réponse
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    const text = await response.text();
+                    console.error('Erreur API - Réponse non-JSON:', text.substring(0, 500));
+                    return { success: false, error: 'Le serveur a renvoyé une erreur. Vérifiez les logs PHP.' };
+                }
+
                 return await response.json();
             } catch (error) {
                 console.error('Erreur API:', error);

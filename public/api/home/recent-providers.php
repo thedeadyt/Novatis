@@ -3,6 +3,8 @@ require_once __DIR__ . '/../../../config/Config.php';
 
 header('Content-Type: application/json');
 
+$pdo = getDBConnection();
+
 try {
     // Récupérer les 4 prestataires les plus récents par catégorie
     $stmt = $pdo->prepare("
