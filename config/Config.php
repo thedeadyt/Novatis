@@ -1,48 +1,41 @@
 <?php
-// config/config.php
+/**
+ * Config.php
+ * Main configuration file for backward compatibility
+ * Uses modern configuration system with .env support
+ */
 
-// Exemple : chemin relatif à la racine du serveur web (à adapter si ton projet n'est pas à la racine)
-define('BASE_URL', '/Novatis/public');
+// Bootstrap the application
+require_once __DIR__ . '/../bootstrap/app.php';
 
-// Mode développement (affiche les codes de vérification pour tester sans SMS)
-// À mettre à false en production
-define('DEVELOPMENT_MODE', true);
+use App\Database\Connection;
 
-// Configuration de la base de données
-define('DB_HOST', 'mysql-alex2pro.alwaysdata.net');
-define('DB_NAME', 'alex2pro_movatis');
-define('DB_USER', 'alex2pro_alex');
-define('DB_PASS', 'Alex.2005');
-define('DB_CHARSET', 'utf8mb4');
+// Legacy constants for backward compatibility
+// These are now loaded from .env but defined here for old code
+if (!defined('BASE_URL')) {
+    define('BASE_URL', rtrim(env('APP_URL'), '/') . '/public');
+}
 
-// Initialiser la session si nécessaire
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
+if (!defined('DEVELOPMENT_MODE')) {
+    define('DEVELOPMENT_MODE', env('APP_DEBUG', false));
+}
+
+if (!defined('DB_HOST')) {
+    define('DB_HOST', env('DB_HOST'));
+    define('DB_NAME', env('DB_NAME'));
+    define('DB_USER', env('DB_USER'));
+    define('DB_PASS', env('DB_PASS'));
+    define('DB_CHARSET', env('DB_CHARSET', 'utf8mb4'));
 }
 
 /**
- * Obtenir une connexion PDO à la base de données
+ * Get database connection (legacy function)
+ * Uses new Connection class internally
+ *
  * @return PDO
  */
-function getDBConnection() {
-    static $pdo = null;
-
-    if ($pdo === null) {
-        $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=" . DB_CHARSET;
-        $options = [
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            PDO::ATTR_EMULATE_PREPARES => false
-        ];
-
-        try {
-            $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
-        } catch (PDOException $e) {
-            die("Erreur de connexion : " . $e->getMessage());
-        }
-    }
-
-    return $pdo;
+function getDBConnection(): PDO {
+    return Connection::getInstance();
 }
 
 /**
@@ -90,6 +83,8 @@ function isAdmin() {
     return $user && isset($user['role']) && $user['role'] === 'admin';
 }
 
-// Pour la rétrocompatibilité, créer la connexion globale $pdo
-$pdo = getDBConnection();
+// Pour la rétrocompatibilité, la variable $pdo sera créée à la demande
+// via getDBConnection() plutôt qu'au chargement du fichier
+// Cela évite les erreurs 500 si la DB distante n'est pas accessible
+// $pdo = getDBConnection(); // Removed: causes 500 errors when DB is unreachable
 ?>

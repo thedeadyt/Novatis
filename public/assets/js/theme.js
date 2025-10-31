@@ -206,7 +206,9 @@ const ThemeManager = {
                 const toggle = document.querySelector('#darkModeToggle');
                 if (toggle) {
                     this.setTheme(toggle.checked ? 'dark' : 'light');
-                    alert('Préférences de thème enregistrées !');
+                    if (typeof window.toast !== 'undefined') {
+                        window.toast.success('messages.saved', 'common', 'Préférences de thème enregistrées !');
+                    }
                 }
             });
         });

@@ -1,0 +1,124 @@
+{
+  "title": "Tableau de bord",
+  "welcome": "Bienvenue",
+  "loading": "Chargement...",
+  "tabs": {
+    "overview": "Vue d'ensemble",
+    "notifications": "Notifications",
+    "messages": "Messages",
+    "services": "Services",
+    "orders": "Commandes",
+    "purchases": "Achats",
+    "reviews": "Évaluations",
+    "portfolio": "Portfolio",
+    "formerClients": "Anciens clients",
+    "adminUsers": "Utilisateurs",
+    "adminCategories": "Catégories",
+    "adminSupport": "Support"
+  },
+  "stats": {
+    "orders": "Commandes",
+    "revenue": "Revenus",
+    "clients": "Clients",
+    "rating": "Note moyenne",
+    "totalOrders": "Total des commandes",
+    "activeServices": "Services actifs",
+    "completedOrders": "Commandes complétées",
+    "totalRevenue": "Revenu total"
+  },
+  "services": {
+    "title": "Mes Services",
+    "recent": "Services Récents",
+    "active": "services actifs",
+    "noServices": "Aucun service pour le moment",
+    "addService": "Ajouter un service",
+    "editService": "Modifier le service",
+    "deleteService": "Supprimer le service",
+    "deleteConfirm": "Êtes-vous sûr de vouloir supprimer ce service ?",
+    "title_field": "Titre",
+    "description": "Description",
+    "price": "Prix",
+    "deliveryTime": "Délai de livraison",
+    "days": "jours",
+    "category": "Catégorie",
+    "selectCategory": "Sélectionnez une catégorie",
+    "image": "Image",
+    "save": "Sauvegarder",
+    "cancel": "Annuler"
+  },
+  "orders": {
+    "title": "Commandes Récentes",
+    "recent": "Commandes récentes",
+    "noOrders": "Aucune commande",
+    "status": {
+      "pending": "En attente",
+      "in_progress": "En cours",
+      "completed": "Terminé",
+      "cancelled": "Annulé"
+    },
+    "viewDetails": "Voir détails",
+    "rate": "Évaluer"
+  },
+  "purchases": {
+    "title": "Mes Achats",
+    "noPurchases": "Aucun achat",
+    "rateService": "Évaluer le service"
+  },
+  "reviews": {
+    "title": "Évaluations",
+    "received": "Évaluations reçues",
+    "given": "Évaluations données",
+    "noReviews": "Aucune évaluation",
+    "totalReviews": "avis reçus",
+    "averageRating": "Note moyenne",
+    "rateOrder": "Évaluer la commande",
+    "rating": "Note",
+    "comment": "Commentaire",
+    "commentPlaceholder": "Décrivez votre expérience...",
+    "submit": "Publier l'évaluation",
+    "ratingFor": "Évaluation de",
+    "for": "Pour"
+  },
+  "messages": {
+    "title": "Messages",
+    "noMessages": "Aucun message",
+    "conversations": "Conversations",
+    "writeMessage": "Écrire un message",
+    "send": "Envoyer",
+    "messagePlaceholder": "Tapez votre message..."
+  },
+  "notifications": {
+    "title": "Notifications",
+    "markAllRead": "Tout marquer comme lu",
+    "noNotifications": "Aucune notification",
+    "deleteAll": "Tout supprimer",
+    "newMessages": "nouveaux messages",
+    "newMessage": "nouveau message"
+  },
+  "portfolio": {
+    "title": "Portfolio",
+    "noItems": "Aucun élément dans le portfolio",
+    "addItem": "Ajouter un élément"
+  },
+  "formerClients": {
+    "title": "Anciens clients",
+    "noClients": "Aucun client"
+  },
+  "admin": {
+    "users": "Gestion des utilisateurs",
+    "categories": "Gestion des catégories",
+    "support": "Tickets de support"
+  },
+  "common": {
+    "save": "Sauvegarder",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "view": "Voir",
+    "close": "Fermer",
+    "confirm": "Confirmer",
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès"
+  }
+}

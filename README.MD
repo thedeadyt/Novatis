@@ -1,148 +1,201 @@
-# 🚀 Novatis – Marketplace Freelance
+# 🚀 Novatis
 
-**Novatis** est une plateforme moderne de mise en relation entre **freelances** et **clients**, inspirée de sites comme **Fiverr** et **Malt**.  
-L’objectif est de créer un espace simple, fiable et transparent où les freelances peuvent proposer leurs services et où les entreprises/particuliers peuvent trouver rapidement le bon prestataire.
+> Plateforme professionnelle de mise en relation entre clients et prestataires de services
 
----
-
-## ✨ Fonctionnalités prévues
-
-- 👤 **Gestion des profils**
-  - Création et personnalisation de profils freelances et clients
-  - Portfolio, compétences, expériences
-
-- 🔍 **Recherche avancée**
-  - Par compétences, budget, localisation, mots-clés
-
-- 💼 **Offres & Services**
-  - Publication d’annonces côté freelance
-  - Demandes de missions côté client
-
-- 💬 **Messagerie interne**
-  - Communication directe entre freelances et clients
-
-- ⭐ **Système d’avis & évaluations**
-  - Notation après chaque mission pour instaurer la confiance
-
-- 💳 **Paiements sécurisés**
-  - Intégration Stripe / PayPal
-  - Escrow pour sécuriser les transactions
-
-- 📊 **Tableau de bord**
-  - Suivi des projets, revenus (freelance) et dépenses (client)
+[![PHP](https://img.shields.io/badge/PHP-8.0%2B-777BB4?logo=php)](https://php.net)
+[![React](https://img.shields.io/badge/React-18-61DAFB?logo=react)](https://reactjs.org)
+[![Tailwind](https://img.shields.io/badge/Tailwind-3.0-38B2AC?logo=tailwindcss)](https://tailwindcss.com)
+[![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?logo=mysql)](https://mysql.com)
 
 ---
 
-## 💰 Modèle économique
+## 📖 Présentation
 
-- La plateforme prend une **commission fixe de 5 %** sur chaque transaction.  
-- Exemple :  
-  - Un freelance facture **1 000 €** → la plateforme prélève **50 €**, le freelance touche **950 €**.  
-- Ce modèle est :
-  - ✔️ Plus compétitif que **Fiverr** (20 % côté freelance)  
-  - ✔️ Plus simple que **Malt** (10 % puis 5 % après 6 mois)  
-- Option future : ajout de **frais côté client** pour diversifier les revenus.
+**Novatis** est une plateforme web moderne qui connecte des clients avec des prestataires de services professionnels. Elle offre un environnement sécurisé et intuitif pour la gestion complète des services : recherche, commande, paiement, et communication.
 
----
+### ✨ Fonctionnalités Principales
 
-## 🛠️ Stack technique
-
-- **Frontend :**
-  - **HTML5 / CSS3**
-  - **JavaScript (vanilla)**
-  - **TailwindCSS** via CDN
-  - **React** via CDN
-
-- **Backend :**
-  - **PHP** (logique serveur et API)
-
-- **Base de données :**
-  - **SQL** (MySQL / MariaDB)
+- 🔐 **Authentification sécurisée** - Inscription, connexion, OAuth (Google, Microsoft, GitHub), 2FA
+- 👤 **Gestion de profils** - Profils utilisateurs et prestataires complets avec portfolios
+- 💼 **Marketplace de services** - Publication, recherche et filtrage de services par catégories
+- 💬 **Messagerie intégrée** - Communication client-prestataire en temps réel
+- 📦 **Gestion de commandes** - Système complet de commandes et suivi des projets
+- ⭐ **Système d'avis** - Évaluations et commentaires vérifiés
+- 🔔 **Notifications** - Alertes en temps réel et historique
+- 🌍 **Multi-langues** - Français et Anglais (i18next)
+- 🌓 **Thème clair/sombre** - Mode sombre automatique avec préférences utilisateur
+- 📱 **Responsive** - Design adaptatif mobile, tablette et desktop
 
 ---
 
-## 📂 Structure du projet
+## 🚀 Démarrage Rapide
 
-/public → Contient tout le site (fichiers visibles)
-/include → Fichiers PHP réutilisables (header, footer, navbar)
-/config → Configuration du projet (BDD, sécurité, constantes)
-/database → Scripts SQL (tables et données de test)
-/docs → Documentation, schémas, maquettes
+### Prérequis
 
---- 
+- **PHP** >= 8.0
+- **MySQL** >= 5.7 ou **MariaDB** >= 10.3
+- **Composer** (gestionnaire de dépendances PHP)
+- **Apache** avec mod_rewrite
+- **Git** (optionnel)
 
-## 🚧 Roadmap – Novatis
+### Installation Express
 
-### Phase 1 : Préparation & Base technique
-- [ ] Définir l’identité visuelle (logo, couleurs, design system)  
-- [ ] Créer les maquettes UI/UX (Figma ou autre outil)  
-- [ ] Mettre en place la structure du projet : `/public`, `/include`, `/config`, `/database`  
-- [ ] Créer la base de données initiale (`users`, `services`, `messages`, `transactions`)  
-- [ ] Développer un système d’includes réutilisables (header, navbar, footer)  
+```bash
+# 1. Cloner le projet
+git clone [URL_DU_REPO] Novatis
+cd Novatis
 
----
+# 2. Installer les dépendances
+composer install
 
-### Phase 2 : Authentification & Profils
-- [ ] Système d’inscription (freelance & client)  
-- [ ] Système de connexion avec sessions sécurisées (PHP + SQL)  
-- [ ] Page de gestion de profil (photo, bio, compétences, portfolio)  
-- [ ] Paramètres de sécurité (hashage mots de passe, protection CSRF, validations)  
+# 3. Configurer l'environnement
+cp .env.example .env
+# Éditez .env avec vos paramètres
 
----
+# 4. Créer la base de données
+mysql -u root -p -e "CREATE DATABASE novatis_db CHARACTER SET utf8mb4"
 
-### Phase 3 : Gestion des services & recherche
-- [ ] Page de création/publication d’un service (freelance)  
-- [ ] Liste des services disponibles (avec pagination)  
-- [ ] Moteur de recherche (par mots-clés, compétences, prix, localisation)  
-- [ ] Filtres avancés côté client (tri par prix, popularité, notes)  
+# 5. Importer la structure SQL
+# (Depuis phpMyAdmin ou fichiers dans database/backups/)
 
----
+# 6. Accéder au site
+http://localhost/Novatis/public/
+```
 
-### Phase 4 : Communication & Collaboration
-- [ ] Messagerie interne entre freelance et client  
-- [ ] Notifications (nouveau message, nouvelle commande, avis reçu)  
-- [ ] Système de suivi de projet (états : en attente, en cours, terminé)  
+📖 **Pour une installation détaillée, consultez [la documentation complète](docs/DOCUMENTATION.md)**
 
 ---
 
-### Phase 5 : Paiements & Transactions
-- [ ] Intégration Stripe / PayPal pour paiements sécurisés  
-- [ ] Mise en place d’un système d’**escrow** (argent bloqué jusqu’à validation de la mission)  
-- [ ] Historique des transactions (côté freelance et client)  
-- [ ] Calcul automatique de la commission (5 %)  
+## 📚 Documentation
+
+### 📖 Documentation Complète
+
+**[→ Accéder à la documentation complète](docs/DOCUMENTATION.md)**
+
+La documentation complète couvre :
+- Guide d'installation détaillé
+- Configuration et paramétrage
+- Toutes les fonctionnalités en détail
+- Documentation API complète
+- Guide de déploiement
+- Dépannage et support
+
+### 🎯 Accès Rapide
+
+| Besoin | Documentation |
+|--------|---------------|
+| 📖 **Documentation complète** | [DOCUMENTATION.md](docs/DOCUMENTATION.md) |
+| 🚀 **Installation rapide** | [Installation](docs/guides/installation/INSTALLATION.md) |
+| 🔧 **Fonctionnalités** | [Voir toutes les fonctionnalités](docs/DOCUMENTATION.md#fonctionnalités) |
+| 🌐 **API** | [Documentation API](docs/api/API.md) |
+| 🚀 **Déploiement** | [Guide de déploiement](docs/deploiement/DEPLOIEMENT.md) |
+| 🐛 **Dépannage** | [Troubleshooting](docs/guides/troubleshooting/TROUBLESHOOTING.md) |
 
 ---
 
-### Phase 6 : Avis & Réputation
-- [ ] Notation après chaque mission (étoiles + commentaire)  
-- [ ] Moyenne visible sur le profil freelance  
-- [ ] Classement des freelances par popularité/note  
+## 📁 Structure du Projet
+
+```
+Novatis/
+├── bootstrap/          # Initialisation de l'application
+├── config/             # Configuration (DB, mail, app)
+├── database/           # SQL et migrations
+├── docs/              # 📚 Documentation complète
+├── includes/          # Composants réutilisables (Header, Footer)
+├── public/            # 🌐 Racine web (DOCUMENT ROOT)
+│   ├── api/          # Endpoints API REST
+│   ├── assets/       # CSS, JS, Images
+│   ├── locales/      # Traductions i18n
+│   └── pages/        # Pages de l'application
+├── scripts/          # Scripts utilitaires
+├── src/              # Code source PHP (PSR-4)
+├── storage/          # Logs, cache, uploads
+└── vendor/           # Dépendances Composer
+```
 
 ---
 
-### Phase 7 : Tableau de bord & Statistiques
-- [ ] Dashboard freelance : revenus, projets en cours, messages  
-- [ ] Dashboard client : dépenses, services achetés, favoris  
-- [ ] Graphiques simples (ex : progression des revenus)  
+## 🛠️ Technologies
+
+### Backend
+- **PHP 8.0+** - Langage serveur
+- **MySQL/MariaDB** - Base de données
+- **Composer** - Gestionnaire de dépendances
+- **PSR-4** - Autoloading
+- **Dotenv** - Variables d'environnement
+
+### Frontend
+- **React 18** - Composants UI
+- **Tailwind CSS 3** - Framework CSS utility-first
+- **i18next** - Internationalisation
+- **Babel** - Transpilation JSX
+
+### Architecture
+- **MVC Pattern** - Séparation des préoccupations
+- **Repository Pattern** - Couche d'accès aux données
+- **Singleton Pattern** - Gestion des connexions
+- **PSR-12** - Standards de codage PHP
 
 ---
 
-### Phase 8 : Lancement bêta
-- [ ] Déploiement sur un serveur en ligne (OVH, Hostinger ou autre)  
-- [ ] Tests utilisateurs fermés (20-50 testeurs)  
-- [ ] Correction des bugs et amélioration UX  
+## 🔐 Sécurité
+
+### Mesures Implémentées
+
+✅ Variables d'environnement (`.env`)
+✅ Mots de passe hashés (Bcrypt)
+✅ Requêtes préparées (PDO)
+✅ Sessions sécurisées
+✅ Validation des entrées
+✅ Protection XSS
+✅ Protection CSRF
+✅ Lazy Loading DB
 
 ---
 
-### Phase 9 : Lancement officiel
-- [ ] Ouverture publique  
-- [ ] Mise en place d’un système de support (FAQ, contact, ticket)  
-- [ ] Communication (réseaux sociaux, LinkedIn, campagnes ciblées)  
+## 🤝 Contribution
+
+Les contributions sont les bienvenues !
+
+1. **Fork** le projet
+2. Créer une branche (`git checkout -b feature/NouvelleFeature`)
+3. Commit (`git commit -m 'Ajout NouvelleFeature'`)
+4. Push (`git push origin feature/NouvelleFeature`)
+5. Ouvrir une **Pull Request**
 
 ---
 
-### Phase 10 : Scalabilité & Optimisations
-- [ ] Optimisation performance (cache, requêtes SQL, CDN)  
-- [ ] Sécurité avancée (anti-injection SQL, audit sécurité)  
-- [ ] Système de plans premium (freelance mis en avant, options clients)  
-- [ ] Mobile-friendly (responsive complet + PWA si besoin)  
+## 🐛 Support
+
+### En cas de problème
+
+1. **Consultez** [la documentation complète](docs/DOCUMENTATION.md)
+2. **Consultez** [le guide de dépannage](docs/guides/troubleshooting/TROUBLESHOOTING.md)
+3. **Activez le debug** : `APP_DEBUG=true` dans `.env`
+4. **Consultez les logs** : `storage/logs/` et `C:\xampp\apache\logs\`
+5. **Créez une issue** sur GitHub
+
+---
+
+## 📄 Licence
+
+**Propriétaire** - © 2024 Novatis. Tous droits réservés.
+
+---
+
+## 📊 Statut
+
+- **Version:** 2.0.0
+- **Statut:** 🟢 Actif
+- **Dernière mise à jour:** Octobre 2025
+- **Environnement:** Production Ready
+
+---
+
+<div align="center">
+
+**Fait avec ❤️ par l'équipe Novatis**
+
+[Documentation](docs/DOCUMENTATION.md) • [API](docs/API.md) • [Support](docs/guides/troubleshooting/TROUBLESHOOTING.md)
+
+</div>

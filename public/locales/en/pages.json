@@ -1,0 +1,123 @@
+{
+  "index": {
+    "title": "Novatis | Home",
+    "welcome": "Welcome to Novatis",
+    "description": "Find the best service providers",
+    "searchPlaceholder": "Search for a service...",
+    "popularCategories": "Popular Categories",
+    "recentProviders": "Recent Providers",
+    "viewAllProviders": "View all providers"
+  },
+  "apropos": {
+    "title": "Novatis | About",
+    "heading": "About - Novatis",
+    "ourGroup": "Our Group",
+    "group": "Group 15",
+    "allInOne": "All at once",
+    "skills": "IT Skills"
+  },
+  "contact": {
+    "title": "Contact",
+    "heading": "Contact Us",
+    "form": {
+      "name": "Name",
+      "email": "Email",
+      "subject": "Subject",
+      "message": "Message",
+      "send": "Send"
+    }
+  },
+  "favoris": {
+    "title": "My Favorites",
+    "heading": "My Favorites",
+    "favoritesCount": "favorite provider(s)",
+    "noFavorites": "No favorites yet",
+    "addFavorites": "Explore our providers and add them to your favorites for easy access!",
+    "discover": "Discover providers",
+    "viewProfile": "View profile",
+    "contact": "Contact",
+    "removeConfirm": "Are you sure you want to remove this provider from your favorites?"
+  },
+  "profil": {
+    "title": "Profile",
+    "about": "About",
+    "services": "Services",
+    "reviews": "Reviews",
+    "contact": "Contact",
+    "noServices": "No services offered",
+    "noReviews": "No reviews",
+    "contactButton": "Contact",
+    "websiteButton": "Website",
+    "activeServices": "Active Services",
+    "completedOrders": "Completed Orders",
+    "receivedReviews": "Reviews Received",
+    "averageRating": "Average Rating",
+    "contactInfo": "Contact Information",
+    "servicesOffered": "Services Offered",
+    "from": "From",
+    "deliveryTime": "Delivery Time",
+    "days": "days",
+    "clientReviews": "Client Reviews",
+    "by": "by",
+    "on": "on",
+    "noServicesAvailable": "No services available at the moment.",
+    "noReviewsYet": "No reviews yet."
+  },
+  "notifications": {
+    "title": "Notifications",
+    "heading": "All your notifications",
+    "markAllRead": "Mark all as read",
+    "deleteAll": "Delete all",
+    "noNotifications": "No notifications",
+    "all": "All",
+    "unread": "Unread",
+    "read": "Read"
+  },
+  "verifyEmail": {
+    "title": "Email Verification",
+    "heading": "Verify your email address",
+    "checking": "Verifying...",
+    "success": "Your email has been successfully verified!",
+    "error": "Error verifying your email",
+    "goToLogin": "Go to login"
+  },
+  "deleteAccount": {
+    "title": "Delete my account",
+    "heading": "Permanently delete my account",
+    "warning": "Warning: This action is irreversible",
+    "confirmText": "Are you sure you want to delete your account? All your data will be lost.",
+    "typeConfirm": "Type \"DELETE\" to confirm",
+    "cancel": "Cancel",
+    "confirm": "Delete permanently"
+  },
+  "prestataires": {
+    "title": "Novatis | Providers",
+    "heading": "Service Providers",
+    "description": "Discover our qualified experts and their services",
+    "searchPlaceholder": "Search for a provider...",
+    "filters": "Filters",
+    "category": "Category",
+    "allCategories": "All categories",
+    "location": "Location",
+    "priceRange": "Price Range",
+    "rating": "Minimum Rating",
+    "sortBy": "Sort by",
+    "name": "Name",
+    "nameAZ": "Name (A-Z)",
+    "nameZA": "Name (Z-A)",
+    "priceAsc": "Price ascending",
+    "priceDesc": "Price descending",
+    "deliveryAsc": "Delivery ascending",
+    "deliveryDesc": "Delivery descending",
+    "apply": "Apply",
+    "reset": "Reset",
+    "results": "results",
+    "resultsFound": "provider(s) found",
+    "noResults": "No providers found",
+    "modifySearch": "Try modifying your search.",
+    "servicesOffered": "Services offered",
+    "viewProfile": "View profile",
+    "contact": "Contact",
+    "addToFavorites": "Add to favorites"
+  }
+}

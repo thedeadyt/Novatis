@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../../config/config.php';
+require_once __DIR__ . '/../../config/Config.php';
 
 // Vérifie si l'utilisateur est connecté
 isUserLoggedIn(true);
@@ -176,7 +176,7 @@ try {
 }
 ?>
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" data-user-lang="fr">
 <head>
     <meta charset='utf-8'>
     <meta http-equiv='X-UA-Compatible' content='IE=edge'>
@@ -430,10 +430,66 @@ try {
             TwoFactorAuth.init('<?= BASE_URL ?>');
         });
     </script>
+
+    <!-- i18next pour les traductions -->
+    <?php include __DIR__ . '/../../includes/i18n-head.php'; ?>
+
+    <!-- Script de synchronisation de la langue -->
+    <script>
+        // Synchroniser la langue entre localStorage et la base de données
+        document.addEventListener('DOMContentLoaded', function() {
+            // Récupérer la langue actuelle du localStorage (utilisée par i18n)
+            const currentLanguage = localStorage.getItem('novatis_language') || 'fr';
+
+            // Récupérer la langue de la base de données (PHP)
+            const dbLanguage = '<?= $preferences['language'] ?? 'fr' ?>';
+
+            // Si les langues diffèrent, synchroniser
+            if (currentLanguage !== dbLanguage) {
+                // Mettre à jour la base de données avec la langue du localStorage
+                fetch('<?= BASE_URL ?>/api/parametres/settings.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'action=update_language&language=' + encodeURIComponent(currentLanguage)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log('✅ Langue synchronisée avec la base de données:', currentLanguage);
+                    }
+                })
+                .catch(error => console.error('Erreur lors de la synchronisation de la langue:', error));
+            }
+
+            // Écouter les changements de langue (depuis le Header LanguageSwitcher)
+            window.addEventListener('languageChanged', function(event) {
+                const newLanguage = event.detail.language;
+
+                // Mettre à jour la base de données
+                fetch('<?= BASE_URL ?>/api/parametres/settings.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'action=update_language&language=' + encodeURIComponent(newLanguage)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log('✅ Langue mise à jour dans la base de données:', newLanguage);
+                    }
+                })
+                .catch(error => console.error('Erreur lors de la mise à jour de la langue:', error));
+            });
+        });
+    </script>
 </head>
 
-<body class="bg-custom-bg min-h-screen">
+<body class="flex flex-col bg-custom-bg min-h-screen">
     <!-- Header -->
+    <main class="flex-1">
     <header class="bg-white shadow-sm border-b border-gray-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
@@ -445,11 +501,11 @@ try {
                 </div>
                 <div class="flex items-center space-x-4">
                     <span class="text-sm text-gray-600">
-                        Connecté en tant que <strong><?= htmlspecialchars($user['email']) ?></strong>
+                        <span data-i18n="connectedAs" data-i18n-ns="settings">Connecté en tant que</span> <strong><?= htmlspecialchars($user['email']) ?></strong>
                     </span>
                     <a href="<?= BASE_URL ?>/logout" class="btn-secondary px-4 py-2 rounded-lg text-sm">
                         <i class="fas fa-sign-out-alt mr-1"></i>
-                        Déconnexion
+                        <span data-i18n="header.logout" data-i18n-ns="common">Déconnexion</span>
                     </a>
                 </div>
             </div>
@@ -463,50 +519,44 @@ try {
             <div class="p-6">
                 <h1 class="text-2xl font-bold text-custom-black mb-6">
                     <i class="fas fa-cog mr-2"></i>
-                    Paramètres
+                    <span data-i18n="title" data-i18n-ns="settings">Paramètres</span>
                 </h1>
 
                 <nav class="space-y-2">
                     <a href="?section=profile"
                        class="sidebar-item flex items-center px-4 py-3 text-sm font-medium <?= $activeSection === 'profile' ? 'active' : 'text-gray-700' ?>">
                         <i class="fas fa-user mr-3"></i>
-                        Profil
+                        <span data-i18n="sections.profile" data-i18n-ns="settings">Profil</span>
                     </a>
 
                     <a href="?section=security"
                        class="sidebar-item flex items-center px-4 py-3 text-sm font-medium <?= $activeSection === 'security' ? 'active' : 'text-gray-700' ?>">
                         <i class="fas fa-shield-alt mr-3"></i>
-                        Sécurité
+                        <span data-i18n="sections.security" data-i18n-ns="settings">Sécurité</span>
                     </a>
 
                     <a href="?section=notifications"
                        class="sidebar-item flex items-center px-4 py-3 text-sm font-medium <?= $activeSection === 'notifications' ? 'active' : 'text-gray-700' ?>">
                         <i class="fas fa-bell mr-3"></i>
-                        Notifications
+                        <span data-i18n="sections.notifications" data-i18n-ns="settings">Notifications</span>
                     </a>
 
                     <a href="?section=privacy"
                        class="sidebar-item flex items-center px-4 py-3 text-sm font-medium <?= $activeSection === 'privacy' ? 'active' : 'text-gray-700' ?>">
                         <i class="fas fa-user-shield mr-3"></i>
-                        Confidentialité
-                    </a>
-
-                    <a href="?section=display"
-                       class="sidebar-item flex items-center px-4 py-3 text-sm font-medium <?= $activeSection === 'display' ? 'active' : 'text-gray-700' ?>">
-                        <i class="fas fa-paint-brush mr-3"></i>
-                        Affichage
+                        <span data-i18n="sections.privacy" data-i18n-ns="settings">Confidentialité</span>
                     </a>
 
                     <a href="?section=integrations"
                        class="sidebar-item flex items-center px-4 py-3 text-sm font-medium <?= $activeSection === 'integrations' ? 'active' : 'text-gray-700' ?>">
                         <i class="fas fa-plug mr-3"></i>
-                        Intégrations
+                        <span data-i18n="sections.integrations" data-i18n-ns="settings">Intégrations</span>
                     </a>
 
                     <a href="?section=support"
                        class="sidebar-item flex items-center px-4 py-3 text-sm font-medium <?= $activeSection === 'support' ? 'active' : 'text-gray-700' ?>">
                         <i class="fas fa-headset mr-3"></i>
-                        Contact Support
+                        <span data-i18n="sections.support" data-i18n-ns="settings">Contact Support</span>
                     </a>
 
                     <div class="border-t border-gray-200 my-4"></div>
@@ -514,7 +564,7 @@ try {
                     <a href="?section=danger"
                        class="sidebar-item flex items-center px-4 py-3 text-sm font-medium <?= $activeSection === 'danger' ? 'active' : 'text-red-600' ?>">
                         <i class="fas fa-exclamation-triangle mr-3"></i>
-                        Zone de danger
+                        <span data-i18n="sections.danger" data-i18n-ns="settings">Zone de danger</span>
                     </a>
                 </nav>
             </div>
@@ -528,9 +578,9 @@ try {
                     <div class="settings-header">
                         <h2 class="text-xl font-semibold text-custom-black">
                             <i class="fas fa-user mr-2"></i>
-                            Informations du profil
+                            <span data-i18n="profile.title" data-i18n-ns="settings">Informations du profil</span>
                         </h2>
-                        <p class="text-sm text-gray-600 mt-1">Modifiez vos informations personnelles</p>
+                        <p class="text-sm text-gray-600 mt-1" data-i18n="profile.subtitle" data-i18n-ns="settings">Modifiez vos informations personnelles</p>
                     </div>
 
                     <form method="POST" action="<?= BASE_URL ?>/api/parametres/settings.php">
@@ -538,76 +588,68 @@ try {
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="form-group">
-                                <label class="form-label">Prénom</label>
+                                <label class="form-label" data-i18n="profile.firstname" data-i18n-ns="settings">Prénom</label>
                                 <input type="text" name="firstname" class="form-input"
-                                       value="<?= htmlspecialchars($user['firstname'] ?? '') ?>"
-                                       placeholder="Votre prénom" required>
+                                       value="<?= htmlspecialchars($user['firstname'] ?? '') ?>" required>
                             </div>
 
                             <div class="form-group">
-                                <label class="form-label">Nom</label>
+                                <label class="form-label" data-i18n="profile.lastname" data-i18n-ns="settings">Nom</label>
                                 <input type="text" name="lastname" class="form-input"
-                                       value="<?= htmlspecialchars($user['lastname'] ?? '') ?>"
-                                       placeholder="Votre nom" required>
+                                       value="<?= htmlspecialchars($user['lastname'] ?? '') ?>" required>
                             </div>
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">Pseudo</label>
+                            <label class="form-label" data-i18n="profile.pseudo" data-i18n-ns="settings">Pseudo</label>
                             <input type="text" name="pseudo" class="form-input"
-                                   value="<?= htmlspecialchars($user['pseudo'] ?? '') ?>"
-                                   placeholder="Votre pseudo" required>
+                                   value="<?= htmlspecialchars($user['pseudo'] ?? '') ?>" required>
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">Email</label>
+                            <label class="form-label" data-i18n="profile.email" data-i18n-ns="settings">Email</label>
                             <input type="email" name="email" class="form-input"
-                                   value="<?= htmlspecialchars($user['email'] ?? '') ?>"
-                                   placeholder="votre@email.com" required>
+                                   value="<?= htmlspecialchars($user['email'] ?? '') ?>" required>
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">Téléphone</label>
+                            <label class="form-label" data-i18n="profile.phone" data-i18n-ns="settings">Téléphone</label>
                             <input type="tel" name="phone" class="form-input"
-                                   value="<?= htmlspecialchars($user['phone'] ?? '') ?>"
-                                   placeholder="+33 1 23 45 67 89">
+                                   value="<?= htmlspecialchars($user['phone'] ?? '') ?>">
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">Bio</label>
-                            <textarea name="bio" class="form-input" rows="4"
-                                      placeholder="Parlez-nous de vous..."><?= htmlspecialchars($user['bio'] ?? '') ?></textarea>
+                            <label class="form-label" data-i18n="profile.bio" data-i18n-ns="settings">Bio</label>
+                            <textarea name="bio" class="form-input" rows="4" data-i18n-attr="placeholder" data-i18n="profile.bioPlaceholder" data-i18n-ns="settings"><?= htmlspecialchars($user['bio'] ?? '') ?></textarea>
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="form-group">
-                                <label class="form-label">Localisation</label>
+                                <label class="form-label" data-i18n="profile.location" data-i18n-ns="settings">Localisation</label>
                                 <input type="text" name="location" class="form-input"
-                                       value="<?= htmlspecialchars($user['location'] ?? '') ?>"
-                                       placeholder="Paris, France">
+                                       value="<?= htmlspecialchars($user['location'] ?? '') ?>" data-i18n-attr="placeholder" data-i18n="profile.locationPlaceholder" data-i18n-ns="settings">
                             </div>
 
                             <div class="form-group">
-                                <label class="form-label">Site web</label>
+                                <label class="form-label" data-i18n="profile.website" data-i18n-ns="settings">Site web</label>
                                 <input type="url" name="website" class="form-input"
-                                       value="<?= htmlspecialchars($user['website'] ?? '') ?>"
-                                       placeholder="https://votre-site.com">
+                                       value="<?= htmlspecialchars($user['website'] ?? '') ?>" data-i18n-attr="placeholder" data-i18n="profile.websitePlaceholder" data-i18n-ns="settings">
                             </div>
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">Fuseau horaire</label>
+                            <label class="form-label" data-i18n="profile.timezone" data-i18n-ns="settings">Fuseau horaire</label>
                             <select name="timezone" class="form-input">
-                                <option value="Europe/Paris" <?= $preferences['timezone'] === 'Europe/Paris' ? 'selected' : '' ?>>Paris (UTC+1)</option>
-                                <option value="Europe/London" <?= $preferences['timezone'] === 'Europe/London' ? 'selected' : '' ?>>Londres (UTC+0)</option>
-                                <option value="America/New_York" <?= $preferences['timezone'] === 'America/New_York' ? 'selected' : '' ?>>New York (UTC-5)</option>
+                                <option value="Europe/Paris" <?= $preferences['timezone'] === 'Europe/Paris' ? 'selected' : '' ?> data-i18n="profile.timezones.paris" data-i18n-ns="settings">Paris (UTC+1)</option>
+                                <option value="Europe/London" <?= $preferences['timezone'] === 'Europe/London' ? 'selected' : '' ?> data-i18n="profile.timezones.london" data-i18n-ns="settings">Londres (UTC+0)</option>
+                                <option value="America/New_York" <?= $preferences['timezone'] === 'America/New_York' ? 'selected' : '' ?> data-i18n="profile.timezones.newYork" data-i18n-ns="settings">New York (UTC-5)</option>
                             </select>
                         </div>
 
                         <div class="flex justify-end">
                             <button type="submit" class="btn-primary px-6 py-2 rounded-lg">
                                 <i class="fas fa-save mr-2"></i>
-                                Sauvegarder
+                                <span data-i18n="buttons.save" data-i18n-ns="common">Sauvegarder</span>
                             </button>
                         </div>
                     </form>
@@ -905,123 +947,6 @@ try {
                     </form>
                 </div>
             </div>
-
-<!-- Section Affichage -->
-<div id="display-section" class="section-content <?= $activeSection === 'display' ? 'active' : '' ?>">
-    <div class="settings-card">
-        <div class="settings-header">
-            <h2 class="text-xl font-semibold text-custom-black">
-                <i class="fas fa-paint-brush mr-2"></i>
-                Préférences d'affichage
-            </h2>
-            <p class="text-sm text-gray-600 mt-1">Personnalisez l'apparence de l'application</p>
-        </div>
-
-        <form id="display-settings-form">
-            <div class="space-y-4">
-
-                <!-- === Mode sombre / clair === -->
-                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                    <div>
-                        <div class="font-medium text-custom-black">Mode sombre</div>
-                        <div class="text-sm text-gray-600">Activez le thème sombre de l'interface</div>
-                    </div>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="darkModeToggle">
-                        <span class="slider"></span>
-                    </label>
-                </div>
-
-                <div class="flex justify-end">
-                    <button type="button" id="saveThemeBtn" class="btn-primary px-6 py-2 rounded-lg">
-                        <i class="fas fa-save mr-2"></i>
-                        Sauvegarder
-                    </button>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- Script de gestion du thème -->
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-    const toggle = document.getElementById("darkModeToggle");
-    const saveBtn = document.getElementById("saveThemeBtn");
-    const html = document.documentElement;
-
-    // Charger la préférence depuis localStorage
-    const isDark = localStorage.getItem("theme") === "dark";
-    toggle.checked = isDark;
-    html.classList.toggle("dark", isDark);
-
-    // Basculer le thème quand on clique sur le switch
-    toggle.addEventListener("change", () => {
-        const dark = toggle.checked;
-        html.classList.toggle("dark", dark);
-    });
-
-    // Sauvegarder la préférence
-    saveBtn.addEventListener("click", () => {
-        const dark = toggle.checked;
-        localStorage.setItem("theme", dark ? "dark" : "light");
-        alert("Préférences enregistrées !");
-    });
-});
-</script>
-
-<!-- Styles spécifiques (si tu n’as pas déjà les classes pour le switch) -->
-<style>
-.toggle-switch {
-    position: relative;
-    display: inline-block;
-    width: 50px;
-    height: 24px;
-}
-.toggle-switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-.slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background-color: #ccc;
-    transition: .4s;
-    border-radius: 24px;
-}
-.slider:before {
-    position: absolute;
-    content: "";
-    height: 18px;
-    width: 18px;
-    left: 3px;
-    bottom: 3px;
-    background-color: white;
-    transition: .4s;
-    border-radius: 50%;
-}
-input:checked + .slider {
-    background-color: #111827; /* gris foncé */
-}
-input:checked + .slider:before {
-    transform: translateX(26px);
-}
-
-/* Mode sombre global (si tu utilises Tailwind, il détectera la classe .dark) */
-html.dark {
-    background-color: #111827;
-    color: #f9fafb;
-}
-html.dark .settings-card {
-    background-color: #1f2937;
-}
-html.dark .text-custom-black {
-    color: #f9fafb;
-}
-</style>
-
 
             <!-- Section Intégrations -->
             <div id="integrations-section" class="section-content <?= $activeSection === 'integrations' ? 'active' : '' ?>">
@@ -1332,11 +1257,11 @@ html.dark .text-custom-black {
 
                 if (event.data.type === 'oauth_success') {
                     popup.close();
-                    alert('Connexion réussie avec ' + provider + ' !');
-                    location.reload();
+                    window.toast.success('messages.success', 'common', 'Connexion réussie avec ' + provider + ' !');
+                    setTimeout(() => location.reload(), 1500);
                 } else if (event.data.type === 'oauth_error') {
                     popup.close();
-                    alert('Erreur lors de la connexion: ' + event.data.message);
+                    window.toast.error('messages.error', 'common', 'Erreur lors de la connexion: ' + event.data.message);
                 }
             });
         }
@@ -1358,15 +1283,15 @@ html.dark .text-custom-black {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert(data.message);
-                    location.reload();
+                    window.toast.success('messages.success', 'common', data.message);
+                    setTimeout(() => location.reload(), 1500);
                 } else {
-                    alert('Erreur: ' + data.message);
+                    window.toast.error('messages.error', 'common', 'Erreur: ' + data.message);
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Erreur lors de la déconnexion du compte OAuth');
+                window.toast.error('messages.error', 'common', 'Erreur lors de la déconnexion du compte OAuth');
             });
         }
 
@@ -1389,13 +1314,13 @@ html.dark .text-custom-black {
 
                         if (newPassword !== confirmPassword) {
                             e.preventDefault();
-                            alert('Les mots de passe ne correspondent pas.');
+                            window.toast.error('auth.messages.passwordMismatch', 'auth', 'Les mots de passe ne correspondent pas.');
                             return false;
                         }
 
                         if (newPassword.length < 8) {
                             e.preventDefault();
-                            alert('Le mot de passe doit contenir au moins 8 caractères.');
+                            window.toast.error('auth.messages.weakPassword', 'auth', 'Le mot de passe doit contenir au moins 8 caractères.');
                             return false;
                         }
                     });
@@ -1405,16 +1330,17 @@ html.dark .text-custom-black {
 
         // Affichage des messages de succès/erreur
         <?php if (isset($_SESSION['success_message'])): ?>
-            alert('<?= addslashes($_SESSION['success_message']) ?>');
+            window.toast.success('messages.success', 'common', '<?= addslashes($_SESSION['success_message']) ?>');
             <?php unset($_SESSION['success_message']); ?>
         <?php endif; ?>
 
         <?php if (isset($_SESSION['error_message'])): ?>
-            alert('<?= addslashes($_SESSION['error_message']) ?>');
+            window.toast.error('messages.error', 'common', '<?= addslashes($_SESSION['error_message']) ?>');
             <?php unset($_SESSION['error_message']); ?>
         <?php endif; ?>
 
 
     </script>
+    </main>
 </body>
 </html>

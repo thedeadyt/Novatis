@@ -1,0 +1,123 @@
+{
+  "index": {
+    "title": "Novatis | Accueil",
+    "welcome": "Bienvenue sur Novatis",
+    "description": "Trouvez les meilleurs prestataires de services",
+    "searchPlaceholder": "Rechercher un service...",
+    "popularCategories": "Catégories populaires",
+    "recentProviders": "Prestataires récents",
+    "viewAllProviders": "Voir tous les prestataires"
+  },
+  "apropos": {
+    "title": "Novatis | À propos",
+    "heading": "À propos - Novatis",
+    "ourGroup": "Notre Groupe",
+    "group": "Groupe 15",
+    "allInOne": "Tout en même temps",
+    "skills": "Compétences informatiques"
+  },
+  "contact": {
+    "title": "Contact",
+    "heading": "Nous contacter",
+    "form": {
+      "name": "Nom",
+      "email": "Email",
+      "subject": "Sujet",
+      "message": "Message",
+      "send": "Envoyer"
+    }
+  },
+  "favoris": {
+    "title": "Mes Favoris",
+    "heading": "Mes Favoris",
+    "favoritesCount": "prestataire(s) favori(s)",
+    "noFavorites": "Aucun favori pour le moment",
+    "addFavorites": "Explorez nos prestataires et ajoutez-les à vos favoris pour les retrouver facilement !",
+    "discover": "Découvrir les prestataires",
+    "viewProfile": "Voir le profil",
+    "contact": "Contacter",
+    "removeConfirm": "Êtes-vous sûr de vouloir retirer ce prestataire de vos favoris ?"
+  },
+  "profil": {
+    "title": "Profil",
+    "about": "À propos",
+    "services": "Services",
+    "reviews": "Avis",
+    "contact": "Contacter",
+    "noServices": "Aucun service proposé",
+    "noReviews": "Aucun avis",
+    "contactButton": "Contacter",
+    "websiteButton": "Site web",
+    "activeServices": "Services actifs",
+    "completedOrders": "Commandes complétées",
+    "receivedReviews": "Avis reçus",
+    "averageRating": "Note moyenne",
+    "contactInfo": "Informations de contact",
+    "servicesOffered": "Services proposés",
+    "from": "À partir de",
+    "deliveryTime": "Délai de livraison",
+    "days": "jours",
+    "clientReviews": "Avis des clients",
+    "by": "par",
+    "on": "le",
+    "noServicesAvailable": "Aucun service disponible pour le moment.",
+    "noReviewsYet": "Aucun avis pour le moment."
+  },
+  "notifications": {
+    "title": "Notifications",
+    "heading": "Toutes vos notifications",
+    "markAllRead": "Tout marquer comme lu",
+    "deleteAll": "Tout supprimer",
+    "noNotifications": "Aucune notification",
+    "all": "Toutes",
+    "unread": "Non lues",
+    "read": "Lues"
+  },
+  "verifyEmail": {
+    "title": "Vérification Email",
+    "heading": "Vérifiez votre adresse email",
+    "checking": "Vérification en cours...",
+    "success": "Votre email a été vérifié avec succès !",
+    "error": "Erreur lors de la vérification de votre email",
+    "goToLogin": "Aller à la connexion"
+  },
+  "deleteAccount": {
+    "title": "Supprimer mon compte",
+    "heading": "Supprimer définitivement mon compte",
+    "warning": "Attention : Cette action est irréversible",
+    "confirmText": "Êtes-vous sûr de vouloir supprimer votre compte ? Toutes vos données seront perdues.",
+    "typeConfirm": "Tapez \"SUPPRIMER\" pour confirmer",
+    "cancel": "Annuler",
+    "confirm": "Supprimer définitivement"
+  },
+  "prestataires": {
+    "title": "Novatis | Prestataires",
+    "heading": "Les Prestataires",
+    "description": "Découvrez nos experts qualifiés et leurs services",
+    "searchPlaceholder": "Rechercher un prestataire...",
+    "filters": "Filtres",
+    "category": "Catégorie",
+    "allCategories": "Toutes les catégories",
+    "location": "Localisation",
+    "priceRange": "Fourchette de prix",
+    "rating": "Note minimum",
+    "sortBy": "Trier par",
+    "name": "Nom",
+    "nameAZ": "Nom (A-Z)",
+    "nameZA": "Nom (Z-A)",
+    "priceAsc": "Prix croissant",
+    "priceDesc": "Prix décroissant",
+    "deliveryAsc": "Délai croissant",
+    "deliveryDesc": "Délai décroissant",
+    "apply": "Appliquer",
+    "reset": "Réinitialiser",
+    "results": "résultats",
+    "resultsFound": "prestataire(s) trouvé(s)",
+    "noResults": "Aucun prestataire trouvé",
+    "modifySearch": "Essayez de modifier votre recherche.",
+    "servicesOffered": "Services proposés",
+    "viewProfile": "Voir profil",
+    "contact": "Contacter",
+    "addToFavorites": "Ajouter aux favoris"
+  }
+}

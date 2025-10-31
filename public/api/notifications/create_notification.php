@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../../../config/config.php';
+require_once __DIR__ . '/../../../config/Config.php';
 
 /**
  * Fonction pour créer une notification
@@ -12,7 +12,7 @@ require_once __DIR__ . '/../../../config/config.php';
  * @param array|null $metadata Données supplémentaires (optionnel)
  */
 function createNotification($user_id, $type, $title, $message, $action_url = null, $metadata = null) {
-    global $pdo;
+    $pdo = getDBConnection();
 
     try {
         // Vérifier d'abord si la table existe

@@ -12,6 +12,7 @@ if ($user) {
 }
 $userInfo = [
     'isLoggedIn' => $user !== null,
+    'id' => $user['id'] ?? null,
     'name' => $userName,
     'pseudo' => $user['pseudo'] ?? null,
     'email' => $user['email'] ?? '',
@@ -33,21 +34,49 @@ $userInfo = [
 
   // Données utilisateur depuis PHP
   const userInfo = <?= json_encode($userInfo) ?>;
+  const BASE_URL = <?= json_encode(BASE_URL) ?>;
 
-  // Traductions
-  const t = {
-    home: "Accueil",
-    findProvider: "Trouver un prestataire",
-    dashboard: "Dashboard",
-    profile: "Voir mon profil",
-    settings: "Paramètres",
-    logout: "Déconnexion",
-    login: "Connexion",
-    register: "S'inscrire",
-    notifications: "Notifications",
-    markAllRead: "Tout marquer comme lu",
-    viewAll: "Voir tout",
-    noNotifications: "Aucune notification"
+  // Hook pour i18next (traductions)
+  const useTranslation = () => {
+    const [, forceUpdate] = React.useReducer(x => x + 1, 0);
+
+    React.useEffect(() => {
+      const handleLanguageChanged = () => forceUpdate();
+      window.addEventListener('i18nReady', handleLanguageChanged);
+      window.addEventListener('languageChanged', handleLanguageChanged);
+
+      return () => {
+        window.removeEventListener('i18nReady', handleLanguageChanged);
+        window.removeEventListener('languageChanged', handleLanguageChanged);
+      };
+    }, []);
+
+    const t = (key) => {
+      if (typeof window.t === 'function') {
+        return window.t(`header.${key}`);
+      }
+      // Fallback si i18next n'est pas encore chargé
+      const fallbacks = {
+        home: "Accueil",
+        findProvider: "Trouver un prestataire",
+        dashboard: "Dashboard",
+        profile: "Voir mon profil",
+        settings: "Paramètres",
+        logout: "Déconnexion",
+        login: "Connexion",
+        register: "S'inscrire",
+        notifications: "Notifications",
+        markAllRead: "Tout marquer comme lu",
+        viewAll: "Voir tout",
+        noNotifications: "Aucune notification",
+        favorites: "Mes Favoris",
+        administrator: "Administrateur",
+        search: "Rechercher..."
+      };
+      return fallbacks[key] || key;
+    };
+
+    return { t };
   };
 
   // SVG Avatar anonyme
@@ -72,6 +101,7 @@ $userInfo = [
   );
 
   function Header() {
+    const { t } = useTranslation(); // Utiliser le hook de traduction
     const [open, setOpen] = useState(false); // mobile menu
     const [dropdownOpen, setDropdownOpen] = useState(false); // profil
     const [notificationOpen, setNotificationOpen] = useState(false); // notifications
@@ -79,11 +109,27 @@ $userInfo = [
     const [unreadCount, setUnreadCount] = useState(0);
     const [activeIndex, setActiveIndex] = useState(0);
     const [highlight, setHighlight] = useState({ left: 0, width: 0 });
+    const [isDarkMode, setIsDarkMode] = useState(document.documentElement.classList.contains('dark'));
     const navRefs = useRef([]);
 
+    // Écouter les changements de thème
+    useEffect(() => {
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.attributeName === 'class') {
+            setIsDarkMode(document.documentElement.classList.contains('dark'));
+          }
+        });
+      });
+
+      observer.observe(document.documentElement, { attributes: true });
+
+      return () => observer.disconnect();
+    }, []);
+
     const items = [
-      { name: t.home, href: "<?= BASE_URL ?>", file: "index.php" },
-      { name: t.findProvider, href: "<?= BASE_URL ?>/Prestataires", file: "Prestataires.php" },
+      { name: t('home'), href: `${BASE_URL}`, file: "index.php" },
+      { name: t('findProvider'), href: `${BASE_URL}/Prestataires`, file: "Prestataires.php" },
     ];
 
     useEffect(() => {
@@ -119,7 +165,7 @@ $userInfo = [
 
     const loadNotifications = async () => {
       try {
-        const response = await fetch('<?= BASE_URL ?>/api/notifications/get.php?action=list&unread=true&limit=5');
+        const response = await fetch(`${BASE_URL}/api/notifications/get.php?action=list&unread=true&limit=5`);
         const data = await response.json();
         if (data.success) {
           setNotifications(data.notifications);
@@ -132,7 +178,7 @@ $userInfo = [
 
     const markAsRead = async (notificationId) => {
       try {
-        const response = await fetch('<?= BASE_URL ?>/api/notifications/update.php', {
+        const response = await fetch(`${BASE_URL}/api/notifications/update.php`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ action: 'mark_read', notification_id: notificationId })
@@ -148,7 +194,7 @@ $userInfo = [
 
     const markAllAsRead = async () => {
       try {
-        const response = await fetch('<?= BASE_URL ?>/api/notifications/update.php', {
+        const response = await fetch(`${BASE_URL}/api/notifications/update.php`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ action: 'mark_all_read' })
@@ -178,11 +224,13 @@ $userInfo = [
       const now = new Date();
       const seconds = Math.floor((now - date) / 1000);
 
-      if (seconds < 60) return 'À l\'instant';
-      if (seconds < 3600) return Math.floor(seconds / 60) + ' min';
-      if (seconds < 86400) return Math.floor(seconds / 3600) + ' h';
-      if (seconds < 2592000) return Math.floor(seconds / 86400) + ' j';
-      return date.toLocaleDateString('fr-FR');
+      const currentLang = window.getCurrentLanguage ? window.getCurrentLanguage() : 'fr';
+
+      if (seconds < 60) return window.t ? window.t('time.justNow') : 'À l\'instant';
+      if (seconds < 3600) return Math.floor(seconds / 60) + (window.t ? ' ' + window.t('time.minutes') : ' min');
+      if (seconds < 86400) return Math.floor(seconds / 3600) + (window.t ? ' ' + window.t('time.hours') : ' h');
+      if (seconds < 2592000) return Math.floor(seconds / 86400) + (window.t ? ' ' + window.t('time.days') : ' j');
+      return date.toLocaleDateString(currentLang);
     };
 
     return (
@@ -190,8 +238,12 @@ $userInfo = [
         <div className="max-w-7xl mx-auto flex items-center justify-between">
 
           {/* Logo + Nom */}
-          <a href="<?= BASE_URL ?>" className="flex items-center space-x-2">
-            <img src="<?= BASE_URL ?>/assets/img/logos/Logo_Novatis_nobg.png" alt="Logo" className="w-12 h-12 rounded-full" />
+          <a href={BASE_URL} className="flex items-center space-x-2">
+            <img
+              src={isDarkMode ? `${BASE_URL}/assets/img/logos/Logo_Novatis_nobg_white.png` : `${BASE_URL}/assets/img/logos/Logo_Novatis_nobg.png`}
+              alt="Logo"
+              className="w-12 h-12 rounded-full transition-all duration-300"
+            />
             <span className="text-xl font-bold">Novatis</span>
           </a>
 
@@ -230,7 +282,7 @@ $userInfo = [
           <div className="hidden md:block flex-1 px-6">
             <input
               type="text"
-              placeholder="Rechercher..."
+              placeholder={t('search')}
               className="w-full border rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -238,6 +290,9 @@ $userInfo = [
           {/* Profil utilisateur */}
           {userInfo.isLoggedIn ? (
             <div className="flex items-center space-x-2">
+              {/* Sélecteur de langue */}
+              {typeof window.LanguageSwitcher !== 'undefined' && React.createElement(window.LanguageSwitcher)}
+
               {/* Toggle de thème */}
               <button
                 onClick={() => window.ThemeManager && window.ThemeManager.toggle()}
@@ -245,9 +300,17 @@ $userInfo = [
                 aria-label="Changer le thème"
                 data-theme-toggle="true"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                </svg>
+                {isDarkMode ? (
+                  // Soleil (mode sombre actif)
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                  </svg>
+                ) : (
+                  // Lune (mode clair actif)
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                  </svg>
+                )}
               </button>
 
               {/* Icône Notifications */}
@@ -271,10 +334,10 @@ $userInfo = [
                   <div className="absolute right-0 mt-2 w-96 bg-white border rounded-lg shadow-lg z-50 max-h-[500px] overflow-hidden flex flex-col">
                     {/* Header */}
                     <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between bg-gray-50">
-                      <h3 className="font-semibold text-gray-900">{t.notifications}</h3>
+                      <h3 className="font-semibold text-gray-900">{t('notifications')}</h3>
                       {unreadCount > 0 && (
                         <button onClick={markAllAsRead} className="text-xs text-blue-600 hover:text-blue-800 font-medium">
-                          {t.markAllRead}
+                          {t('markAllRead')}
                         </button>
                       )}
                     </div>
@@ -286,7 +349,7 @@ $userInfo = [
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto mb-3 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
                           </svg>
-                          <p className="text-sm">{t.noNotifications}</p>
+                          <p className="text-sm">{t('noNotifications')}</p>
                         </div>
                       ) : (
                         notifications.map((notif) => (
@@ -323,8 +386,8 @@ $userInfo = [
                     {/* Footer */}
                     {notifications.length > 0 && (
                       <div className="px-4 py-3 border-t border-gray-200 bg-gray-50 text-center">
-                        <a href="<?= BASE_URL ?>/notifications" className="text-sm text-blue-600 hover:text-blue-800 font-medium">
-                          {t.viewAll}
+                        <a href={`${BASE_URL}/notifications`} className="text-sm text-blue-600 hover:text-blue-800 font-medium">
+                          {t('viewAll')}
                         </a>
                       </div>
                     )}
@@ -386,7 +449,7 @@ $userInfo = [
                         <p className="text-sm text-gray-500 mt-1">{userInfo.email}</p>
                         {userInfo.role === 'admin' && (
                           <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full mt-2">
-                            Administrateur
+                            {t('administrator')}
                           </span>
                         )}
                       </div>
@@ -395,31 +458,31 @@ $userInfo = [
 
                   {/* Menu items */}
                   <div className="py-2">
-                    <a href="<?= BASE_URL ?>/Dashboard" className="flex items-center px-5 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors">
+                    <a href={`${BASE_URL}/Dashboard`} className="flex items-center px-5 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-3 text-gray-400" fill="none"
                            viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
                               d="M3 3h7v7H3V3zM14 3h7v4h-7V3zM3 14h7v7H3v-7zM14 14h7v7h-7v-7z"/>
                       </svg>
-                      Dashboard
+                      {t('dashboard')}
                     </a>
-                    <a href="<?= BASE_URL ?>/profil?id=<?= $user['id'] ?>" className="flex items-center px-5 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors">
+                    <a href={`${BASE_URL}/profil?id=${userInfo.id || ''}`} className="flex items-center px-5 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-3 text-gray-400" fill="none"
                            viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
                               d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                       </svg>
-                      Voir mon profil
+                      {t('profile')}
                     </a>
-                    <a href="<?= BASE_URL ?>/Favoris" className="flex items-center px-5 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors">
+                    <a href={`${BASE_URL}/Favoris`} className="flex items-center px-5 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-3 text-gray-400" fill="none"
                            viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
                               d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
                       </svg>
-                      Mes Favoris
+                      {t('favorites')}
                     </a>
-                    <a href="<?= BASE_URL ?>/Parametres?section=profile" className="flex items-center px-5 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors">
+                    <a href={`${BASE_URL}/Parametres?section=profile`} className="flex items-center px-5 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 2122 2122"
@@ -428,17 +491,17 @@ $userInfo = [
                       >
                         <path d="M1909.18,1148.97v-176.63h-107.48c-4.98-42.32-13.52-83.56-25.3-123.41l98.63-42.43-69.8-162.26-98.67,42.44c-17.77-30.62-37.65-59.9-59.45-87.57l76-76-124.9-124.9-75.99,76c-32.94-25.95-68.09-49.18-105.16-69.37l39.75-99.74-164.09-65.39-39.75,99.76c-33.78-8.99-68.49-15.66-103.98-19.85v-107.49h-176.63v107.49c-42.34,4.99-83.56,13.52-123.41,25.29l-42.43-98.63-162.25,69.8,42.44,98.67c-30.64,17.77-59.9,37.65-87.57,59.45l-76-76-124.9,124.9,76,75.99c-25.94,32.94-49.18,68.09-69.37,105.16l-99.74-39.75-65.39,164.09,99.76,39.75c-8.99,33.78-15.66,68.49-19.85,103.98h-107.49v176.63h107.49c4.98,42.34,13.52,83.56,25.29,123.41l-98.63,42.43,69.8,162.26,98.67-42.44c17.77,30.62,37.65,59.9,59.45,87.57l-76,76,124.9,124.9,75.99-76c32.94,25.95,68.09,49.18,105.16,69.37l-39.75,99.74,164.09,65.39,39.75-99.76c33.78,8.99,68.49,15.66,103.98,19.85v107.49h176.63v-107.49c42.34-4.99,83.56-13.52,123.41-25.3l42.43,98.63,162.25-69.8-42.44-98.67c30.64-17.77,59.9-37.65,87.57-59.45l76,76,124.9-124.9-76-75.99c25.94-32.94,49.18-68.09,69.37-105.16l99.74,39.75,65.39-164.09-99.76-39.75c8.99-33.78,15.66-68.49,19.85-103.98h107.49ZM1061,1412.12c-193.51,0-350.61-157.1-350.61-350.61s157.1-350.61,350.61-350.61,350.61,157.1,350.61,350.61-157.1,350.61-350.61,350.61Z"/>
                       </svg>
-                      Paramètres
+                      {t('settings')}
                     </a>
                   </div>
                   <div className="border-t border-gray-100 pt-2">
-                    <a href="<?= BASE_URL ?>/logout" className="flex items-center px-5 py-3 text-base font-medium text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors">
+                    <a href={`${BASE_URL}/logout`} className="flex items-center px-5 py-3 text-base font-medium text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-3 text-red-400" fill="none"
                            viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
                               d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1"/>
                       </svg>
-                      Déconnexion
+                      {t('logout')}
                     </a>
                   </div>
                 </div>
@@ -448,6 +511,9 @@ $userInfo = [
           ) : (
             /* Boutons connexion/inscription pour utilisateurs non connectés */
             <div className="flex items-center space-x-3">
+              {/* Sélecteur de langue pour utilisateurs non connectés */}
+              {typeof window.LanguageSwitcher !== 'undefined' && React.createElement(window.LanguageSwitcher)}
+
               {/* Toggle de thème pour utilisateurs non connectés */}
               <button
                 onClick={() => window.ThemeManager && window.ThemeManager.toggle()}
@@ -455,22 +521,30 @@ $userInfo = [
                 aria-label="Changer le thème"
                 data-theme-toggle="true"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                </svg>
+                {isDarkMode ? (
+                  // Soleil (mode sombre actif)
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                  </svg>
+                ) : (
+                  // Lune (mode clair actif)
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                  </svg>
+                )}
               </button>
 
               <a
-                href="<?= BASE_URL ?>/Autentification?mode=login"
+                href={`${BASE_URL}/Autentification?mode=login`}
                 className="text-gray-700 hover:text-gray-900 font-medium px-3 py-2 rounded-md transition-colors"
               >
-                Connexion
+                {t('login')}
               </a>
               <a
-                href="<?= BASE_URL ?>/Autentification?mode=register"
+                href={`${BASE_URL}/Autentification?mode=register`}
                 className="bg-black text-white hover:bg-gray-800 font-medium px-4 py-2 rounded-md transition-colors"
               >
-                S'inscrire
+                {t('register')}
               </a>
             </div>
           )}
@@ -495,7 +569,7 @@ $userInfo = [
             ))}
             <input
               type="text"
-              placeholder="Rechercher..."
+              placeholder={t('search')}
               className="w-full border rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 mt-2"
             />
 
@@ -515,29 +589,29 @@ $userInfo = [
                   <div>
                     <p className="font-medium text-gray-900">{userInfo.pseudo || userInfo.name}</p>
                     {userInfo.role === 'admin' && (
-                      <span className="text-xs text-red-600 font-medium">Administrateur</span>
+                      <span className="text-xs text-red-600 font-medium">{t('administrator')}</span>
                     )}
                   </div>
                 </div>
 
                 {/* Menu liens */}
-                <a href="<?= BASE_URL ?>/pages/Dashboard" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded">
+                <a href={`${BASE_URL}/Dashboard`} className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none"
                        viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
                           d="M3 3h7v7H3V3zM14 3h7v4h-7V3zM3 14h7v7H3v-7zM14 14h7v7h-7v-7z"/>
                   </svg>
-                  Dashboard
+                  {t('dashboard')}
                 </a>
-                <a href="<?= BASE_URL ?>/Favoris" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded">
+                <a href={`${BASE_URL}/Favoris`} className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none"
                        viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
                           d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
                   </svg>
-                  Mes Favoris
+                  {t('favorites')}
                 </a>
-                <a href="<?= BASE_URL ?>/Parametres?section=profile" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded">
+                <a href={`${BASE_URL}/Parametres?section=profile`} className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded">
                   <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 2122 2122"
@@ -546,25 +620,25 @@ $userInfo = [
                   >
                   <path d="M1909.18,1148.97v-176.63h-107.48c-4.98-42.32-13.52-83.56-25.3-123.41l98.63-42.43-69.8-162.26-98.67,42.44c-17.77-30.62-37.65-59.9-59.45-87.57l76-76-124.9-124.9-75.99,76c-32.94-25.95-68.09-49.18-105.16-69.37l39.75-99.74-164.09-65.39-39.75,99.76c-33.78-8.99-68.49-15.66-103.98-19.85v-107.49h-176.63v107.49c-42.34,4.99-83.56,13.52-123.41,25.29l-42.43-98.63-162.25,69.8,42.44,98.67c-30.64,17.77-59.9,37.65-87.57,59.45l-76-76-124.9,124.9,76,75.99c-25.94,32.94-49.18,68.09-69.37,105.16l-99.74-39.75-65.39,164.09,99.76,39.75c-8.99,33.78-15.66,68.49-19.85,103.98h-107.49v176.63h107.49c4.98,42.34,13.52,83.56,25.29,123.41l-98.63,42.43,69.8,162.26,98.67-42.44c17.77,30.62,37.65,59.9,59.45,87.57l-76,76,124.9,124.9,75.99-76c32.94,25.95,68.09,49.18,105.16,69.37l-39.75,99.74,164.09,65.39,39.75-99.76c33.78,8.99,68.49,15.66,103.98,19.85v107.49h176.63v-107.49c42.34-4.99,83.56-13.52,123.41-25.3l42.43,98.63,162.25-69.8-42.44-98.67c30.64-17.77,59.9-37.65,87.57-59.45l76,76,124.9-124.9-76-75.99c25.94-32.94,49.18-68.09,69.37-105.16l99.74,39.75,65.39-164.09-99.76-39.75c8.99-33.78,15.66-68.49,19.85-103.98h107.49ZM1061,1412.12c-193.51,0-350.61-157.1-350.61-350.61s157.1-350.61,350.61-350.61,350.61,157.1,350.61,350.61-157.1,350.61-350.61,350.61Z"/>
                   </svg>
-                  Paramètres
+                  {t('settings')}
                 </a>
-                <a href="<?= BASE_URL ?>/logout" className="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-gray-100 rounded">
+                <a href={`${BASE_URL}/logout`} className="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-gray-100 rounded">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none"
                        viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
                           d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1"/>
                   </svg>
-                  Déconnexion
+                  {t('logout')}
                 </a>
               </div>
             ) : (
               /* Liens connexion/inscription pour mobile */
               <div className="mt-2 border-t pt-2 space-y-2">
-                <a href="<?= BASE_URL ?>/Autentification?mode=login" className="block bg-white text-center px-4 py-2 rounded shadow">
-                  Connexion
+                <a href={`${BASE_URL}/Autentification?mode=login`} className="block bg-white text-center px-4 py-2 rounded shadow">
+                  {t('login')}
                 </a>
-                <a href="<?= BASE_URL ?>/Autentification?mode=register" className="block bg-black text-white text-center px-4 py-2 rounded shadow">
-                  S'inscrire
+                <a href={`${BASE_URL}/Autentification?mode=register`} className="block bg-black text-white text-center px-4 py-2 rounded shadow">
+                  {t('register')}
                 </a>
               </div>
             )}

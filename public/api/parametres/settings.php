@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../../../config/config.php';
+require_once __DIR__ . '/../../../config/Config.php';
 
 // Vérifie si l'utilisateur est connecté
 requireAuth();
@@ -49,6 +49,10 @@ if ($method === 'POST') {
             updateDisplay($pdo_settings, $user);
             break;
 
+        case 'update_language':
+            updateLanguage($pdo_settings, $user);
+            break;
+
         default:
             http_response_code(400);
             echo json_encode(['error' => 'Action non reconnue']);
@@ -68,6 +72,7 @@ function createTablesIfNotExist($pdo) {
             push_notifications BOOLEAN DEFAULT FALSE,
             sms_notifications BOOLEAN DEFAULT FALSE,
             dark_mode BOOLEAN DEFAULT FALSE,
+            language VARCHAR(10) DEFAULT 'fr',
             timezone VARCHAR(50) DEFAULT 'Europe/Paris',
             currency VARCHAR(3) DEFAULT 'EUR',
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -75,6 +80,13 @@ function createTablesIfNotExist($pdo) {
             UNIQUE KEY unique_user (user_id)
         )
     ");
+
+    // Ajouter la colonne language si elle n'existe pas (pour les tables existantes)
+    try {
+        $pdo->exec("ALTER TABLE user_preferences ADD COLUMN language VARCHAR(10) DEFAULT 'fr' AFTER dark_mode");
+    } catch (PDOException $e) {
+        // Colonne existe déjà, ignorer l'erreur
+    }
 
     // Table de sécurité
     $pdo->exec("
@@ -365,5 +377,49 @@ function generateRandomSecret($length = 32) {
         $secret .= $characters[random_int(0, strlen($characters) - 1)];
     }
     return $secret;
+}
+
+function updateLanguage($pdo, $user) {
+    try {
+        $language = $_POST['language'] ?? 'fr';
+
+        // Valider la langue (seulement fr et en acceptés)
+        $allowedLanguages = ['fr', 'en'];
+        if (!in_array($language, $allowedLanguages)) {
+            http_response_code(400);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Langue non supportée. Utilisez "fr" ou "en".'
+            ]);
+            return;
+        }
+
+        // Mise à jour dans la base de données
+        $stmt = $pdo->prepare("
+            INSERT INTO user_preferences (user_id, language)
+            VALUES (?, ?)
+            ON DUPLICATE KEY UPDATE
+            language = VALUES(language)
+        ");
+        $stmt->execute([$user['id'], $language]);
+
+        // Mettre à jour la session
+        $_SESSION['user_language'] = $language;
+
+        // Réponse JSON pour AJAX
+        http_response_code(200);
+        echo json_encode([
+            'success' => true,
+            'message' => 'Langue mise à jour avec succès',
+            'language' => $language
+        ]);
+
+    } catch (Exception $e) {
+        http_response_code(500);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Erreur lors de la mise à jour de la langue : ' . $e->getMessage()
+        ]);
+    }
 }
 ?>

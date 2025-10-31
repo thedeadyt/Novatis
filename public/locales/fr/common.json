@@ -1,0 +1,58 @@
+{
+  "header": {
+    "home": "Accueil",
+    "findProvider": "Trouver un prestataire",
+    "dashboard": "Dashboard",
+    "profile": "Voir mon profil",
+    "favorites": "Mes Favoris",
+    "settings": "Paramètres",
+    "logout": "Déconnexion",
+    "login": "Connexion",
+    "register": "S'inscrire",
+    "search": "Rechercher...",
+    "notifications": "Notifications",
+    "markAllRead": "Tout marquer comme lu",
+    "viewAll": "Voir tout",
+    "noNotifications": "Aucune notification",
+    "administrator": "Administrateur",
+    "changeTheme": "Changer le thème"
+  },
+  "time": {
+    "justNow": "À l'instant",
+    "minutes": "min",
+    "hours": "h",
+    "days": "j"
+  },
+  "buttons": {
+    "save": "Sauvegarder",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "connect": "Connecter",
+    "disconnect": "Déconnecter",
+    "send": "Envoyer",
+    "close": "Fermer"
+  },
+  "messages": {
+    "success": "Opération réussie",
+    "error": "Une erreur s'est produite",
+    "loading": "Chargement en cours...",
+    "noData": "Aucune donnée disponible",
+    "changeLanguageSuccess": "Langue changée en Français",
+    "saved": "Modifications enregistrées avec succès",
+    "deleted": "Supprimé avec succès",
+    "updated": "Mis à jour avec succès"
+  },
+  "footer": {
+    "description": "Trouvez les meilleurs prestataires de services pour tous vos besoins.",
+    "navigation": "Navigation",
+    "legalTitle": "Mentions légales",
+    "legal": "Mentions légales",
+    "privacy": "Politique de confidentialité",
+    "rights": "Tous droits réservés",
+    "home": "Accueil",
+    "providers": "Prestataires",
+    "contact": "Contact",
+    "about": "À propos"
+  }
+}

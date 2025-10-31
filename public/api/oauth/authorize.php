@@ -4,7 +4,7 @@
  * Redirige l'utilisateur vers le fournisseur OAuth (Google, Microsoft, GitHub)
  */
 
-require_once __DIR__ . '/../../../config/config.php';
+require_once __DIR__ . '/../../../config/Config.php';
 
 // Récupérer le provider demandé
 $provider = $_GET['provider'] ?? '';

@@ -1,5 +1,8 @@
 <?php
-require_once __DIR__ . '/../../config/config.php';
+require_once __DIR__ . '/../../config/Config.php';
+
+// Obtenir la connexion à la base de données
+$pdo = getDBConnection();
 
 // Récupérer l'ID du prestataire depuis l'URL
 $userId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
@@ -39,7 +42,6 @@ if (!$prestataire) {
 }
 
 // Récupérer les paramètres de confidentialité
-$pdo = getDBConnection();
 $stmt = $pdo->prepare("SELECT * FROM user_privacy WHERE user_id = ?");
 $stmt->execute([$userId]);
 $privacy = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -79,8 +81,9 @@ if ($privacy['profile_visibility'] === 'private' && $currentUserId != $userId) {
         <script src="<?= BASE_URL ?>/assets/js/theme.js"></script>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     </head>
-    <body class="bg-gray-100">
+    <body class="flex flex-col min-h-screen bg-gray-100">
         <?php include __DIR__ . '/../../includes/Header.php'; ?>
+        <main class="flex-1">
         <div class="min-h-screen flex items-center justify-center" style="margin-top: 6rem;">
             <div class="bg-white rounded-lg shadow-lg p-8 max-w-md text-center">
                 <i class="fas fa-lock text-6xl text-gray-400 mb-4"></i>
@@ -91,6 +94,7 @@ if ($privacy['profile_visibility'] === 'private' && $currentUserId != $userId) {
                 </a>
             </div>
         </div>
+        </main>
         <?php include __DIR__ . '/../../includes/Footer.php'; ?>
     </body>
     </html>
@@ -135,11 +139,11 @@ $avgRating = count($reviews) > 0 ? array_sum(array_column($reviews, 'rating')) /
 ?>
 
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" data-user-lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= htmlspecialchars($prestataire['name']) ?> - Profil | Novatis</title>
+    <title data-i18n="profil.title" data-i18n-ns="pages"><?= htmlspecialchars($prestataire['name']) ?> - Profil | Novatis</title>
     <link rel="icon" type="image/png" href="<?= BASE_URL ?>/assets/img/logos/Logo_Novatis.png">
     <?php if (!$privacy['allow_search_engines']): ?>
     <meta name="robots" content="noindex, nofollow">
@@ -158,6 +162,10 @@ $avgRating = count($reviews) > 0 ? array_sum(array_column($reviews, 'rating')) /
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- i18next -->
+    <?php include __DIR__ . '/../../includes/i18n-head.php'; ?>
+
     <style>
         .profile-container {
             max-width: 1200px;
@@ -201,8 +209,9 @@ $avgRating = count($reviews) > 0 ? array_sum(array_column($reviews, 'rating')) /
         }
     </style>
 </head>
-<body>
+<body class="flex flex-col min-h-screen">
     <?php include __DIR__ . '/../../includes/Header.php'; ?>
+    <main class="flex-1">
 
     <div class="profile-container">
         <!-- Header du profil -->
@@ -232,12 +241,12 @@ $avgRating = count($reviews) > 0 ? array_sum(array_column($reviews, 'rating')) /
                 <div class="flex flex-col gap-3">
                     <a href="<?= BASE_URL ?>/contact?prestataire=<?= $userId ?>"
                        class="bg-white text-red-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors text-center">
-                        <i class="fas fa-envelope mr-2"></i>Contacter
+                        <i class="fas fa-envelope mr-2"></i><span data-i18n="profil.contactButton" data-i18n-ns="pages">Contacter</span>
                     </a>
                     <?php if ($prestataire['website']): ?>
                         <a href="<?= htmlspecialchars($prestataire['website']) ?>" target="_blank" rel="noopener noreferrer"
                            class="bg-white/20 backdrop-blur text-white px-6 py-3 rounded-lg font-semibold hover:bg-white/30 transition-colors text-center">
-                            <i class="fas fa-globe mr-2"></i>Site web
+                            <i class="fas fa-globe mr-2"></i><span data-i18n="profil.websiteButton" data-i18n-ns="pages">Site web</span>
                         </a>
                     <?php endif; ?>
                 </div>
@@ -248,19 +257,19 @@ $avgRating = count($reviews) > 0 ? array_sum(array_column($reviews, 'rating')) /
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             <div class="stat-card">
                 <div class="text-3xl font-bold text-red-600"><?= count($services) ?></div>
-                <div class="text-gray-600 text-sm">Services actifs</div>
+                <div class="text-gray-600 text-sm" data-i18n="profil.activeServices" data-i18n-ns="pages">Services actifs</div>
             </div>
             <div class="stat-card">
                 <div class="text-3xl font-bold text-red-600"><?= $prestataire['completed_orders'] ?></div>
-                <div class="text-gray-600 text-sm">Commandes complétées</div>
+                <div class="text-gray-600 text-sm" data-i18n="profil.completedOrders" data-i18n-ns="pages">Commandes complétées</div>
             </div>
             <div class="stat-card">
                 <div class="text-3xl font-bold text-red-600"><?= count($reviews) ?></div>
-                <div class="text-gray-600 text-sm">Avis reçus</div>
+                <div class="text-gray-600 text-sm" data-i18n="profil.receivedReviews" data-i18n-ns="pages">Avis reçus</div>
             </div>
             <div class="stat-card">
                 <div class="text-3xl font-bold text-red-600"><?= number_format($avgRating, 1) ?></div>
-                <div class="text-gray-600 text-sm">Note moyenne</div>
+                <div class="text-gray-600 text-sm" data-i18n="profil.averageRating" data-i18n-ns="pages">Note moyenne</div>
             </div>
         </div>
 
@@ -268,7 +277,7 @@ $avgRating = count($reviews) > 0 ? array_sum(array_column($reviews, 'rating')) /
         <?php if ($privacy['show_email'] || $privacy['show_phone']): ?>
             <div class="bg-white rounded-lg shadow-md p-6 mb-8">
                 <h2 class="text-2xl font-bold mb-4">
-                    <i class="fas fa-address-card mr-2 text-red-600"></i>Informations de contact
+                    <i class="fas fa-address-card mr-2 text-red-600"></i><span data-i18n="profil.contactInfo" data-i18n-ns="pages">Informations de contact</span>
                 </h2>
                 <div class="space-y-3">
                     <?php if ($privacy['show_email'] && $prestataire['email']): ?>
@@ -293,7 +302,7 @@ $avgRating = count($reviews) > 0 ? array_sum(array_column($reviews, 'rating')) /
 
         <!-- Services -->
         <div class="mb-8">
-            <h2 class="text-2xl font-bold mb-4">Services proposés</h2>
+            <h2 class="text-2xl font-bold mb-4" data-i18n="profil.servicesOffered" data-i18n-ns="pages">Services proposés</h2>
             <?php if (count($services) > 0): ?>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <?php foreach ($services as $service): ?>
@@ -436,5 +445,6 @@ $avgRating = count($reviews) > 0 ? array_sum(array_column($reviews, 'rating')) /
             }
         <?php endforeach; ?>
     </script>
+    </main>
 </body>
 </html>

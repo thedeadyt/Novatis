@@ -5,7 +5,7 @@
  * Récupère les informations utilisateur et crée/connecte le compte
  */
 
-require_once __DIR__ . '/../../../config/config.php';
+require_once __DIR__ . '/../../../config/Config.php';
 
 // Récupérer les paramètres de callback
 $code = $_GET['code'] ?? '';

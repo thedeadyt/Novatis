@@ -1,19 +1,20 @@
 
 <?php
-require_once __DIR__ . '/../config/config.php';
+require_once __DIR__ . '/../config/Config.php';
 
 // Vérifier si un message est passé en paramètre
 $message = $_GET['message'] ?? null;
 ?>
 <!DOCTYPE html>
-<html>
+<html lang="fr" data-user-lang="fr">
 <head>
     <meta charset='utf-8'>
     <meta http-equiv='X-UA-Compatible' content='IE=edge'>
-    <title>Novatis | Accueil</title>
+    <title data-i18n="index.title" data-i18n-ns="pages">Novatis | Accueil</title>
     <link rel="icon" type="image/png" href="<?= BASE_URL ?>/assets/img/logos/Logo_Novatis.png">
     <meta name='viewport' content='width=device-width, initial-scale=1'>
     <link rel='stylesheet' type='text/css' media='screen' href='<?= BASE_URL ?>/assets/css/Variables.css'>
+    <link rel='stylesheet' type='text/css' media='screen' href='<?= BASE_URL ?>/assets/css/theme.css'>
     <link rel='stylesheet' type='text/css' media='screen' href='<?= BASE_URL ?>/assets/css/Footer.css'>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -24,9 +25,16 @@ $message = $_GET['message'] ?? null;
 
     <!-- Babel CDN pour JSX -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- i18next pour les traductions -->
+    <?php include __DIR__ . '/../includes/i18n-head.php'; ?>
+
+    <!-- Script de thème global -->
+    <script src="<?= BASE_URL ?>/assets/js/theme.js"></script>
 </head>
-<body>
+<body class="flex flex-col min-h-screen">
      <?php include __DIR__ . '/../includes/header.php';?>
+     <main class="flex-1">
 
      <!-- Message de confirmation de suppression de compte -->
      <?php if ($message === 'account_deleted'): ?>
@@ -60,6 +68,8 @@ $message = $_GET['message'] ?? null;
          }, 5000);
      </script>
      <?php endif; ?>
+
+     </main>
      <?php include __DIR__ . '/../includes/footer.php';?>
 </body>
 </html>

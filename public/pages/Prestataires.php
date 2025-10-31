@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../../config/config.php';
+require_once __DIR__ . '/../../config/Config.php';
 
 $pdo = getDBConnection();
 
@@ -54,10 +54,10 @@ foreach ($prestataires as &$prestataire) {
 ?>
 
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" data-user-lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Novatis |Prestataires</title>
+    <title data-i18n="prestataires.title" data-i18n-ns="pages">Novatis | Prestataires</title>
     <link rel="icon" type="image/png" href="<?= BASE_URL ?>/assets/img/logos/Logo_Novatis.png">
     <link rel='stylesheet' type='text/css' media='screen' href='<?= BASE_URL ?>/assets/css/Variables.css'>
     <link rel='stylesheet' type='text/css' media='screen' href='<?= BASE_URL ?>/assets/css/prestataires.css'>
@@ -78,15 +78,19 @@ foreach ($prestataires as &$prestataire) {
 
     <!-- Babel CDN pour JSX -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- i18next -->
+    <?php include __DIR__ . '/../../includes/i18n-head.php'; ?>
 </head>
-<body>
+<body class="flex flex-col min-h-screen">
     <?php include __DIR__ . '/../../includes/Header.php';?>
+    <main class="flex-1">
     <div class="content" id="content">
 <!-- Container Prestataires -->
 <div class="Prestataires max-w-7xl mx-auto mt-32 px-4">
     <div class="text-center mb-12">
-        <h1 class="text-4xl font-bold mb-4">Les Prestataires</h1>
-        <p class="text-lg text-gray-600">Découvrez nos experts qualifiés et leurs services</p>
+        <h1 class="text-4xl font-bold mb-4" data-i18n="prestataires.heading" data-i18n-ns="pages">Les Prestataires</h1>
+        <p class="text-lg text-gray-600" data-i18n="prestataires.description" data-i18n-ns="pages">Découvrez nos experts qualifiés et leurs services</p>
     </div>
 
     <!-- Filtres et recherche -->
@@ -97,6 +101,9 @@ foreach ($prestataires as &$prestataire) {
                 <input type="text"
                        id="searchInput"
                        placeholder="Rechercher un prestataire..."
+                       data-i18n="prestataires.searchPlaceholder"
+                       data-i18n-ns="pages"
+                       data-i18n-attr="placeholder"
                        class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                 <svg class="absolute left-3 top-3.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
@@ -105,9 +112,9 @@ foreach ($prestataires as &$prestataire) {
 
             <!-- Filtres par catégorie -->
             <div class="flex flex-wrap gap-2 items-center">
-                <label class="text-sm font-medium text-gray-700">Catégorie:</label>
+                <label class="text-sm font-medium text-gray-700" data-i18n="prestataires.category" data-i18n-ns="pages">Catégorie:</label>
                 <select id="categoryFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    <option value="">Toutes les catégories</option>
+                    <option value="" data-i18n="prestataires.allCategories" data-i18n-ns="pages">Toutes les catégories</option>
                     <?php
                     // Récupérer les catégories uniques des services
                     $categories = [];
@@ -127,14 +134,14 @@ foreach ($prestataires as &$prestataire) {
 
             <!-- Tri par prix -->
             <div class="flex flex-wrap gap-2 items-center">
-                <label class="text-sm font-medium text-gray-700">Trier par:</label>
+                <label class="text-sm font-medium text-gray-700" data-i18n="prestataires.sortBy" data-i18n-ns="pages">Trier par:</label>
                 <select id="sortFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    <option value="name">Nom (A-Z)</option>
-                    <option value="name-desc">Nom (Z-A)</option>
-                    <option value="price-asc">Prix croissant</option>
-                    <option value="price-desc">Prix décroissant</option>
-                    <option value="delivery-asc">Délai croissant</option>
-                    <option value="delivery-desc">Délai décroissant</option>
+                    <option value="name" data-i18n="prestataires.nameAZ" data-i18n-ns="pages">Nom (A-Z)</option>
+                    <option value="name-desc" data-i18n="prestataires.nameZA" data-i18n-ns="pages">Nom (Z-A)</option>
+                    <option value="price-asc" data-i18n="prestataires.priceAsc" data-i18n-ns="pages">Prix croissant</option>
+                    <option value="price-desc" data-i18n="prestataires.priceDesc" data-i18n-ns="pages">Prix décroissant</option>
+                    <option value="delivery-asc" data-i18n="prestataires.deliveryAsc" data-i18n-ns="pages">Délai croissant</option>
+                    <option value="delivery-desc" data-i18n="prestataires.deliveryDesc" data-i18n-ns="pages">Délai décroissant</option>
                 </select>
             </div>
 
@@ -143,13 +150,13 @@ foreach ($prestataires as &$prestataire) {
                 <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                 </svg>
-                Réinitialiser
+                <span data-i18n="prestataires.reset" data-i18n-ns="pages">Réinitialiser</span>
             </button>
         </div>
 
         <!-- Compteur de résultats -->
         <div class="mt-4 text-sm text-gray-600">
-            <span id="resultsCount"><?= count($prestataires) ?></span> prestataire(s) trouvé(s)
+            <span id="resultsCount"><?= count($prestataires) ?></span> <span data-i18n="prestataires.resultsFound" data-i18n-ns="pages">prestataire(s) trouvé(s)</span>
         </div>
     </div>
 
@@ -217,8 +224,8 @@ foreach ($prestataires as &$prestataire) {
         <svg class="mx-auto h-24 w-24 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.516-.798-6.235-2.145a9.974 9.974 0 01-1.761-2.145A9.974 9.974 0 014.004 8.854a2.014 2.014 0 00.562-.84c.08-.151.185-.281.315-.389a.994.994 0 011.319-.042.996.996 0 01.042 1.639zM15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
         </svg>
-        <h3 class="mt-4 text-lg font-medium text-gray-900">Aucun prestataire trouvé</h3>
-        <p class="mt-2 text-gray-500">Essayez de modifier votre recherche.</p>
+        <h3 class="mt-4 text-lg font-medium text-gray-900" data-i18n="prestataires.noResults" data-i18n-ns="pages">Aucun prestataire trouvé</h3>
+        <p class="mt-2 text-gray-500" data-i18n="prestataires.modifySearch" data-i18n-ns="pages">Essayez de modifier votre recherche.</p>
     </div>
 </div>
 
@@ -437,5 +444,7 @@ foreach ($prestataires as &$prestataire) {
             animateCards();
         });
     </script>
+    </div>
+    </main>
 </body>
 </html>

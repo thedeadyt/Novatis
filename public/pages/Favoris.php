@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../../config/config.php';
+require_once __DIR__ . '/../../config/Config.php';
 
 // Vérifie si l'utilisateur est connecté
 isUserLoggedIn(true);
@@ -58,11 +58,11 @@ try {
 $currentPage = 'Favoris.php';
 ?>
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" data-user-lang="fr">
 <head>
     <meta charset='utf-8'>
     <meta http-equiv='X-UA-Compatible' content='IE=edge'>
-    <title>Novatis | Mes Favoris</title>
+    <title data-i18n="favoris.title" data-i18n-ns="pages">Novatis | Mes Favoris</title>
     <link rel="icon" type="image/png" href="<?= BASE_URL ?>/assets/img/logos/Logo_Novatis.png">
     <meta name='viewport' content='width=device-width, initial-scale=1'>
 
@@ -82,6 +82,9 @@ $currentPage = 'Favoris.php';
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- i18next -->
+    <?php include __DIR__ . '/../../includes/i18n-head.php'; ?>
 
     <!-- Tailwind Config -->
     <script>
@@ -134,21 +137,22 @@ $currentPage = 'Favoris.php';
     </style>
 </head>
 
-<body class="bg-custom-bg min-h-screen">
+<body class="flex flex-col bg-custom-bg min-h-screen">
     <!-- Header -->
     <?php include __DIR__ . '/../../includes/Header.php'; ?>
 
     <!-- Main Content -->
+    <main class="flex-1">
     <div class="container mx-auto px-4 py-8 mt-20">
         <div class="max-w-7xl mx-auto">
             <!-- En-tête -->
             <div class="mb-8">
                 <h1 class="text-4xl font-bold text-custom-black mb-2">
                     <i class="fas fa-heart text-red-500 mr-3"></i>
-                    Mes Favoris
+                    <span data-i18n="favoris.heading" data-i18n-ns="pages">Mes Favoris</span>
                 </h1>
-                <p class="text-gray-600">
-                    <?= count($favorites) ?> prestataire<?= count($favorites) > 1 ? 's' : '' ?> favori<?= count($favorites) > 1 ? 's' : '' ?>
+                <p class="text-gray-600" id="favorites-count">
+                    <span class="count-number"><?= count($favorites) ?></span> <span class="count-text" data-i18n="favoris.favoritesCount" data-i18n-ns="pages">prestataire(s) favori(s)</span>
                 </p>
             </div>
 
@@ -156,14 +160,14 @@ $currentPage = 'Favoris.php';
                 <!-- Message si aucun favori -->
                 <div class="bg-white rounded-lg shadow-md p-12 text-center">
                     <i class="fas fa-heart-broken text-gray-300 text-6xl mb-4"></i>
-                    <h2 class="text-2xl font-semibold text-gray-700 mb-2">Aucun favori pour le moment</h2>
-                    <p class="text-gray-500 mb-6">
+                    <h2 class="text-2xl font-semibold text-gray-700 mb-2" data-i18n="favoris.noFavorites" data-i18n-ns="pages">Aucun favori pour le moment</h2>
+                    <p class="text-gray-500 mb-6" data-i18n="favoris.addFavorites" data-i18n-ns="pages">
                         Explorez nos prestataires et ajoutez-les à vos favoris pour les retrouver facilement !
                     </p>
                     <a href="<?= BASE_URL ?>/Prestataires"
                        class="inline-block bg-custom-red text-white px-6 py-3 rounded-lg hover:bg-hover-2 transition">
                         <i class="fas fa-search mr-2"></i>
-                        Découvrir les prestataires
+                        <span data-i18n="favoris.discover" data-i18n-ns="pages">Découvrir les prestataires</span>
                     </a>
                 </div>
             <?php else: ?>
@@ -252,16 +256,13 @@ $currentPage = 'Favoris.php';
             <?php endif; ?>
         </div>
     </div>
+    </main>
 
     <!-- Footer -->
     <?php include __DIR__ . '/../../includes/Footer.php'; ?>
 
     <script>
         function removeFavorite(userId) {
-            if (!confirm('Êtes-vous sûr de vouloir retirer ce prestataire de vos favoris ?')) {
-                return;
-            }
-
             fetch('<?= BASE_URL ?>/api/favorites/favorites.php', {
                 method: 'POST',
                 headers: {
@@ -275,14 +276,15 @@ $currentPage = 'Favoris.php';
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    location.reload();
+                    window.toast.success('messages.deleted', 'common', 'Retiré des favoris');
+                    setTimeout(() => location.reload(), 1000);
                 } else {
-                    alert('Erreur : ' + (data.message || 'Impossible de retirer des favoris'));
+                    window.toast.error('messages.error', 'common', 'Erreur : ' + (data.message || 'Impossible de retirer des favoris'));
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Erreur lors de la suppression');
+                window.toast.error('messages.error', 'common', 'Erreur lors de la suppression');
             });
         }
     </script>

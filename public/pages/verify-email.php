@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../../config/config.php';
+require_once __DIR__ . '/../../config/Config.php';
 require_once __DIR__ . '/../../includes/EmailService.php';
 
 $pdo = getDBConnection();
@@ -290,7 +290,8 @@ require_once __DIR__ . '/../../includes/Header.php';
         }
     </style>
 </head>
-<body>
+<body class="flex flex-col min-h-screen">
+    <main class="flex-1 flex items-center justify-center">
     <div class="container animate-fadeIn">
         <?php if ($success): ?>
             <!-- Message de succès -->
@@ -404,5 +405,6 @@ require_once __DIR__ . '/../../includes/Header.php';
             </div>
         <?php endif; ?>
     </div>
+    </main>
 </body>
 </html>

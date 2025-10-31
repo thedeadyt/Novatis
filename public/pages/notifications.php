@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../../config/config.php';
+require_once __DIR__ . '/../../config/Config.php';
 require_once __DIR__ . '/../../includes/NotificationService.php';
 
 // Vérifie si l'utilisateur est connecté
@@ -17,23 +17,53 @@ $notificationService = new NotificationService($pdo);
 ?>
 
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" data-user-lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Novatis | Notifications</title>
+    <title data-i18n="notifications.title" data-i18n-ns="pages">Novatis | Notifications</title>
     <link rel="icon" type="image/png" href="<?= BASE_URL ?>/assets/img/logos/Logo_Novatis.png">
 
     <!-- Variables CSS -->
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/variables.css">
 
+    <!-- Thème Global CSS -->
+    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/theme.css">
+
     <!-- Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        'custom-bg': '#e8e8e8',
+                        'custom-white': '#e8e8e8',
+                        'custom-black': '#1f2020',
+                        'custom-red': '#B41200',
+                        'accent-1': '#1f2020',
+                        'accent-2': '#7F0D00',
+                        'hover-1': '#464646',
+                        'hover-2': '#E04830'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Script de thème global -->
+    <script src="<?= BASE_URL ?>/assets/js/theme.js"></script>
 
     <!-- React & Babel -->
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- i18next -->
+    <?php include __DIR__ . '/../../includes/i18n-head.php'; ?>
 
     <style>
         body {
@@ -60,6 +90,18 @@ $notificationService = new NotificationService($pdo);
             opacity: 0.8;
         }
 
+        /* Dark mode styles */
+        .dark .notification-unread {
+            background: linear-gradient(to right, #1e3a5f, #2d3748);
+            border-left: 4px solid var(--color-red);
+        }
+
+        .dark .notification-read {
+            background: #2d3748;
+            border-left: 4px solid #4a5568;
+            opacity: 0.8;
+        }
+
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -71,13 +113,36 @@ $notificationService = new NotificationService($pdo);
     </style>
 </head>
 
-<body class="pt-24 min-h-screen">
+<body class="flex flex-col pt-24 min-h-screen">
+    <main class="flex-1">
     <div id="notifications-root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect } = React;
+        const { useState, useEffect, useReducer } = React;
 
         const NotificationsPage = () => {
+            // Hook pour forcer le re-render quand la langue change
+            const [, forceUpdate] = useReducer(x => x + 1, 0);
+
+            // Fonction de traduction
+            const t = (key) => {
+                if (typeof window.t === 'function') {
+                    return window.t(key, 'pages') || key;
+                }
+                return key;
+            };
+
+            // Écouter les changements de langue
+            useEffect(() => {
+                const handleLanguageChanged = () => forceUpdate();
+                window.addEventListener('i18nReady', handleLanguageChanged);
+                window.addEventListener('languageChanged', handleLanguageChanged);
+                return () => {
+                    window.removeEventListener('i18nReady', handleLanguageChanged);
+                    window.removeEventListener('languageChanged', handleLanguageChanged);
+                };
+            }, []);
+
             const [notifications, setNotifications] = useState([]);
             const [filter, setFilter] = useState('all'); // all, unread, read
             const [loading, setLoading] = useState(true);
@@ -142,9 +207,10 @@ $notificationService = new NotificationService($pdo);
             };
 
             const deleteNotification = async (notificationId) => {
-                if (!confirm('Supprimer cette notification ?')) return;
-
                 try {
+                    // Optimistic UI: supprimer visuellement la notification immédiatement
+                    setNotifications(prev => prev.filter(n => n.id !== notificationId));
+
                     const response = await fetch('<?= BASE_URL ?>/api/notifications/update.php', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -153,10 +219,19 @@ $notificationService = new NotificationService($pdo);
 
                     const data = await response.json();
                     if (data.success) {
+                        window.toast.success('messages.deleted', 'common', 'Notification supprimée');
+                        // Recharger pour être sûr d'avoir les données à jour
+                        loadNotifications();
+                    } else {
+                        window.toast.error('messages.error', 'common', 'Erreur lors de la suppression');
+                        // En cas d'erreur, recharger pour restaurer l'état correct
                         loadNotifications();
                     }
                 } catch (error) {
                     console.error('Erreur:', error);
+                    window.toast.error('messages.error', 'common', 'Erreur lors de la suppression');
+                    // En cas d'erreur, recharger pour restaurer l'état correct
+                    loadNotifications();
                 }
             };
 
@@ -192,14 +267,14 @@ $notificationService = new NotificationService($pdo);
 
             return React.createElement('div', { className: "max-w-4xl mx-auto px-4 py-8" },
                 // Header
-                React.createElement('div', { className: "bg-white rounded-lg shadow-sm p-6 mb-6" },
+                React.createElement('div', { className: "bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-6" },
                     React.createElement('div', { className: "flex items-center justify-between mb-4" },
-                        React.createElement('h1', { className: "text-3xl font-bold text-gray-900" }, '🔔 Notifications'),
+                        React.createElement('h1', { className: "text-3xl font-bold text-gray-900 dark:text-white" }, `🔔 ${t('notifications.heading')}`),
                         React.createElement('div', { className: "flex gap-2" },
                             unreadCount > 0 && React.createElement('button', {
                                 onClick: markAllAsRead,
-                                className: "px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium"
-                            }, `Tout marquer comme lu (${unreadCount})`)
+                                className: "px-4 py-2 bg-blue-600 dark:bg-blue-700 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition text-sm font-medium"
+                            }, `${t('notifications.markAllRead')} (${unreadCount})`)
                         )
                     ),
 
@@ -210,25 +285,25 @@ $notificationService = new NotificationService($pdo);
                             className: `px-4 py-2 rounded-lg font-medium transition ${
                                 filter === 'all'
                                     ? 'bg-red-600 text-white'
-                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600'
                             }`
-                        }, 'Toutes'),
+                        }, t('notifications.all')),
                         React.createElement('button', {
                             onClick: () => setFilter('unread'),
                             className: `px-4 py-2 rounded-lg font-medium transition ${
                                 filter === 'unread'
                                     ? 'bg-red-600 text-white'
-                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600'
                             }`
-                        }, `Non lues (${unreadCount})`),
+                        }, `${t('notifications.unread')} (${unreadCount})`),
                         React.createElement('button', {
                             onClick: () => setFilter('read'),
                             className: `px-4 py-2 rounded-lg font-medium transition ${
                                 filter === 'read'
                                     ? 'bg-red-600 text-white'
-                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600'
                             }`
-                        }, 'Lues')
+                        }, t('notifications.read'))
                     )
                 ),
 
@@ -238,10 +313,10 @@ $notificationService = new NotificationService($pdo);
                         React.createElement('div', { className: "animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto" })
                     )
                     : notifications.length === 0
-                    ? React.createElement('div', { className: "bg-white rounded-lg shadow-sm p-12 text-center" },
+                    ? React.createElement('div', { className: "bg-white dark:bg-gray-800 rounded-lg shadow-sm p-12 text-center" },
                         React.createElement('div', { className: "text-6xl mb-4" }, '📭'),
-                        React.createElement('h2', { className: "text-xl font-semibold text-gray-900 mb-2" }, 'Aucune notification'),
-                        React.createElement('p', { className: "text-gray-600" }, 'Vous n\'avez aucune notification pour le moment')
+                        React.createElement('h2', { className: "text-xl font-semibold text-gray-900 dark:text-white mb-2" }, t('notifications.noNotifications')),
+                        React.createElement('p', { className: "text-gray-600 dark:text-gray-400" }, t('notifications.noNotifications'))
                     )
                     : React.createElement('div', { className: "space-y-3" },
                         notifications.map((notif) =>
@@ -262,12 +337,12 @@ $notificationService = new NotificationService($pdo);
                                         React.createElement('div', { className: "flex items-start gap-3" },
                                             React.createElement('span', { className: "text-3xl" }, getNotificationIcon(notif.type)),
                                             React.createElement('div', { className: "flex-1" },
-                                                React.createElement('h3', { className: "font-semibold text-gray-900 mb-1" }, notif.title),
-                                                React.createElement('p', { className: "text-gray-700 text-sm mb-2" }, notif.message),
-                                                React.createElement('div', { className: "flex items-center gap-3 text-xs text-gray-500" },
+                                                React.createElement('h3', { className: "font-semibold text-gray-900 dark:text-white mb-1" }, notif.title),
+                                                React.createElement('p', { className: "text-gray-700 dark:text-gray-300 text-sm mb-2" }, notif.message),
+                                                React.createElement('div', { className: "flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400" },
                                                     React.createElement('span', null, formatDate(notif.created_at)),
                                                     !notif.is_read && React.createElement('span', {
-                                                        className: "px-2 py-1 bg-red-100 text-red-700 rounded-full font-medium"
+                                                        className: "px-2 py-1 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 rounded-full font-medium"
                                                     }, 'Nouveau')
                                                 )
                                             )
@@ -280,7 +355,7 @@ $notificationService = new NotificationService($pdo);
                                                 e.stopPropagation();
                                                 markAsRead(notif.id);
                                             },
-                                            className: "p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition",
+                                            className: "p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900 rounded-lg transition",
                                             title: "Marquer comme lu"
                                         },
                                             React.createElement('svg', { className: "w-5 h-5", fill: "none", stroke: "currentColor", viewBox: "0 0 24 24" },
@@ -297,7 +372,7 @@ $notificationService = new NotificationService($pdo);
                                                 e.stopPropagation();
                                                 deleteNotification(notif.id);
                                             },
-                                            className: "p-2 text-red-600 hover:bg-red-50 rounded-lg transition",
+                                            className: "p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900 rounded-lg transition",
                                             title: "Supprimer"
                                         },
                                             React.createElement('svg', { className: "w-5 h-5", fill: "none", stroke: "currentColor", viewBox: "0 0 24 24" },
@@ -321,5 +396,7 @@ $notificationService = new NotificationService($pdo);
             React.createElement(NotificationsPage)
         );
     </script>
+    </div>
+    </main>
 </body>
 </html>

@@ -1,0 +1,58 @@
+{
+  "header": {
+    "home": "Home",
+    "findProvider": "Find a Provider",
+    "dashboard": "Dashboard",
+    "profile": "View my profile",
+    "favorites": "My Favorites",
+    "settings": "Settings",
+    "logout": "Logout",
+    "login": "Login",
+    "register": "Sign up",
+    "search": "Search...",
+    "notifications": "Notifications",
+    "markAllRead": "Mark all as read",
+    "viewAll": "View all",
+    "noNotifications": "No notifications",
+    "administrator": "Administrator",
+    "changeTheme": "Change theme"
+  },
+  "time": {
+    "justNow": "Just now",
+    "minutes": "min",
+    "hours": "h",
+    "days": "d"
+  },
+  "buttons": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "connect": "Connect",
+    "disconnect": "Disconnect",
+    "send": "Send",
+    "close": "Close"
+  },
+  "messages": {
+    "success": "Operation successful",
+    "error": "An error occurred",
+    "loading": "Loading...",
+    "noData": "No data available",
+    "changeLanguageSuccess": "Language changed to English",
+    "saved": "Changes saved successfully",
+    "deleted": "Deleted successfully",
+    "updated": "Updated successfully"
+  },
+  "footer": {
+    "description": "Find the best service providers for all your needs.",
+    "navigation": "Navigation",
+    "legalTitle": "Legal",
+    "legal": "Legal Notice",
+    "privacy": "Privacy Policy",
+    "rights": "All rights reserved",
+    "home": "Home",
+    "providers": "Providers",
+    "contact": "Contact",
+    "about": "About"
+  }
+}

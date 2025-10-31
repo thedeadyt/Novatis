@@ -1,0 +1,124 @@
+{
+  "title": "Dashboard",
+  "welcome": "Welcome",
+  "loading": "Loading...",
+  "tabs": {
+    "overview": "Overview",
+    "notifications": "Notifications",
+    "messages": "Messages",
+    "services": "Services",
+    "orders": "Orders",
+    "purchases": "Purchases",
+    "reviews": "Reviews",
+    "portfolio": "Portfolio",
+    "formerClients": "Former Clients",
+    "adminUsers": "Users",
+    "adminCategories": "Categories",
+    "adminSupport": "Support"
+  },
+  "stats": {
+    "orders": "Orders",
+    "revenue": "Revenue",
+    "clients": "Clients",
+    "rating": "Average Rating",
+    "totalOrders": "Total Orders",
+    "activeServices": "Active Services",
+    "completedOrders": "Completed Orders",
+    "totalRevenue": "Total Revenue"
+  },
+  "services": {
+    "title": "My Services",
+    "recent": "Recent Services",
+    "active": "active services",
+    "noServices": "No services yet",
+    "addService": "Add Service",
+    "editService": "Edit Service",
+    "deleteService": "Delete Service",
+    "deleteConfirm": "Are you sure you want to delete this service?",
+    "title_field": "Title",
+    "description": "Description",
+    "price": "Price",
+    "deliveryTime": "Delivery Time",
+    "days": "days",
+    "category": "Category",
+    "selectCategory": "Select a category",
+    "image": "Image",
+    "save": "Save",
+    "cancel": "Cancel"
+  },
+  "orders": {
+    "title": "Recent Orders",
+    "recent": "Recent orders",
+    "noOrders": "No orders",
+    "status": {
+      "pending": "Pending",
+      "in_progress": "In Progress",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "viewDetails": "View Details",
+    "rate": "Rate"
+  },
+  "purchases": {
+    "title": "My Purchases",
+    "noPurchases": "No purchases",
+    "rateService": "Rate Service"
+  },
+  "reviews": {
+    "title": "Reviews",
+    "received": "Received Reviews",
+    "given": "Given Reviews",
+    "noReviews": "No reviews",
+    "totalReviews": "reviews received",
+    "averageRating": "Average Rating",
+    "rateOrder": "Rate Order",
+    "rating": "Rating",
+    "comment": "Comment",
+    "commentPlaceholder": "Describe your experience...",
+    "submit": "Submit Review",
+    "ratingFor": "Review for",
+    "for": "For"
+  },
+  "messages": {
+    "title": "Messages",
+    "noMessages": "No messages",
+    "conversations": "Conversations",
+    "writeMessage": "Write a message",
+    "send": "Send",
+    "messagePlaceholder": "Type your message..."
+  },
+  "notifications": {
+    "title": "Notifications",
+    "markAllRead": "Mark All as Read",
+    "noNotifications": "No notifications",
+    "deleteAll": "Delete All",
+    "newMessages": "new messages",
+    "newMessage": "new message"
+  },
+  "portfolio": {
+    "title": "Portfolio",
+    "noItems": "No portfolio items",
+    "addItem": "Add Item"
+  },
+  "formerClients": {
+    "title": "Former Clients",
+    "noClients": "No clients"
+  },
+  "admin": {
+    "users": "User Management",
+    "categories": "Category Management",
+    "support": "Support Tickets"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View",
+    "close": "Close",
+    "confirm": "Confirm",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success"
+  }
+}

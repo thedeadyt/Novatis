@@ -4,7 +4,7 @@
  * Permet de délier un provider (Google, Microsoft, GitHub) du compte utilisateur
  */
 
-require_once __DIR__ . '/../../../config/config.php';
+require_once __DIR__ . '/../../../config/Config.php';
 
 // Vérifier que l'utilisateur est connecté
 isUserLoggedIn(true);

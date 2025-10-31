@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../../config/config.php';
+require_once __DIR__ . '/../../config/Config.php';
 
 // Vérifier si l'utilisateur est connecté
 isUserLoggedIn(true);
@@ -36,11 +36,11 @@ if (!$prestataire) {
 }
 ?>
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" data-user-lang="fr">
 <head>
     <meta charset='utf-8'>
     <meta http-equiv='X-UA-Compatible' content='IE=edge'>
-    <title>Novatis | Contacter <?= htmlspecialchars($prestataire['name']) ?></title>
+    <title data-i18n="contact.title" data-i18n-ns="pages">Novatis | Contacter <?= htmlspecialchars($prestataire['name']) ?></title>
     <link rel="icon" type="image/png" href="<?= BASE_URL ?>/assets/img/logos/Logo_Novatis.png">
     <meta name='viewport' content='width=device-width, initial-scale=1'>
 
@@ -54,6 +54,9 @@ if (!$prestataire) {
     <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- i18next -->
+    <?php include __DIR__ . '/../../includes/i18n-head.php'; ?>
 
     <style>
         body {
@@ -86,7 +89,8 @@ if (!$prestataire) {
     </style>
 </head>
 
-<body>
+<body class="flex flex-col min-h-screen">
+    <main class="flex-1">
     <div class="min-h-screen py-8">
         <div class="max-w-4xl mx-auto px-4">
             <!-- Header -->
@@ -225,15 +229,17 @@ if (!$prestataire) {
                     const result = await response.json();
 
                     if (result.success) {
-                        alert('Commande créée avec succès ! Vous allez être redirigé vers votre dashboard.');
-                        window.location.href = result.redirect || '<?= BASE_URL ?>/pages/Dashboard.php';
+                        window.toast.success('messages.success', 'common', 'Commande créée avec succès ! Vous allez être redirigé vers votre dashboard.');
+                        setTimeout(() => {
+                            window.location.href = result.redirect || '<?= BASE_URL ?>/pages/Dashboard.php';
+                        }, 1500);
                     } else {
-                        alert('Erreur: ' + result.error);
+                        window.toast.error('messages.error', 'common', 'Erreur: ' + result.error);
                         button.textContent = originalText;
                         button.disabled = false;
                     }
                 } catch (error) {
-                    alert('Erreur lors de la commande: ' + error.message);
+                    window.toast.error('messages.error', 'common', 'Erreur lors de la commande: ' + error.message);
                     button.textContent = originalText;
                     button.disabled = false;
                 }
@@ -292,5 +298,7 @@ if (!$prestataire) {
             }
         });
     </script>
+    </div>
+    </main>
 </body>
 </html>

@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../../config/config.php';
+require_once __DIR__ . '/../../config/Config.php';
 
 // Si l'utilisateur est déjà connecté, rediriger vers le dashboard
 if (isUserLoggedIn()) {
@@ -9,11 +9,11 @@ if (isUserLoggedIn()) {
 ?>
 
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" data-user-lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Novatis | Connexion / Inscription</title>
+    <title data-i18n="auth.title" data-i18n-ns="auth">Novatis | Connexion / Inscription</title>
     <link rel="icon" type="image/png" href="<?= BASE_URL ?>/assets/img/logos/Logo_Novatis.png">
 
     <!-- Variables CSS -->
@@ -32,6 +32,12 @@ if (isUserLoggedIn()) {
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- i18next -->
+    <?php include __DIR__ . '/../../includes/i18n-head.php'; ?>
+
+    <!-- Toast notification system -->
+    <script src="<?= BASE_URL ?>/assets/js/toast.js"></script>
 
     <!-- Tailwind Config -->
     <script>
@@ -193,12 +199,45 @@ if (isUserLoggedIn()) {
         </svg>
     </button>
 
+    <!-- Language selector (fixed top-left) -->
+    <div class="fixed top-4 left-4 z-50">
+        <select id="language-selector" class="px-4 py-3 bg-white border-2 border-gray-300 rounded-full hover:bg-gray-50 transition-all shadow-lg cursor-pointer text-gray-700 font-medium">
+            <option value="fr">🇫🇷 Français</option>
+            <option value="en">🇬🇧 English</option>
+        </select>
+    </div>
+
+    <!-- Toast notification container -->
+    <div id="toast-container" class="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 space-y-2"></div>
+
     <div id="auth-root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect } = React;
+        const { useState, useEffect, useReducer } = React;
 
         const AuthPage = () => {
+            // Hook pour forcer le re-render quand la langue change
+            const [, forceUpdate] = useReducer(x => x + 1, 0);
+
+            // Fonction de traduction
+            const t = (key) => {
+                if (typeof window.t === 'function') {
+                    return window.t(key, 'auth') || key;
+                }
+                return key;
+            };
+
+            // Écouter les changements de langue
+            useEffect(() => {
+                const handleLanguageChanged = () => forceUpdate();
+                window.addEventListener('i18nReady', handleLanguageChanged);
+                window.addEventListener('languageChanged', handleLanguageChanged);
+                return () => {
+                    window.removeEventListener('i18nReady', handleLanguageChanged);
+                    window.removeEventListener('languageChanged', handleLanguageChanged);
+                };
+            }, []);
+
             const [isLogin, setIsLogin] = useState(true);
             const [isTransitioning, setIsTransitioning] = useState(false);
             const [formData, setFormData] = useState({
@@ -523,13 +562,13 @@ if (isUserLoggedIn()) {
                             },
                                 React.createElement('h2', {
                                     className: "text-lg lg:text-2xl font-semibold mb-2 lg:mb-3"
-                                }, isLogin ? "Nouveau sur Novatis ?" : "Bon retour parmi nous !"),
+                                }, isLogin ? t('login.welcomeNew') : t('register.welcomeBack')),
                                 React.createElement('p', {
                                     className: "text-sm lg:text-lg opacity-90 leading-relaxed px-2 lg:px-0"
                                 },
                                     isLogin
-                                        ? "Rejoignez notre communauté de freelances étudiants et commencez à proposer vos services dès maintenant."
-                                        : "Connectez-vous pour accéder à votre espace personnel et gérer vos services."
+                                        ? t('login.welcomeDescription')
+                                        : t('register.welcomeDescription')
                                 )
                             ),
 
@@ -538,7 +577,7 @@ if (isUserLoggedIn()) {
                                 onClick: switchMode,
                                 disabled: isTransitioning,
                                 className: "btn-switch px-6 py-3 lg:px-8 lg:py-4 text-lg lg:text-xl font-bold rounded-full hover:scale-105 transition-all duration-300 disabled:opacity-50"
-                            }, isLogin ? "S'inscrire" : "Se connecter")
+                            }, isLogin ? t('login.signUp') : t('register.signIn'))
                         )
                     ),
 
@@ -558,10 +597,10 @@ if (isUserLoggedIn()) {
                                 React.createElement('h2', {
                                     className: "text-2xl lg:text-3xl font-bold mb-2",
                                     style: { color: 'var(--color-black)' }
-                                }, isLogin ? "Connexion" : "Inscription"),
+                                }, isLogin ? t('login.title') : t('register.title')),
                                 React.createElement('p', {
                                     className: "text-gray-600 text-sm lg:text-base"
-                                }, isLogin ? "Accédez à votre espace" : "Créez votre compte")
+                                }, isLogin ? t('login.subtitle') : t('register.subtitle'))
                             ),
 
                             // Boutons OAuth EN HAUT
@@ -749,7 +788,7 @@ if (isUserLoggedIn()) {
                                     type: "submit",
                                     disabled: loading,
                                     className: "w-full btn-primary font-semibold py-3 px-6 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                                }, loading ? (isLogin ? "Connexion..." : "Inscription...") : (isLogin ? "Se connecter" : "S'inscrire"))
+                                }, loading ? (isLogin ? t('login.loading') : t('register.loading')) : (isLogin ? t('login.loginButton') : t('register.registerButton')))
                             )
                         )
                     )
@@ -761,6 +800,33 @@ if (isUserLoggedIn()) {
         ReactDOM.createRoot(document.getElementById('auth-root')).render(
             React.createElement(AuthPage)
         );
+    </script>
+
+    <!-- Language selector -->
+    <script>
+        // Language selector
+        document.addEventListener('DOMContentLoaded', function() {
+            const languageSelector = document.getElementById('language-selector');
+
+            // Wait for i18next to be ready
+            window.addEventListener('i18nReady', function(e) {
+                // Set initial value
+                languageSelector.value = e.detail.language;
+
+                // Handle language change
+                languageSelector.addEventListener('change', function() {
+                    const newLang = this.value;
+                    window.changeLanguage(newLang);
+
+                    // Show toast notification
+                    const messageKey = 'changeLanguageSuccess';
+                    const message = newLang === 'fr'
+                        ? 'Langue changée en Français'
+                        : 'Language changed to English';
+                    window.toast.success(messageKey, 'messages', message);
+                });
+            });
+        });
     </script>
 </body>
 </html>

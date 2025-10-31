@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../../config/config.php';
+require_once __DIR__ . '/../../config/Config.php';
 
 // Vérifie si l'utilisateur est connecté
 isUserLoggedIn(true);
@@ -9,7 +9,7 @@ $user = getCurrentUser();
 $isAdmin = isAdmin();
 ?>
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" data-user-lang="fr">
 <head>
     <meta charset='utf-8'>
     <meta http-equiv='X-UA-Compatible' content='IE=edge'>
@@ -52,6 +52,12 @@ $isAdmin = isAdmin();
 
     <!-- Script de thème global -->
     <script src="<?= BASE_URL ?>/assets/js/theme.js"></script>
+
+    <!-- i18next -->
+    <?php include __DIR__ . '/../../includes/i18n-head.php'; ?>
+
+    <!-- Toast notification system -->
+    <script src="<?= BASE_URL ?>/assets/js/toast.js"></script>
 
     <!-- React & ReactDOM -->
     <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
@@ -216,17 +222,45 @@ $isAdmin = isAdmin();
             transform: scale(1.1);
         }
     </style>
+
+    <!-- i18next pour les traductions -->
+    <?php include __DIR__ . '/../../includes/i18n-head.php'; ?>
 </head>
 
-<body style="background-color: var(--color-bg); color: var(--color-black);">
+<body class="flex flex-col min-h-screen" style="background-color: var(--color-bg); color: var(--color-black);">
     <?php include __DIR__ . '/../../includes/Header.php';?>
+    <main class="flex-1">
     <div id="dashboard-root"></div>
 
     <script type="text/babel">
         // Fix pour les hooks React avec CDN
         const React = window.React;
         const ReactDOM = window.ReactDOM;
-        const { useState, useEffect } = React;
+        const { useState, useEffect, useReducer } = React;
+
+        // Hook de traduction pour le Dashboard
+        const useDashboardTranslation = () => {
+            const [, forceUpdate] = useReducer(x => x + 1, 0);
+
+            useEffect(() => {
+                const handleLanguageChanged = () => forceUpdate();
+                window.addEventListener('i18nReady', handleLanguageChanged);
+                window.addEventListener('languageChanged', handleLanguageChanged);
+                return () => {
+                    window.removeEventListener('i18nReady', handleLanguageChanged);
+                    window.removeEventListener('languageChanged', handleLanguageChanged);
+                };
+            }, []);
+
+            const t = (key) => {
+                if (typeof window.t === 'function') {
+                    return window.t(key, 'dashboard') || key;
+                }
+                return key;
+            };
+
+            return { t };
+        };
 
         // Données utilisateur depuis PHP
         const userData = {
@@ -287,7 +321,7 @@ $isAdmin = isAdmin();
         };
 
         // Composant Dropdown Notifications
-        const NotificationsDropdown = ({ notifications, unreadCount, onClose, onMarkAsRead, onMarkAllAsRead, onDelete, onNavigate }) => {
+        const NotificationsDropdown = ({ notifications, unreadCount, onClose, onMarkAsRead, onMarkAllAsRead, onDelete, onNavigate, t }) => {
             const getNotificationIcon = (type) => {
                 const icons = {
                     order: 'fas fa-briefcase',
@@ -362,13 +396,13 @@ $isAdmin = isAdmin();
                 // Header
                 React.createElement('div', { className: "flex items-center justify-between p-4 border-b bg-gray-50" },
                     React.createElement('h3', { className: "font-medium text-gray-900" },
-                        `Notifications${unreadCount > 0 ? ` (${unreadCount} non lues)` : ''}`
+                        `${t('notifications.title')}${unreadCount > 0 ? ` (${unreadCount})` : ''}`
                     ),
                     React.createElement('div', { className: "flex items-center space-x-2" },
                         unreadCount > 0 && React.createElement('button', {
                             onClick: onMarkAllAsRead,
                             className: "text-xs text-blue-600 hover:text-blue-800 font-medium"
-                        }, "Tout marquer lu"),
+                        }, t('notifications.markAllRead')),
                         React.createElement('button', {
                             onClick: onClose,
                             className: "text-gray-500 hover:text-gray-700"
@@ -381,7 +415,7 @@ $isAdmin = isAdmin();
                     notifications.length === 0 ?
                         React.createElement('div', { className: "p-8 text-center text-gray-500" },
                             React.createElement('i', { className: "fas fa-bell-slash text-3xl mb-2 opacity-50" }),
-                            React.createElement('p', null, "Aucune notification")
+                            React.createElement('p', null, t('notifications.noNotifications'))
                         ) :
                         notifications.map(notification =>
                             React.createElement('div', {
@@ -887,6 +921,7 @@ $isAdmin = isAdmin();
 
         // Dashboard Component
         const Dashboard = () => {
+            const { t } = useDashboardTranslation();
             const [activeTab, setActiveTab] = useState('overview');
             const [sidebarOpen, setSidebarOpen] = useState(false);
             const [data, setData] = useState({
@@ -914,13 +949,24 @@ $isAdmin = isAdmin();
                 loadDashboardData();
                 loadNotifications();
                 loadPredefinedServices();
-                // Rafraîchir les notifications toutes les 30 secondes
-                const interval = setInterval(loadNotifications, 30000);
-                return () => clearInterval(interval);
+
+                // Rafraîchissement automatique toutes les 30 secondes
+                const notifInterval = setInterval(loadNotifications, 30000);
+                // Rafraîchir les données du dashboard toutes les 2 minutes
+                const dataInterval = setInterval(() => {
+                    loadDashboardData(true); // true = refresh silencieux
+                }, 120000);
+
+                return () => {
+                    clearInterval(notifInterval);
+                    clearInterval(dataInterval);
+                };
             }, []);
 
-            const loadDashboardData = async () => {
-                setLoading(true);
+            const loadDashboardData = async (silent = false) => {
+                if (!silent) {
+                    setLoading(true);
+                }
 
                 try {
                     const result = await apiCall('dashboard/dashboard.php');
@@ -940,7 +986,9 @@ $isAdmin = isAdmin();
                     console.error('Erreur lors du chargement:', error);
                 }
 
-                setLoading(false);
+                if (!silent) {
+                    setLoading(false);
+                }
             };
 
             const loadNotifications = async () => {
@@ -1015,13 +1063,13 @@ $isAdmin = isAdmin();
                         // Recharger les données
                         loadDashboardData();
                         loadNotifications();
-                        alert('Évaluation publiée avec succès !');
+                        window.toast.success('saved', 'messages', 'Évaluation publiée avec succès !');
                     } else {
                         throw new Error(result.error || 'Erreur lors de la publication');
                     }
                 } catch (error) {
                     console.error('Erreur soumission évaluation:', error);
-                    alert('Erreur: ' + error.message);
+                    window.toast.error('error', 'messages', 'Erreur: ' + error.message);
                     throw error;
                 }
             };
@@ -1041,42 +1089,42 @@ $isAdmin = isAdmin();
             const renderContent = () => {
                 if (loading) {
                     return React.createElement('div', { className: "flex items-center justify-center h-64" },
-                        React.createElement('div', { className: "text-lg" }, "Chargement...")
+                        React.createElement('div', { className: "text-lg" }, t('loading'))
                     );
                 }
 
                 switch(activeTab) {
-                    case 'overview': return React.createElement(OverviewTab, { data, loadData: loadDashboardData });
-                    case 'notifications': return React.createElement(NotificationsTab, { notifications, unreadCount, onMarkAsRead: markNotificationAsRead, onMarkAllAsRead: markAllAsRead, onDelete: deleteNotification, onNavigate: setActiveTab });
-                    case 'messages': return React.createElement(MessagesTab, { data, setData, loadNotifications });
-                    case 'services': return React.createElement(ServicesTab, { data, loadData: loadDashboardData, predefinedServices });
-                    case 'orders': return React.createElement(OrdersTab, { data, openRatingModal });
-                    case 'purchases': return React.createElement(PurchasesTab, { data, openRatingModal });
-                    case 'reviews': return React.createElement(ReviewsTab, { userData });
-                    case 'portfolio': return React.createElement(PortfolioTab, { data, loadData: loadDashboardData });
-                    case 'former-clients': return React.createElement(FormerClientsTab, { data });
-                    case 'admin-users': return React.createElement(AdminUsersTab, { data, loadData: loadDashboardData });
-                    case 'admin-categories': return React.createElement(AdminCategoriesTab, { data, loadData: loadDashboardData });
-                    case 'admin-support': return React.createElement(AdminSupportTab, { data, loadData: loadDashboardData });
-                    default: return React.createElement(OverviewTab, { data, loadData: loadDashboardData });
+                    case 'overview': return React.createElement(OverviewTab, { data, loadData: loadDashboardData, t });
+                    case 'notifications': return React.createElement(NotificationsTab, { notifications, unreadCount, onMarkAsRead: markNotificationAsRead, onMarkAllAsRead: markAllAsRead, onDelete: deleteNotification, onNavigate: setActiveTab, t });
+                    case 'messages': return React.createElement(MessagesTab, { data, setData, loadNotifications, t });
+                    case 'services': return React.createElement(ServicesTab, { data, loadData: loadDashboardData, predefinedServices, t });
+                    case 'orders': return React.createElement(OrdersTab, { data, openRatingModal, t });
+                    case 'purchases': return React.createElement(PurchasesTab, { data, openRatingModal, t });
+                    case 'reviews': return React.createElement(ReviewsTab, { userData, t });
+                    case 'portfolio': return React.createElement(PortfolioTab, { data, loadData: loadDashboardData, t });
+                    case 'former-clients': return React.createElement(FormerClientsTab, { data, t });
+                    case 'admin-users': return React.createElement(AdminUsersTab, { data, loadData: loadDashboardData, t });
+                    case 'admin-categories': return React.createElement(AdminCategoriesTab, { data, loadData: loadDashboardData, t });
+                    case 'admin-support': return React.createElement(AdminSupportTab, { data, loadData: loadDashboardData, t });
+                    default: return React.createElement(OverviewTab, { data, loadData: loadDashboardData, t });
                 }
             };
 
             const getPageTitle = () => {
                 switch(activeTab) {
-                    case 'overview': return 'Vue d\'ensemble';
-                    case 'notifications': return 'Notifications';
-                    case 'messages': return 'Messages';
-                    case 'reviews': return 'Mes Évaluations';
-                    case 'services': return isAdmin ? 'Tous les Services' : 'Mes Services';
-                    case 'orders': return 'Mes Ventes';
-                    case 'purchases': return 'Mes Achats';
-                    case 'portfolio': return 'Portfolio';
-                    case 'former-clients': return 'Anciens Clients';
-                    case 'admin-users': return 'Gestion Utilisateurs';
-                    case 'admin-categories': return 'Gestion Catégories';
-                    case 'admin-support': return 'Support';
-                    default: return 'Dashboard';
+                    case 'overview': return t('tabs.overview');
+                    case 'notifications': return t('tabs.notifications');
+                    case 'messages': return t('tabs.messages');
+                    case 'reviews': return t('reviews.title');
+                    case 'services': return t('services.title');
+                    case 'orders': return t('orders.title');
+                    case 'purchases': return t('purchases.title');
+                    case 'portfolio': return t('portfolio.title');
+                    case 'former-clients': return t('formerClients.title');
+                    case 'admin-users': return t('admin.users');
+                    case 'admin-categories': return t('admin.categories');
+                    case 'admin-support': return t('admin.support');
+                    default: return t('title');
                 }
             };
 
@@ -1089,7 +1137,8 @@ $isAdmin = isAdmin();
                     onClose: () => setSidebarOpen(false),
                     data,
                     handleLogout,
-                    unreadCount
+                    unreadCount,
+                    t
                 }),
 
                 // Rating Modal
@@ -1140,7 +1189,8 @@ $isAdmin = isAdmin();
                                         onMarkAsRead: markNotificationAsRead,
                                         onMarkAllAsRead: markAllAsRead,
                                         onDelete: deleteNotification,
-                                        onNavigate: setActiveTab
+                                        onNavigate: setActiveTab,
+                                        t
                                     })
                                 ),
 
@@ -1151,9 +1201,7 @@ $isAdmin = isAdmin();
                                 },
                                     React.createElement('i', { className: "fas fa-envelope mr-2" }),
                                     React.createElement('span', { className: "font-medium mr-1" }, data.unreadMessages),
-                                    React.createElement('span', null,
-                                        data.unreadMessages === 1 ? "nouveau message" : "nouveaux messages"
-                                    )
+                                    React.createElement('span', null, data.unreadMessages === 1 ? t('notifications.newMessage') : t('notifications.newMessages'))
                                 )
                             )
                         )
@@ -1166,26 +1214,26 @@ $isAdmin = isAdmin();
         };
 
         // Sidebar Component
-        const Sidebar = ({ activeTab, setActiveTab, isOpen, onClose, data, handleLogout, unreadCount }) => {
+        const Sidebar = ({ activeTab, setActiveTab, isOpen, onClose, data, handleLogout, unreadCount, t }) => {
             const userMenuItems = [
-                { id: 'overview', icon: 'fas fa-chart-line', label: 'Vue d\'ensemble' },
-                { id: 'notifications', icon: 'fas fa-bell', label: 'Notifications', badge: unreadCount },
-                { id: 'messages', icon: 'fas fa-envelope', label: 'Messages', badge: data.unreadMessages || 0 },
-                { id: 'services', icon: 'fas fa-cog', label: 'Mes Services' },
-                { id: 'orders', icon: 'fas fa-briefcase', label: 'Mes Ventes' },
-                { id: 'purchases', icon: 'fas fa-shopping-cart', label: 'Mes Achats' },
-                { id: 'reviews', icon: 'fas fa-star', label: 'Évaluations' },
-                { id: 'portfolio', icon: 'fas fa-images', label: 'Portfolio' },
-                { id: 'former-clients', icon: 'fas fa-users', label: 'Anciens Clients' }
+                { id: 'overview', icon: 'fas fa-chart-line', label: t('tabs.overview') },
+                { id: 'notifications', icon: 'fas fa-bell', label: t('tabs.notifications'), badge: unreadCount },
+                { id: 'messages', icon: 'fas fa-envelope', label: t('tabs.messages'), badge: data.unreadMessages || 0 },
+                { id: 'services', icon: 'fas fa-cog', label: t('tabs.services') },
+                { id: 'orders', icon: 'fas fa-briefcase', label: t('tabs.orders') },
+                { id: 'purchases', icon: 'fas fa-shopping-cart', label: t('tabs.purchases') },
+                { id: 'reviews', icon: 'fas fa-star', label: t('tabs.reviews') },
+                { id: 'portfolio', icon: 'fas fa-images', label: t('tabs.portfolio') },
+                { id: 'former-clients', icon: 'fas fa-users', label: t('tabs.formerClients') }
             ];
 
             const adminMenuItems = [
-                { id: 'overview', icon: 'fas fa-chart-line', label: 'Vue d\'ensemble' },
-                { id: 'admin-users', icon: 'fas fa-users', label: 'Utilisateurs' },
-                { id: 'services', icon: 'fas fa-cog', label: 'Tous les Services' },
-                { id: 'orders', icon: 'fas fa-briefcase', label: 'Toutes les Commandes' },
-                { id: 'admin-categories', icon: 'fas fa-tags', label: 'Catégories' },
-                { id: 'admin-support', icon: 'fas fa-headset', label: 'Support', badge: 0 }
+                { id: 'overview', icon: 'fas fa-chart-line', label: t('tabs.overview') },
+                { id: 'admin-users', icon: 'fas fa-users', label: t('tabs.adminUsers') },
+                { id: 'services', icon: 'fas fa-cog', label: t('tabs.services') },
+                { id: 'orders', icon: 'fas fa-briefcase', label: t('tabs.orders') },
+                { id: 'admin-categories', icon: 'fas fa-tags', label: t('tabs.adminCategories') },
+                { id: 'admin-support', icon: 'fas fa-headset', label: t('tabs.adminSupport'), badge: 0 }
             ];
 
             const menuItems = isAdmin ? adminMenuItems : userMenuItems;
@@ -1219,7 +1267,7 @@ $isAdmin = isAdmin();
         };
 
         // Overview Tab
-        const OverviewTab = ({ data, loadData }) => {
+        const OverviewTab = ({ data, loadData, t }) => {
             const StatsCard = ({ title, value, icon, color, isRating = false }) =>
                 React.createElement('div', { className: "bg-white rounded-lg p-6", style: {boxShadow: 'var(--shadow-md)'} },
                     React.createElement('div', { className: "flex items-center justify-between" },
@@ -1238,30 +1286,23 @@ $isAdmin = isAdmin();
                 );
 
             const formatStatus = (status) => {
-                const statusLabels = {
-                    pending: 'En attente',
-                    in_progress: 'En cours',
-                    delivered: 'Livré',
-                    completed: 'Terminé',
-                    cancelled: 'Annulé'
-                };
-                return statusLabels[status] || status;
+                return t(`orders.status.${status}`) || status;
             };
 
             const getStatsData = () => {
                 if (isAdmin) {
                     return [
-                        { title: "Utilisateurs", value: data.stats.total_users || 0, icon: "fas fa-users", color: "bg-blue-100" },
-                        { title: "Commandes", value: data.stats.total_orders || 0, icon: "fas fa-box", color: "bg-green-100" },
-                        { title: "Services", value: data.stats.active_services || 0, icon: "fas fa-cog", color: "bg-purple-100" },
-                        { title: "Tickets", value: data.stats.open_tickets || 0, icon: "fas fa-ticket-alt", color: "bg-red-100" }
+                        { title: t('stats.clients'), value: data.stats.total_users || 0, icon: "fas fa-users", color: "bg-blue-100" },
+                        { title: t('stats.orders'), value: data.stats.total_orders || 0, icon: "fas fa-box", color: "bg-green-100" },
+                        { title: t('stats.activeServices'), value: data.stats.active_services || 0, icon: "fas fa-cog", color: "bg-purple-100" },
+                        { title: t('admin.support'), value: data.stats.open_tickets || 0, icon: "fas fa-ticket-alt", color: "bg-red-100" }
                     ];
                 } else {
                     return [
-                        { title: "Revenus", value: `${data.stats.earnings || 0}€`, icon: "fas fa-euro-sign", color: "bg-green-100" },
-                        { title: "Ventes", value: data.stats.sales || 0, icon: "fas fa-briefcase", color: "bg-blue-100" },
-                        { title: "Achats", value: data.stats.purchases || 0, icon: "fas fa-shopping-cart", color: "bg-purple-100" },
-                        { title: "Note Moyenne", value: data.stats.rating || 0, icon: "fas fa-star", color: "bg-yellow-100", isRating: true }
+                        { title: t('stats.revenue'), value: `${data.stats.earnings || 0}€`, icon: "fas fa-euro-sign", color: "bg-green-100" },
+                        { title: t('stats.orders'), value: data.stats.sales || 0, icon: "fas fa-briefcase", color: "bg-blue-100" },
+                        { title: t('purchases.title'), value: data.stats.purchases || 0, icon: "fas fa-shopping-cart", color: "bg-purple-100" },
+                        { title: t('stats.rating'), value: data.stats.rating || 0, icon: "fas fa-star", color: "bg-yellow-100", isRating: true }
                     ];
                 }
             };
@@ -1285,7 +1326,7 @@ $isAdmin = isAdmin();
                 React.createElement('div', { className: "grid grid-cols-1 lg:grid-cols-2 gap-6" },
                     // Services/Commandes
                     React.createElement('div', { className: "bg-white rounded-lg p-6", style: {boxShadow: 'var(--shadow-md)'} },
-                        React.createElement('h3', { className: "text-lg font-bold mb-4" }, isAdmin ? "Services Récents" : "Mes Services"),
+                        React.createElement('h3', { className: "text-lg font-bold mb-4" }, isAdmin ? t('services.recent') : t('services.title')),
                         React.createElement('div', { className: "space-y-3" },
                             (data.services || []).slice(0, 3).map(service =>
                                 React.createElement('div', { key: service.id, className: "flex items-center justify-between p-3 bg-gray-50 rounded-lg" },
@@ -1299,13 +1340,13 @@ $isAdmin = isAdmin();
                                     }, service.status)
                                 )
                             ),
-                            (data.services || []).length === 0 && React.createElement('p', { className: "text-gray-500 text-center py-4" }, "Aucun service")
+                            (data.services || []).length === 0 && React.createElement('p', { className: "text-gray-500 text-center py-4" }, t('services.noServices'))
                         )
                     ),
 
                     // Commandes
                     React.createElement('div', { className: "bg-white rounded-lg p-6", style: {boxShadow: 'var(--shadow-md)'} },
-                        React.createElement('h3', { className: "text-lg font-bold mb-4" }, "Commandes Récentes"),
+                        React.createElement('h3', { className: "text-lg font-bold mb-4" }, t('orders.recent')),
                         React.createElement('div', { className: "space-y-3" },
                             (data.orders || []).slice(0, 3).map(order =>
                                 React.createElement('div', { key: order.id, className: "flex items-center justify-between p-3 bg-gray-50 rounded-lg" },
@@ -1322,7 +1363,7 @@ $isAdmin = isAdmin();
                                     }, formatStatus(order.status))
                                 )
                             ),
-                            (data.orders || []).length === 0 && React.createElement('p', { className: "text-gray-500 text-center py-4" }, "Aucune commande")
+                            (data.orders || []).length === 0 && React.createElement('p', { className: "text-gray-500 text-center py-4" }, t('orders.noOrders'))
                         )
                     )
                 )
@@ -1385,11 +1426,11 @@ $isAdmin = isAdmin();
                         }
                     } else {
                         console.error('Erreur envoi message:', result.error);
-                        alert('Erreur lors de l\'envoi du message: ' + (result.error || 'Erreur inconnue'));
+                        window.toast.error('error', 'messages', 'Erreur lors de l\'envoi du message: ' + (result.error || 'Erreur inconnue'));
                     }
                 } catch (error) {
                     console.error('Erreur lors de l\'envoi:', error);
-                    alert('Erreur lors de l\'envoi du message');
+                    window.toast.error('error', 'messages', 'Erreur lors de l\'envoi du message');
                 } finally {
                     setSending(false);
                 }
@@ -1676,8 +1717,9 @@ $isAdmin = isAdmin();
                 if (result.success) {
                     handleCloseModal();
                     loadData();
+                    window.toast.success('saved', 'messages', 'Service sauvegardé avec succès');
                 } else {
-                    alert(result.error || 'Erreur lors de la sauvegarde');
+                    window.toast.error('error', 'messages', result.error || 'Erreur lors de la sauvegarde');
                 }
             };
 
@@ -1705,8 +1747,9 @@ $isAdmin = isAdmin();
                     const result = await apiCall('services/services.php', 'DELETE', { id: serviceId });
                     if (result.success) {
                         loadData();
+                        window.toast.success('deleted', 'messages', 'Service supprimé avec succès');
                     } else {
-                        alert(result.error || 'Erreur lors de la suppression');
+                        window.toast.error('error', 'messages', result.error || 'Erreur lors de la suppression');
                     }
                 }
             };
@@ -2594,8 +2637,9 @@ $isAdmin = isAdmin();
                     handleCloseModal();
                     loadCategories();
                     loadData(); // Recharger les données du dashboard
+                    window.toast.success('messages.saved', 'common', 'Sauvegardé avec succès');
                 } else {
-                    alert(result.error || 'Erreur lors de la sauvegarde');
+                    window.toast.error('messages.error', 'common', result.error || 'Erreur lors de la sauvegarde');
                 }
             };
 
@@ -2620,8 +2664,9 @@ $isAdmin = isAdmin();
                     if (result.success) {
                         loadCategories();
                         loadData();
+                        window.toast.success('deleted', 'messages', 'Service supprimé avec succès');
                     } else {
-                        alert(result.error || 'Erreur lors de la suppression');
+                        window.toast.error('error', 'messages', result.error || 'Erreur lors de la suppression');
                     }
                 }
             };
@@ -2687,6 +2732,8 @@ $isAdmin = isAdmin();
         const root = ReactDOM.createRoot(document.getElementById('dashboard-root'));
         root.render(React.createElement(Dashboard));
     </script>
+    </div>
+    </main>
     <?php include __DIR__ . '/../../includes/Footer.php';?>
 </body>
 </html>
