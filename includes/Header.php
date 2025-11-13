@@ -110,6 +110,10 @@ $userInfo = [
     const [activeIndex, setActiveIndex] = useState(0);
     const [highlight, setHighlight] = useState({ left: 0, width: 0 });
     const [isDarkMode, setIsDarkMode] = useState(document.documentElement.classList.contains('dark'));
+    const [searchQuery, setSearchQuery] = useState('');
+    const [searchResults, setSearchResults] = useState([]);
+    const [searchOpen, setSearchOpen] = useState(false);
+    const searchTimeoutRef = useRef(null);
     const navRefs = useRef([]);
 
     // Écouter les changements de thème
@@ -208,6 +212,39 @@ $userInfo = [
       }
     };
 
+    const handleSearch = (value) => {
+      setSearchQuery(value);
+      
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+
+      if (value.length < 2) {
+        setSearchResults([]);
+        setSearchOpen(false);
+        return;
+      }
+
+      searchTimeoutRef.current = setTimeout(async () => {
+        try {
+          const response = await fetch(`${BASE_URL}/api/search.php?q=${encodeURIComponent(value)}`);
+          const data = await response.json();
+          setSearchResults(data.results || []);
+          setSearchOpen(data.results && data.results.length > 0);
+        } catch (error) {
+          console.error('Erreur recherche:', error);
+          setSearchResults([]);
+        }
+      }, 300);
+    };
+
+    const handleSearchResultClick = (result) => {
+      window.location.href = `${BASE_URL}/profil?id=${result.provider_id}`;
+      setSearchQuery('');
+      setSearchResults([]);
+      setSearchOpen(false);
+    };
+
     const getNotificationIcon = (type) => {
       switch(type) {
         case 'order': return '🛍️';
@@ -234,21 +271,21 @@ $userInfo = [
     };
 
     return (
-      <nav className="bg-white shadow-md px-6 py-3 fixed top-0 left-0 right-0 z-50 overflow-visible">
+      <nav className="bg-white dark:bg-slate-800 shadow-md px-4 sm:px-6 py-3 fixed top-0 left-0 right-0 z-50 overflow-visible">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
 
           {/* Logo + Nom */}
-          <a href={BASE_URL} className="flex items-center space-x-2">
+          <a href={BASE_URL} className="flex items-center space-x-2 flex-shrink-0">
             <img
               src={isDarkMode ? `${BASE_URL}/assets/img/logos/Logo_Novatis_nobg_white.png` : `${BASE_URL}/assets/img/logos/Logo_Novatis_nobg.png`}
               alt="Logo"
-              className="w-12 h-12 rounded-full transition-all duration-300"
+              className="w-10 sm:w-12 h-10 sm:h-12 rounded-full transition-all duration-300"
             />
-            <span className="text-xl font-bold">Novatis</span>
+            <span className="hidden sm:inline text-lg sm:text-xl font-bold">Novatis</span>
           </a>
 
           {/* Menu desktop */}
-          <div className="hidden md:flex items-center space-x-6 relative">
+          <div className="hidden md:flex items-center space-x-6 relative flex-1">
             <div
               className="absolute rounded transition-all duration-500 ease-out nav-highlight-slider"
               style={{
@@ -279,30 +316,72 @@ $userInfo = [
           </div>
 
           {/* Search bar desktop */}
-          <div className="hidden md:block flex-1 px-6">
+          <div className="hidden md:block flex-1 px-6 relative">
             <input
               type="text"
               placeholder={t('search')}
-              className="w-full border rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={searchQuery}
+              onChange={(e) => handleSearch(e.target.value)}
+              onFocus={() => searchResults.length > 0 && setSearchOpen(true)}
+              className="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
             />
+            
+            {/* Dropdown de résultats de recherche */}
+            {searchOpen && searchResults.length > 0 && (
+              <div className="absolute top-full mt-2 left-6 right-6 bg-white dark:bg-slate-700 border dark:border-slate-600 rounded-lg shadow-lg z-50 max-h-96 overflow-hidden">
+                {searchResults.map((result, index) => (
+                  <div
+                    key={index}
+                    onClick={() => handleSearchResultClick(result)}
+                    className="p-4 border-b border-gray-100 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-600 cursor-pointer transition-colors flex items-start space-x-3"
+                  >
+                    {result.avatar ? (
+                      React.createElement('img', {
+                        src: result.avatar,
+                        alt: result.provider_name,
+                        className: "w-10 h-10 rounded-full object-cover flex-shrink-0"
+                      })
+                    ) : (
+                      React.createElement(AnonymousAvatar, { size: 40 })
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-gray-900 dark:text-white text-sm truncate">{result.title}</p>
+                      <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">Par {result.provider_name}</p>
+                      {result.category && (
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{result.category}</p>
+                      )}
+                      <p className="text-sm font-bold text-red-600 dark:text-red-400 mt-1">{result.price}€</p>
+                    </div>
+                    {result.rating && (
+                      <div className="flex items-center space-x-1 flex-shrink-0">
+                        <svg className="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                        <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">{result.rating}</span>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* Profil utilisateur */}
+          {/* Actions desktop - Langue, thème, notifications, profil */}
           {userInfo.isLoggedIn ? (
-            <div className="flex items-center space-x-2">
+            <div className="hidden md:flex items-center space-x-2">
               {/* Sélecteur de langue */}
               {typeof window.LanguageSwitcher !== 'undefined' && React.createElement(window.LanguageSwitcher)}
 
               {/* Toggle de thème */}
               <button
                 onClick={() => window.ThemeManager && window.ThemeManager.toggle()}
-                className="p-2 hover:bg-gray-50 rounded-lg transition-colors focus:outline-none"
+                className="p-2 hover:bg-gray-50 dark:hover:bg-slate-700 rounded-lg transition-colors focus:outline-none"
                 aria-label="Changer le thème"
                 data-theme-toggle="true"
               >
                 {isDarkMode ? (
                   // Soleil (mode sombre actif)
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-700 dark:text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
                   </svg>
                 ) : (
@@ -317,7 +396,7 @@ $userInfo = [
               <div className="relative">
                 <button
                   onClick={() => setNotificationOpen(!notificationOpen)}
-                  className="relative p-2 hover:bg-gray-50 rounded-lg transition-colors focus:outline-none"
+                  className="relative p-2 hover:bg-gray-50 dark:hover:bg-slate-700 rounded-lg transition-colors focus:outline-none"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
@@ -333,10 +412,10 @@ $userInfo = [
                 {notificationOpen && (
                   <div className="absolute right-0 mt-2 w-96 bg-white border rounded-lg shadow-lg z-50 max-h-[500px] overflow-hidden flex flex-col">
                     {/* Header */}
-                    <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between bg-gray-50">
-                      <h3 className="font-semibold text-gray-900">{t('notifications')}</h3>
+                    <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between bg-gray-50 dark:bg-gray-800">
+                      <h3 className="font-semibold text-gray-900 dark:text-white">{t('notifications')}</h3>
                       {unreadCount > 0 && (
-                        <button onClick={markAllAsRead} className="text-xs text-blue-600 hover:text-blue-800 font-medium">
+                        <button onClick={markAllAsRead} className="text-xs text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 font-medium">
                           {t('markAllRead')}
                         </button>
                       )}
@@ -375,7 +454,7 @@ $userInfo = [
                                 </p>
                               </div>
                               {!notif.is_read && (
-                                <div className="w-2 h-2 bg-blue-600 rounded-full flex-shrink-0 mt-2"></div>
+                                <div className="w-2 h-2 bg-red-600 dark:bg-red-400 rounded-full flex-shrink-0 mt-2"></div>
                               )}
                             </div>
                           </div>
@@ -385,8 +464,8 @@ $userInfo = [
 
                     {/* Footer */}
                     {notifications.length > 0 && (
-                      <div className="px-4 py-3 border-t border-gray-200 bg-gray-50 text-center">
-                        <a href={`${BASE_URL}/notifications`} className="text-sm text-blue-600 hover:text-blue-800 font-medium">
+                      <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-center">
+                        <a href={`${BASE_URL}/notifications`} className="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 font-medium">
                           {t('viewAll')}
                         </a>
                       </div>
@@ -396,14 +475,14 @@ $userInfo = [
               </div>
 
               {/* Menu Profil */}
-              <div className="relative ml-2">
+              <div className="relative ml-2 hidden md:block">
                 <button
                   onClick={() => {
                     if (window.innerWidth >= 768) {
                       setDropdownOpen(!dropdownOpen);
                     }
                   }}
-                  className="flex items-center space-x-2 focus:outline-none hover:bg-gray-50 rounded-lg px-2 py-1 transition-colors"
+                  className="flex items-center space-x-2 focus:outline-none hover:bg-gray-50 dark:hover:bg-slate-700 rounded-lg px-2 py-1 transition-colors"
                 >
                 <div className="text-right hidden sm:block">
                   <span className="font-medium text-gray-700 block">{userInfo.pseudo || userInfo.name}</span>
@@ -431,9 +510,9 @@ $userInfo = [
               </button>
 
               {dropdownOpen && (
-                <div className="absolute right-0 mt-5 w-80 bg-white border rounded-lg shadow-lg py-3 z-50">
+                <div className="absolute right-0 mt-5 w-80 bg-white dark:bg-slate-700 border dark:border-slate-600 rounded-lg shadow-lg py-3 z-50">
                   {/* Info utilisateur */}
-                  <div className="px-5 py-4 border-b border-gray-100">
+                  <div className="px-5 py-4 border-b border-gray-100 dark:border-slate-600">
                     <div className="flex items-center space-x-4">
                       {userInfo.avatar ? (
                         React.createElement('img', {
@@ -445,10 +524,10 @@ $userInfo = [
                         React.createElement(AnonymousAvatar, { size: 56 })
                       )}
                       <div className="flex-1">
-                        <p className="font-semibold text-gray-900 text-base">{userInfo.pseudo || userInfo.name}</p>
-                        <p className="text-sm text-gray-500 mt-1">{userInfo.email}</p>
+                        <p className="font-semibold text-gray-900 dark:text-white text-base">{userInfo.pseudo || userInfo.name}</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-300 mt-1">{userInfo.email}</p>
                         {userInfo.role === 'admin' && (
-                          <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full mt-2">
+                          <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded-full mt-2">
                             {t('administrator')}
                           </span>
                         )}
@@ -458,35 +537,35 @@ $userInfo = [
 
                   {/* Menu items */}
                   <div className="py-2">
-                    <a href={`${BASE_URL}/Dashboard`} className="flex items-center px-5 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-3 text-gray-400" fill="none"
+                    <a href={`${BASE_URL}/Dashboard`} className="flex items-center px-5 py-3 text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-600 hover:text-gray-900 dark:hover:text-white transition-colors">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-3 text-gray-400 dark:text-gray-400" fill="none"
                            viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
                               d="M3 3h7v7H3V3zM14 3h7v4h-7V3zM3 14h7v7H3v-7zM14 14h7v7h-7v-7z"/>
                       </svg>
                       {t('dashboard')}
                     </a>
-                    <a href={`${BASE_URL}/profil?id=${userInfo.id || ''}`} className="flex items-center px-5 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-3 text-gray-400" fill="none"
+                    <a href={`${BASE_URL}/profil?id=${userInfo.id || ''}`} className="flex items-center px-5 py-3 text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-600 hover:text-gray-900 dark:hover:text-white transition-colors">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-3 text-gray-400 dark:text-gray-400" fill="none"
                            viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
                               d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                       </svg>
                       {t('profile')}
                     </a>
-                    <a href={`${BASE_URL}/Favoris`} className="flex items-center px-5 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-3 text-gray-400" fill="none"
+                    <a href={`${BASE_URL}/Favoris`} className="flex items-center px-5 py-3 text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-600 hover:text-gray-900 dark:hover:text-white transition-colors">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-3 text-gray-400 dark:text-gray-400" fill="none"
                            viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
                               d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
                       </svg>
                       {t('favorites')}
                     </a>
-                    <a href={`${BASE_URL}/Parametres?section=profile`} className="flex items-center px-5 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors">
+                    <a href={`${BASE_URL}/Parametres?section=profile`} className="flex items-center px-5 py-3 text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-600 hover:text-gray-900 dark:hover:text-white transition-colors">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 2122 2122"
-                        className="w-6 h-6 mr-3 text-gray-400"
+                        className="w-6 h-6 mr-3 text-gray-400 dark:text-gray-400"
                         fill="currentColor"
                       >
                         <path d="M1909.18,1148.97v-176.63h-107.48c-4.98-42.32-13.52-83.56-25.3-123.41l98.63-42.43-69.8-162.26-98.67,42.44c-17.77-30.62-37.65-59.9-59.45-87.57l76-76-124.9-124.9-75.99,76c-32.94-25.95-68.09-49.18-105.16-69.37l39.75-99.74-164.09-65.39-39.75,99.76c-33.78-8.99-68.49-15.66-103.98-19.85v-107.49h-176.63v107.49c-42.34,4.99-83.56,13.52-123.41,25.29l-42.43-98.63-162.25,69.8,42.44,98.67c-30.64,17.77-59.9,37.65-87.57,59.45l-76-76-124.9,124.9,76,75.99c-25.94,32.94-49.18,68.09-69.37,105.16l-99.74-39.75-65.39,164.09,99.76,39.75c-8.99,33.78-15.66,68.49-19.85,103.98h-107.49v176.63h107.49c4.98,42.34,13.52,83.56,25.29,123.41l-98.63,42.43,69.8,162.26,98.67-42.44c17.77,30.62,37.65,59.9,59.45,87.57l-76,76,124.9,124.9,75.99-76c32.94,25.95,68.09,49.18,105.16,69.37l-39.75,99.74,164.09,65.39,39.75-99.76c33.78,8.99,68.49,15.66,103.98,19.85v107.49h176.63v-107.49c42.34-4.99,83.56-13.52,123.41-25.3l42.43,98.63,162.25-69.8-42.44-98.67c30.64-17.77,59.9-37.65,87.57-59.45l76,76,124.9-124.9-76-75.99c25.94-32.94,49.18-68.09,69.37-105.16l99.74,39.75,65.39-164.09-99.76-39.75c8.99-33.78,15.66-68.49,19.85-103.98h107.49ZM1061,1412.12c-193.51,0-350.61-157.1-350.61-350.61s157.1-350.61,350.61-350.61,350.61,157.1,350.61,350.61-157.1,350.61-350.61,350.61Z"/>
@@ -494,9 +573,9 @@ $userInfo = [
                       {t('settings')}
                     </a>
                   </div>
-                  <div className="border-t border-gray-100 pt-2">
-                    <a href={`${BASE_URL}/logout`} className="flex items-center px-5 py-3 text-base font-medium text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-3 text-red-400" fill="none"
+                  <div className="border-t border-gray-100 dark:border-slate-600 pt-2">
+                    <a href={`${BASE_URL}/logout`} className="flex items-center px-5 py-3 text-base font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-slate-600 hover:text-red-700 dark:hover:text-red-300 transition-colors">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-3 text-red-400 dark:text-red-400" fill="none"
                            viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
                               d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1"/>
@@ -510,14 +589,14 @@ $userInfo = [
             </div>
           ) : (
             /* Boutons connexion/inscription pour utilisateurs non connectés */
-            <div className="flex items-center space-x-3">
+            <div className="hidden md:flex items-center space-x-3">
               {/* Sélecteur de langue pour utilisateurs non connectés */}
               {typeof window.LanguageSwitcher !== 'undefined' && React.createElement(window.LanguageSwitcher)}
 
               {/* Toggle de thème pour utilisateurs non connectés */}
               <button
                 onClick={() => window.ThemeManager && window.ThemeManager.toggle()}
-                className="p-2 hover:bg-gray-50 rounded-lg transition-colors focus:outline-none"
+                className="p-2 hover:bg-gray-50 dark:hover:bg-slate-700 rounded-lg transition-colors focus:outline-none"
                 aria-label="Changer le thème"
                 data-theme-toggle="true"
               >
@@ -549,9 +628,13 @@ $userInfo = [
             </div>
           )}
 
-          {/* Mobile toggle */}
-          <button onClick={() => setOpen(!open)} className="md:hidden ml-4">
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="black">
+          {/* Mobile toggle - Hamburger Button */}
+          <button 
+            onClick={() => setOpen(!open)} 
+            className="md:hidden ml-4 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
+            aria-label="Toggle menu"
+          >
+            <svg className="w-6 h-6 text-gray-900 dark:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
                     d={open ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
             </svg>
@@ -561,22 +644,112 @@ $userInfo = [
 
         {/* Mobile menu */}
         {open && (
-          <div className="md:hidden mt-4 space-y-2">
-            {items.map((item, i) => (
-              <a key={i} href={item.href} className="block bg-white px-4 py-2 rounded shadow">
-                {item.name}
-              </a>
-            ))}
-            <input
-              type="text"
-              placeholder={t('search')}
-              className="w-full border rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 mt-2"
-            />
+          <div className="md:hidden mt-4 space-y-2 bg-white dark:bg-slate-700 rounded-lg p-4 shadow-lg border dark:border-slate-600">
+            {/* Navigation Items */}
+            <div className="space-y-1">
+              {items.map((item, i) => (
+                <a 
+                  key={i} 
+                  href={item.href} 
+                  className="block px-4 py-2 rounded text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-600 transition-colors font-medium"
+                >
+                  {item.name}
+                </a>
+              ))}
+            </div>
+
+            {/* Mobile Search */}
+            <div className="border-t border-gray-200 dark:border-slate-600 pt-3 mt-3">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder={t('search')}
+                  value={searchQuery}
+                  onChange={(e) => handleSearch(e.target.value)}
+                  onFocus={() => searchResults.length > 0 && setSearchOpen(true)}
+                  className="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+                />
+                
+                {/* Dropdown mobile */}
+                {searchOpen && searchResults.length > 0 && (
+                  <div className="absolute top-full mt-1 left-0 right-0 bg-white dark:bg-slate-600 border dark:border-slate-500 rounded-lg shadow-lg z-50 max-h-80 overflow-hidden">
+                    {searchResults.map((result, index) => (
+                      <div
+                        key={index}
+                        onClick={() => {
+                          handleSearchResultClick(result);
+                          setOpen(false);
+                        }}
+                        className="p-3 border-b border-gray-100 dark:border-slate-500 hover:bg-gray-50 dark:hover:bg-slate-700 cursor-pointer transition-colors flex items-start space-x-3"
+                      >
+                        {result.avatar ? (
+                          React.createElement('img', {
+                            src: result.avatar,
+                            alt: result.provider_name,
+                            className: "w-8 h-8 rounded-full object-cover flex-shrink-0"
+                          })
+                        ) : (
+                          React.createElement(AnonymousAvatar, { size: 32 })
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-gray-900 dark:text-white text-sm truncate">{result.title}</p>
+                          <p className="text-xs text-gray-600 dark:text-gray-300 mt-0.5">Par {result.provider_name}</p>
+                          <p className="text-sm font-bold text-red-600 dark:text-red-400 mt-1">{result.price}€</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Utilities Section */}
+            <div className="border-t border-gray-200 dark:border-slate-600 pt-3 mt-3 space-y-2">
+              {/* Language Selector */}
+              <select
+                onChange={(e) => {
+                  i18n.changeLanguage(e.target.value);
+                  localStorage.setItem("language", e.target.value);
+                }}
+                defaultValue={localStorage.getItem("language") || "fr"}
+                className="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+              >
+                <option value="fr">🇫🇷 {t('french')}</option>
+                <option value="en">🇬🇧 {t('english')}</option>
+              </select>
+
+              {/* Theme Toggle */}
+              <button
+                onClick={() => {
+                  document.documentElement.classList.toggle('dark');
+                  setIsDarkMode(!isDarkMode);
+                  localStorage.setItem('dark-mode', !isDarkMode);
+                }}
+                className="w-full flex items-center justify-center px-4 py-2 rounded text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-600 transition-colors"
+                aria-label="Change theme"
+              >
+                {isDarkMode ? (
+                  <>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                    {t('light_mode')}
+                  </>
+                ) : (
+                  <>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                    </svg>
+                    {t('dark_mode')}
+                  </>
+                )}
+              </button>
+            </div>
 
             {userInfo.isLoggedIn ? (
-              <div className="mt-2 border-t pt-2">
-                {/* Info utilisateur mobile */}
-                <div className="flex items-center space-x-3 px-4 py-3 bg-gray-50 rounded-lg mb-2">
+              <div className="border-t border-gray-200 dark:border-slate-600 pt-3 mt-3">
+                {/* User Info Card */}
+                <div className="flex items-center space-x-3 px-4 py-3 bg-gray-50 dark:bg-slate-600 rounded-lg mb-3">
                   {userInfo.avatar ? (
                     React.createElement('img', {
                       src: userInfo.avatar,
@@ -587,57 +760,59 @@ $userInfo = [
                     React.createElement(AnonymousAvatar, { size: 40 })
                   )}
                   <div>
-                    <p className="font-medium text-gray-900">{userInfo.pseudo || userInfo.name}</p>
+                    <p className="font-medium text-gray-900 dark:text-white">{userInfo.pseudo || userInfo.name}</p>
                     {userInfo.role === 'admin' && (
-                      <span className="text-xs text-red-600 font-medium">{t('administrator')}</span>
+                      <span className="text-xs text-red-600 dark:text-red-400 font-medium">{t('administrator')}</span>
                     )}
                   </div>
                 </div>
 
-                {/* Menu liens */}
-                <a href={`${BASE_URL}/Dashboard`} className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none"
-                       viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                          d="M3 3h7v7H3V3zM14 3h7v4h-7V3zM3 14h7v7H3v-7zM14 14h7v7h-7v-7z"/>
-                  </svg>
-                  {t('dashboard')}
-                </a>
-                <a href={`${BASE_URL}/Favoris`} className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none"
-                       viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                          d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-                  </svg>
-                  {t('favorites')}
-                </a>
-                <a href={`${BASE_URL}/Parametres?section=profile`} className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded">
-                  <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 2122 2122"
-                  className="w-5 h-5 mr-2"
-                  fill="currentColor"
-                  >
-                  <path d="M1909.18,1148.97v-176.63h-107.48c-4.98-42.32-13.52-83.56-25.3-123.41l98.63-42.43-69.8-162.26-98.67,42.44c-17.77-30.62-37.65-59.9-59.45-87.57l76-76-124.9-124.9-75.99,76c-32.94-25.95-68.09-49.18-105.16-69.37l39.75-99.74-164.09-65.39-39.75,99.76c-33.78-8.99-68.49-15.66-103.98-19.85v-107.49h-176.63v107.49c-42.34,4.99-83.56,13.52-123.41,25.29l-42.43-98.63-162.25,69.8,42.44,98.67c-30.64,17.77-59.9,37.65-87.57,59.45l-76-76-124.9,124.9,76,75.99c-25.94,32.94-49.18,68.09-69.37,105.16l-99.74-39.75-65.39,164.09,99.76,39.75c-8.99,33.78-15.66,68.49-19.85,103.98h-107.49v176.63h107.49c4.98,42.34,13.52,83.56,25.29,123.41l-98.63,42.43,69.8,162.26,98.67-42.44c17.77,30.62,37.65,59.9,59.45,87.57l-76,76,124.9,124.9,75.99-76c32.94,25.95,68.09,49.18,105.16,69.37l-39.75,99.74,164.09,65.39,39.75-99.76c33.78,8.99,68.49,15.66,103.98,19.85v107.49h176.63v-107.49c42.34-4.99,83.56-13.52,123.41-25.3l42.43,98.63,162.25-69.8-42.44-98.67c30.64-17.77,59.9-37.65,87.57-59.45l76,76,124.9-124.9-76-75.99c25.94-32.94,49.18-68.09,69.37-105.16l99.74,39.75,65.39-164.09-99.76-39.75c8.99-33.78,15.66-68.49,19.85-103.98h107.49ZM1061,1412.12c-193.51,0-350.61-157.1-350.61-350.61s157.1-350.61,350.61-350.61,350.61,157.1,350.61,350.61-157.1,350.61-350.61,350.61Z"/>
-                  </svg>
-                  {t('settings')}
-                </a>
-                <a href={`${BASE_URL}/logout`} className="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-gray-100 rounded">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none"
-                       viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                          d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1"/>
-                  </svg>
-                  {t('logout')}
-                </a>
+                {/* User Menu Links */}
+                <div className="space-y-1">
+                  <a href={`${BASE_URL}/Dashboard`} className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-600 rounded transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none"
+                         viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                            d="M3 3h7v7H3V3zM14 3h7v4h-7V3zM3 14h7v7H3v-7zM14 14h7v7h-7v-7z"/>
+                    </svg>
+                    {t('dashboard')}
+                  </a>
+                  <a href={`${BASE_URL}/Favoris`} className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-600 rounded transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none"
+                         viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                            d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                    </svg>
+                    {t('favorites')}
+                  </a>
+                  <a href={`${BASE_URL}/Parametres?section=profile`} className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-600 rounded transition-colors">
+                    <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 2122 2122"
+                    className="w-5 h-5 mr-2"
+                    fill="currentColor"
+                    >
+                    <path d="M1909.18,1148.97v-176.63h-107.48c-4.98-42.32-13.52-83.56-25.3-123.41l98.63-42.43-69.8-162.26-98.67,42.44c-17.77-30.62-37.65-59.9-59.45-87.57l76-76-124.9-124.9-75.99,76c-32.94-25.95-68.09-49.18-105.16-69.37l39.75-99.74-164.09-65.39-39.75,99.76c-33.78-8.99-68.49-15.66-103.98-19.85v-107.49h-176.63v107.49c-42.34,4.99-83.56,13.52-123.41,25.29l-42.43-98.63-162.25,69.8,42.44,98.67c-30.64,17.77-59.9,37.65-87.57,59.45l-76-76-124.9,124.9,76,75.99c-25.94,32.94-49.18,68.09-69.37,105.16l-99.74-39.75-65.39,164.09,99.76,39.75c-8.99,33.78-15.66,68.49-19.85,103.98h-107.49v176.63h107.49c4.98,42.34,13.52,83.56,25.29,123.41l-98.63,42.43,69.8,162.26,98.67-42.44c17.77,30.62,37.65,59.9,59.45,87.57l-76,76,124.9,124.9,75.99-76c32.94,25.95,68.09,49.18,105.16,69.37l-39.75,99.74,164.09,65.39,39.75-99.76c33.78,8.99,68.49,15.66,103.98,19.85v107.49h176.63v-107.49c42.34-4.99,83.56-13.52,123.41-25.3l42.43,98.63,162.25-69.8-42.44-98.67c30.64-17.77,59.9-37.65,87.57-59.45l76,76,124.9-124.9-76-75.99c25.94-32.94,49.18-68.09,69.37-105.16l99.74,39.75,65.39-164.09-99.76-39.75c8.99-33.78,15.66-68.49,19.85-103.98h107.49ZM1061,1412.12c-193.51,0-350.61-157.1-350.61-350.61s157.1-350.61,350.61-350.61,350.61,157.1,350.61,350.61-157.1,350.61-350.61,350.61Z"/>
+                    </svg>
+                    {t('settings')}
+                  </a>
+                  <a href={`${BASE_URL}/logout`} className="flex items-center px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-slate-600 rounded transition-colors font-medium">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none"
+                         viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1"/>
+                    </svg>
+                    {t('logout')}
+                  </a>
+                </div>
               </div>
             ) : (
-              /* Liens connexion/inscription pour mobile */
-              <div className="mt-2 border-t pt-2 space-y-2">
-                <a href={`${BASE_URL}/Autentification?mode=login`} className="block bg-white text-center px-4 py-2 rounded shadow">
+              /* Auth Links for mobile */
+              <div className="border-t border-gray-200 dark:border-slate-600 pt-3 mt-3 space-y-2">
+                <a href={`${BASE_URL}/Autentification?mode=login`} className="block bg-gray-100 dark:bg-slate-600 text-center text-gray-700 dark:text-white px-4 py-2 rounded font-medium hover:bg-gray-200 dark:hover:bg-slate-500 transition-colors">
                   {t('login')}
                 </a>
-                <a href={`${BASE_URL}/Autentification?mode=register`} className="block bg-black text-white text-center px-4 py-2 rounded shadow">
+                <a href={`${BASE_URL}/Autentification?mode=register`} className="block bg-red-600 dark:bg-red-700 text-white text-center px-4 py-2 rounded font-medium hover:bg-red-700 dark:hover:bg-red-600 transition-colors">
                   {t('register')}
                 </a>
               </div>
