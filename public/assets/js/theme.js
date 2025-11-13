@@ -21,9 +21,11 @@ const ThemeManager = {
             }
         });
 
-        // Détecter la préférence système si aucun thème n'est défini
-        if (!localStorage.getItem(this.STORAGE_KEY)) {
+        // Détecter la préférence système SEULEMENT si aucun thème n'est défini ET qu'on n'a jamais défini de thème
+        // Ne pas réinitialiser après le premier chargement
+        if (!localStorage.getItem(this.STORAGE_KEY) && !sessionStorage.getItem('theme_initialized')) {
             this.detectSystemPreference();
+            sessionStorage.setItem('theme_initialized', 'true');
         }
     },
 
@@ -94,6 +96,11 @@ const ThemeManager = {
      * Détecte la préférence système de l'utilisateur
      */
     detectSystemPreference() {
+        // Ne détecter que si aucun thème n'a jamais été défini
+        if (localStorage.getItem(this.STORAGE_KEY)) {
+            return; // Déjà défini, ne pas changer
+        }
+
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
             this.setTheme('dark');
         } else {
