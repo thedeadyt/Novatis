@@ -13,7 +13,7 @@ use App\Database\Connection;
 // Legacy constants for backward compatibility
 // These are now loaded from .env but defined here for old code
 if (!defined('BASE_URL')) {
-    define('BASE_URL', rtrim(env('APP_URL'), '/') . '/public');
+    define('BASE_URL', rtrim(env('APP_URL'), '/'));
 }
 
 if (!defined('DEVELOPMENT_MODE')) {

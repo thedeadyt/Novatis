@@ -111,6 +111,7 @@ $userInfo = [
     const [highlight, setHighlight] = useState({ left: 0, width: 0 });
     const [isDarkMode, setIsDarkMode] = useState(document.documentElement.classList.contains('dark'));
     const [searchQuery, setSearchQuery] = useState('');
+    const [currentLang, setCurrentLang] = useState(localStorage.getItem('language') || 'fr');
     const [searchResults, setSearchResults] = useState([]);
     const [searchOpen, setSearchOpen] = useState(false);
     const searchTimeoutRef = useRef(null);
@@ -708,14 +709,19 @@ $userInfo = [
               {/* Language Selector */}
               <select
                 onChange={(e) => {
-                  i18n.changeLanguage(e.target.value);
-                  localStorage.setItem("language", e.target.value);
+                  const newLang = e.target.value;
+                  setCurrentLang(newLang);
+                  localStorage.setItem("language", newLang);
+                  if (window.i18n && window.i18n.changeLanguage) {
+                    window.i18n.changeLanguage(newLang);
+                  }
+                  setTimeout(() => window.location.reload(), 100);
                 }}
-                defaultValue={localStorage.getItem("language") || "fr"}
+                value={currentLang}
                 className="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
               >
-                <option value="fr">🇫🇷 {t('french')}</option>
-                <option value="en">🇬🇧 {t('english')}</option>
+                <option value="fr">🇫🇷 Français</option>
+                <option value="en">🇬🇧 English</option>
               </select>
 
               {/* Theme Toggle */}
@@ -733,14 +739,14 @@ $userInfo = [
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
                     </svg>
-                    {t('light_mode')}
+                    {currentLang === 'fr' ? 'Mode clair' : 'Light mode'}
                   </>
                 ) : (
                   <>
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                     </svg>
-                    {t('dark_mode')}
+                    {currentLang === 'fr' ? 'Mode sombre' : 'Dark mode'}
                   </>
                 )}
               </button>

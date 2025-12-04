@@ -45,7 +45,7 @@ if (!$prestataire) {
     <meta name='viewport' content='width=device-width, initial-scale=1'>
 
     <!-- Variables CSS -->
-    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/variables.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/Variables.css">
 
     <!-- Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -57,6 +57,9 @@ if (!$prestataire) {
 
     <!-- i18next -->
     <?php include __DIR__ . '/../../includes/i18n-head.php'; ?>
+
+    <!-- Toast notifications -->
+    <script src="<?= BASE_URL ?>/assets/js/toast.js"></script>
 
     <style>
         body {

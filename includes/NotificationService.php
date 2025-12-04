@@ -290,7 +290,7 @@ class NotificationService {
             'order',
             'Nouvelle commande reçue',
             "Vous avez reçu une nouvelle commande d'un montant de {$orderAmount}€.",
-            "/Novatis/public/Dashboard?tab=orders"
+            "/novatis/Dashboard?tab=orders"
         );
     }
 
@@ -303,7 +303,7 @@ class NotificationService {
             'message',
             'Nouveau message',
             "{$senderName} vous a envoyé un message.",
-            "/Novatis/public/Dashboard?tab=messages"
+            "/novatis/Dashboard?tab=messages"
         );
     }
 
@@ -316,7 +316,7 @@ class NotificationService {
             'security',
             'Alerte de sécurité',
             $alertMessage,
-            "/Novatis/public/Parametres"
+            "/novatis/Parametres"
         );
     }
 
@@ -329,7 +329,7 @@ class NotificationService {
             'payment',
             'Rappel de paiement',
             "Un paiement de {$amount}€ est dû le {$dueDate}.",
-            "/Novatis/public/Dashboard?tab=purchases"
+            "/novatis/Dashboard?tab=purchases"
         );
     }
 
@@ -342,7 +342,7 @@ class NotificationService {
             'service_update',
             "Mise à jour: {$serviceName}",
             $updateMessage,
-            "/Novatis/public/Dashboard?tab=services"
+            "/novatis/Dashboard?tab=services"
         );
     }
 }

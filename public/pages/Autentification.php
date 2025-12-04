@@ -17,7 +17,7 @@ if (isUserLoggedIn()) {
     <link rel="icon" type="image/png" href="<?= BASE_URL ?>/assets/img/logos/Logo_Novatis.png">
 
     <!-- Variables CSS -->
-    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/variables.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/Variables.css">
 
     <!-- Thème Global CSS -->
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/theme.css">
@@ -345,7 +345,7 @@ if (isUserLoggedIn()) {
                     const result = await response.json();
 
                     if (result.success) {
-                        window.location.href = '<?= BASE_URL ?>/Dashboard';
+                        window.location.href = '<?= BASE_URL ?>/pages/Dashboard.php';
                     } else if (result.require_2fa) {
                         // A2F requis - afficher le modal
                         setShow2FA(true);
@@ -384,7 +384,7 @@ if (isUserLoggedIn()) {
                     const twoFAResult = await twoFAResponse.json();
 
                     if (twoFAResult.success) {
-                        window.location.href = '<?= BASE_URL ?>/Dashboard';
+                        window.location.href = '<?= BASE_URL ?>/pages/Dashboard.php';
                     } else {
                         setErrors({ twoFactor: twoFAResult.error || 'Code incorrect' });
                         setTwoFactorCode('');
@@ -408,28 +408,49 @@ if (isUserLoggedIn()) {
                     `width=${width},height=${height},left=${left},top=${top},scrollbars=yes`
                 );
 
+                if (!popup) {
+                    setErrors({ general: 'Impossible d\'ouvrir la popup. Vérifiez que les popups ne sont pas bloquées.' });
+                    return;
+                }
+
                 // Écouter les messages du popup
                 const messageHandler = (event) => {
-                    if (event.origin !== window.location.origin) return;
+                    console.log('Message reçu:', event.data, 'Origin:', event.origin, 'Expected:', window.location.origin);
+
+                    // Vérifier que c'est bien un message OAuth
+                    if (!event.data || !event.data.type) {
+                        console.log('Message invalide, ignoring');
+                        return;
+                    }
 
                     if (event.data.type === 'oauth_success') {
-                        popup.close();
-                        window.location.href = '<?= BASE_URL ?>/Dashboard';
+                        console.log('✓ OAuth success reçu ! Token:', event.data.loginToken);
+                        // Ne pas essayer de fermer la popup (COOP policy)
+                        // Elle se fermera toute seule
+
+                        // Nettoyer le listener
+                        window.removeEventListener('message', messageHandler);
+
+                        // Rediriger vers le dashboard AVEC le token
+                        const token = event.data.loginToken;
+                        window.location.href = '<?= BASE_URL ?>/pages/Dashboard.php?login_token=' + token;
                     } else if (event.data.type === 'oauth_error') {
-                        popup.close();
+                        console.log('✗ OAuth error reçu:', event.data.message);
+                        // Ne pas essayer de fermer la popup (COOP policy)
+
+                        // Nettoyer le listener
+                        window.removeEventListener('message', messageHandler);
+
+                        // Afficher l'erreur
                         setErrors({ general: event.data.message || 'Erreur lors de la connexion OAuth' });
                     }
                 };
 
                 window.addEventListener('message', messageHandler);
 
-                // Nettoyer l'écouteur si le popup est fermé manuellement
-                const checkPopup = setInterval(() => {
-                    if (popup.closed) {
-                        clearInterval(checkPopup);
-                        window.removeEventListener('message', messageHandler);
-                    }
-                }, 500);
+                // NE PAS vérifier popup.closed à cause de COOP policy
+                // Le listener sera supprimé quand on recevra le message oauth_success
+                console.log('Listener postMessage actif, en attente du message OAuth...');
             };
 
             return React.createElement('div', {
@@ -545,7 +566,7 @@ if (isUserLoggedIn()) {
                                 className: "mb-6 lg:mb-8"
                             },
                                 React.createElement('img', {
-                                    src: "<?= BASE_URL ?>/assets/img/logo.png",
+                                    src: "<?= BASE_URL ?>/assets/img/logos/Logo_Novatis_nobg.png",
                                     alt: "Novatis Logo",
                                     className: "w-16 h-16 lg:w-24 lg:h-24 mx-auto rounded-full logo-glow"
                                 })

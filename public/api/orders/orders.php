@@ -110,7 +110,7 @@ try {
                 'order',
                 'Commande créée',
                 "Votre commande pour \"{$service['title']}\" a été créée avec succès",
-                "/Novatis/public/Dashboard?tab=purchases"
+                "/novatis/Dashboard?tab=purchases"
             );
 
             // Si un message a été fourni, l'envoyer automatiquement
@@ -201,7 +201,7 @@ try {
                         'order',
                         'Mise à jour de commande',
                         $status_messages[$new_status]['buyer'],
-                        '/Novatis/public/Dashboard?tab=purchases'
+                        '/novatis/Dashboard?tab=purchases'
                     );
 
                     // Notification pour le vendeur (sauf si c'est lui qui fait l'action)
@@ -211,7 +211,7 @@ try {
                             'order',
                             'Mise à jour de commande',
                             $status_messages[$new_status]['seller'],
-                            '/Novatis/public/Dashboard?tab=orders'
+                            '/novatis/Dashboard?tab=orders'
                         );
                     }
                 }
@@ -241,7 +241,7 @@ try {
                             'message',
                             'Demande d\'évaluation',
                             "Votre commande a été livrée ! Laissez une évaluation pour aider les autres utilisateurs.",
-                            '/Novatis/public/Dashboard?tab=messages'
+                            '/novatis/Dashboard?tab=messages'
                         );
                     } catch (Exception $e) {
                         // Ne pas faire échouer la mise à jour du statut si le message automatique échoue

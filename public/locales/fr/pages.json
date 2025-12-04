@@ -1,12 +1,26 @@
 {
   "index": {
     "title": "Novatis | Accueil",
-    "welcome": "Bienvenue sur Novatis",
-    "description": "Trouvez les meilleurs prestataires de services",
+    "welcome": "Bienvenue sur",
+    "welcomeBrand": "Novatis",
+    "description": "Novatis est votre marketplace de services professionnels. Découvrez des prestataires qualifiés, explorez leurs services et construisez votre projet avec les meilleurs talents.",
     "searchPlaceholder": "Rechercher un service...",
+    "discoverServices": "Découvrir les services",
+    "becomeProvider": "Devenir prestataire",
     "popularCategories": "Catégories populaires",
     "recentProviders": "Prestataires récents",
-    "viewAllProviders": "Voir tous les prestataires"
+    "viewAllProviders": "Voir tous les prestataires",
+    "loadingCategories": "Chargement des catégories...",
+    "loading": "Chargement...",
+    "popularServices": "Services populaires",
+    "newProviders": "Nouveaux prestataires",
+    "noServicesInCategory": "Aucun service dans cette catégorie",
+    "noProvidersInCategory": "Aucun prestataire dans cette catégorie",
+    "servicesOffered": "services proposés",
+    "accountDeleted": {
+      "title": "Compte supprimé avec succès",
+      "message": "Vos données ont été définitivement supprimées."
+    }
   },
   "apropos": {
     "title": "Novatis | À propos",
@@ -96,11 +110,15 @@
     "description": "Découvrez nos experts qualifiés et leurs services",
     "searchPlaceholder": "Rechercher un prestataire...",
     "filters": "Filtres",
+    "categories": "Catégories",
     "category": "Catégorie",
     "allCategories": "Toutes les catégories",
     "location": "Localisation",
     "priceRange": "Fourchette de prix",
-    "rating": "Note minimum",
+    "min": "Min",
+    "max": "Max",
+    "rating": "Notation",
+    "ratingDesc": "Note minimum",
     "sortBy": "Trier par",
     "name": "Nom",
     "nameAZ": "Nom (A-Z)",
@@ -109,15 +127,22 @@
     "priceDesc": "Prix décroissant",
     "deliveryAsc": "Délai croissant",
     "deliveryDesc": "Délai décroissant",
+    "ratingBest": "Meilleure note",
     "apply": "Appliquer",
+    "applyFilters": "Appliquer les filtres",
     "reset": "Réinitialiser",
+    "resetAll": "Réinitialiser tout",
     "results": "résultats",
     "resultsFound": "prestataire(s) trouvé(s)",
     "noResults": "Aucun prestataire trouvé",
     "modifySearch": "Essayez de modifier votre recherche.",
     "servicesOffered": "Services proposés",
+    "services": "Services",
+    "moreServices": "service(s) supplémentaire(s)",
     "viewProfile": "Voir profil",
     "contact": "Contacter",
-    "addToFavorites": "Ajouter aux favoris"
+    "addToFavorites": "Ajouter aux favoris",
+    "priceFrom": "À partir de",
+    "andMore": "et plus"
   }
 }

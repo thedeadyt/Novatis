@@ -105,6 +105,9 @@ class ComposerStaticInit0229362f466a16060058d180d11d028d
     );
 
     public static $classMap = array (
+        'App\\Database\\Connection' => __DIR__ . '/../..' . '/src/Database/Connection.php',
+        'App\\Repositories\\BaseRepository' => __DIR__ . '/../..' . '/src/Repositories/BaseRepository.php',
+        'App\\Utils\\Response' => __DIR__ . '/../..' . '/src/Utils/Response.php',
         'Attribute' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Attribute.php',
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
         'DeepCopy\\DeepCopy' => __DIR__ . '/..' . '/myclabs/deep-copy/src/DeepCopy/DeepCopy.php',

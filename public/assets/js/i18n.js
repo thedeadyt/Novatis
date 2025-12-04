@@ -42,7 +42,7 @@
 
           // Configuration du backend (chargement des fichiers JSON)
           backend: {
-            loadPath: '/Novatis/public/locales/{{lng}}/{{ns}}.json',
+            loadPath: '/novatis/locales/{{lng}}/{{ns}}.json',
           },
 
           // Namespaces (fichiers de traduction)
@@ -170,7 +170,7 @@
    */
   async function saveLanguagePreference(language) {
     try {
-      const response = await fetch('/Novatis/public/api/parametres/settings.php', {
+      const response = await fetch('/novatis/api/parametres/settings.php', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',

@@ -3,7 +3,7 @@
         'name' => 'novatis/novatis',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => '557ed8bf4b9d1d5f9a3431b5577537db0da821b3',
+        'reference' => '395271b1ef08f3e2ba511f1029c887a7fa72d57a',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -49,7 +49,7 @@
         'novatis/novatis' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '557ed8bf4b9d1d5f9a3431b5577537db0da821b3',
+            'reference' => '395271b1ef08f3e2ba511f1029c887a7fa72d57a',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

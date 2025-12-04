@@ -1,6 +1,47 @@
 <?php
 require_once __DIR__ . '/../../config/Config.php';
 
+// Vérifier s'il y a un token de connexion OAuth
+if (isset($_GET['login_token']) && !empty($_GET['login_token'])) {
+    $loginToken = $_GET['login_token'];
+
+    // Vérifier le token dans la session
+    if (isset($_SESSION['login_token']) &&
+        isset($_SESSION['login_token_user_id']) &&
+        isset($_SESSION['login_token_expires']) &&
+        $_SESSION['login_token'] === $loginToken &&
+        $_SESSION['login_token_expires'] > time()) {
+
+        // Token valide ! Restaurer la session utilisateur
+        $userId = $_SESSION['login_token_user_id'];
+
+        // Récupérer l'utilisateur depuis la BDD
+        $pdo = getDBConnection();
+        $stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
+        $stmt->execute([$userId]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($user) {
+            // Restaurer la session
+            $_SESSION['user'] = $user;
+            $_SESSION['user_id'] = $userId;
+
+            // Nettoyer le token
+            unset($_SESSION['login_token']);
+            unset($_SESSION['login_token_user_id']);
+            unset($_SESSION['login_token_expires']);
+
+            // Rediriger vers Dashboard sans le token dans l'URL
+            header('Location: ' . BASE_URL . '/pages/Dashboard.php');
+            exit;
+        }
+    }
+
+    // Token invalide ou expiré - rediriger vers login
+    header('Location: ' . BASE_URL . '/pages/Autentification.php');
+    exit;
+}
+
 // Vérifie si l'utilisateur est connecté
 isUserLoggedIn(true);
 
@@ -18,7 +59,7 @@ $isAdmin = isAdmin();
     <meta name='viewport' content='width=device-width, initial-scale=1'>
 
     <!-- Variables CSS -->
-    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/variables.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/Variables.css">
 
     <!-- Thème Global CSS -->
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/theme.css">
@@ -240,10 +281,18 @@ $isAdmin = isAdmin();
 
         // Hook de traduction pour le Dashboard
         const useDashboardTranslation = () => {
-            const [, forceUpdate] = useReducer(x => x + 1, 0);
+            const [i18nReady, setI18nReady] = useState(false);
 
             useEffect(() => {
-                const handleLanguageChanged = () => forceUpdate();
+                // Vérifier si i18next est déjà prêt
+                if (window.i18next && window.i18next.isInitialized) {
+                    setI18nReady(true);
+                }
+
+                const handleLanguageChanged = () => {
+                    setI18nReady(true);
+                };
+
                 window.addEventListener('i18nReady', handleLanguageChanged);
                 window.addEventListener('languageChanged', handleLanguageChanged);
                 return () => {
@@ -253,7 +302,7 @@ $isAdmin = isAdmin();
             }, []);
 
             const t = (key) => {
-                if (typeof window.t === 'function') {
+                if (i18nReady && typeof window.t === 'function') {
                     return window.t(key, 'dashboard') || key;
                 }
                 return key;
@@ -360,10 +409,10 @@ $isAdmin = isAdmin();
                 const time = new Date(timestamp);
                 const diffInMinutes = Math.floor((now - time) / 60000);
 
-                if (diffInMinutes < 1) return 'À l\'instant';
-                if (diffInMinutes < 60) return `Il y a ${diffInMinutes} min`;
-                if (diffInMinutes < 1440) return `Il y a ${Math.floor(diffInMinutes / 60)} h`;
-                return `Il y a ${Math.floor(diffInMinutes / 1440)} j`;
+                if (diffInMinutes < 1) return t('notifications.timeAgo.justNow');
+                if (diffInMinutes < 60) return t('notifications.timeAgo.minutesAgo').replace('{{minutes}}', diffInMinutes);
+                if (diffInMinutes < 1440) return t('notifications.timeAgo.hoursAgo').replace('{{hours}}', Math.floor(diffInMinutes / 60));
+                return t('notifications.timeAgo.daysAgo').replace('{{days}}', Math.floor(diffInMinutes / 1440));
             };
 
             const handleNotificationClick = (notification) => {
@@ -480,13 +529,13 @@ $isAdmin = isAdmin();
                 notifications.length > 0 && React.createElement('div', { className: "p-3 border-t bg-gray-50 text-center" },
                     React.createElement('button', {
                         className: "text-sm text-blue-600 hover:text-blue-800 font-medium"
-                    }, "Voir toutes les notifications")
+                    }, t('notifications.viewAll'))
                 )
             );
         };
 
         // Notifications Tab Component
-        const NotificationsTab = ({ notifications, unreadCount, onMarkAsRead, onMarkAllAsRead, onDelete, onNavigate }) => {
+        const NotificationsTab = ({ notifications, unreadCount, onMarkAsRead, onMarkAllAsRead, onDelete, onNavigate, t }) => {
             const getNotificationIcon = (type) => {
                 const icons = {
                     order: 'fas fa-briefcase',
@@ -516,10 +565,10 @@ $isAdmin = isAdmin();
                 const time = new Date(timestamp);
                 const diffInMinutes = Math.floor((now - time) / 60000);
 
-                if (diffInMinutes < 1) return 'À l\'instant';
-                if (diffInMinutes < 60) return `Il y a ${diffInMinutes} min`;
-                if (diffInMinutes < 1440) return `Il y a ${Math.floor(diffInMinutes / 60)} h`;
-                return `Il y a ${Math.floor(diffInMinutes / 1440)} j`;
+                if (diffInMinutes < 1) return t('notifications.timeAgo.justNow');
+                if (diffInMinutes < 60) return t('notifications.timeAgo.minutesAgo').replace('{{minutes}}', diffInMinutes);
+                if (diffInMinutes < 1440) return t('notifications.timeAgo.hoursAgo').replace('{{hours}}', Math.floor(diffInMinutes / 60));
+                return t('notifications.timeAgo.daysAgo').replace('{{days}}', Math.floor(diffInMinutes / 1440));
             };
 
             const handleNotificationClick = (notification) => {
@@ -542,20 +591,20 @@ $isAdmin = isAdmin();
                 // Header avec actions
                 React.createElement('div', { className: "flex items-center justify-between mb-6" },
                     React.createElement('h3', { className: "text-lg font-bold" },
-                        `Notifications${unreadCount > 0 ? ` (${unreadCount} non lues)` : ''}`
+                        `${t('notifications.title')}${unreadCount > 0 ? ` (${unreadCount} ${t('notifications.unread')})` : ''}`
                     ),
                     unreadCount > 0 && React.createElement('button', {
                         onClick: onMarkAllAsRead,
                         className: "btn-secondary px-4 py-2 rounded-lg text-sm"
-                    }, "Marquer tout comme lu")
+                    }, t('notifications.markAllRead'))
                 ),
 
                 // Liste des notifications
                 notifications.length === 0 ?
                     React.createElement('div', { className: "text-center py-12 text-gray-500" },
                         React.createElement('i', { className: "fas fa-bell-slash text-4xl mb-4 opacity-50" }),
-                        React.createElement('h4', { className: "text-lg font-medium mb-2" }, "Aucune notification"),
-                        React.createElement('p', null, "Vous n'avez pas encore de notifications.")
+                        React.createElement('h4', { className: "text-lg font-medium mb-2" }, t('notifications.noNotifications')),
+                        React.createElement('p', null, t('notifications.noNotificationsDesc'))
                     ) :
                     React.createElement('div', { className: "space-y-3" },
                         notifications.map(notification =>
@@ -603,7 +652,7 @@ $isAdmin = isAdmin();
                                         ),
                                         !notification.is_read && React.createElement('div', { className: "flex items-center mt-2" },
                                             React.createElement('div', { className: "w-2 h-2 bg-blue-500 rounded-full mr-2" }),
-                                            React.createElement('span', { className: "text-xs text-blue-600 font-medium" }, "Nouveau")
+                                            React.createElement('span', { className: "text-xs text-blue-600 font-medium" }, t('notifications.new'))
                                         )
                                     )
                                 )
@@ -648,7 +697,7 @@ $isAdmin = isAdmin();
         };
 
         // Rating Modal Component
-        const RatingModal = ({ isOpen, onClose, order, onSubmit }) => {
+        const RatingModal = ({ isOpen, onClose, order, onSubmit, t }) => {
             const [rating, setRating] = useState(5);
             const [hoverRating, setHoverRating] = useState(0);
             const [comment, setComment] = useState('');
@@ -656,11 +705,11 @@ $isAdmin = isAdmin();
 
             const getRatingMessage = (rating) => {
                 const messages = {
-                    1: "😞 Très décevant - Le travail ne correspond pas du tout à vos attentes",
-                    2: "😕 Décevant - Le travail présente des lacunes importantes",
-                    3: "😐 Correct - Le travail est acceptable mais peut être amélioré",
-                    4: "😊 Bien - Le travail est de bonne qualité avec quelques points d'amélioration",
-                    5: "🌟 Excellent - Le travail dépasse vos attentes !"
+                    1: t('reviews.ratingMessages.1'),
+                    2: t('reviews.ratingMessages.2'),
+                    3: t('reviews.ratingMessages.3'),
+                    4: t('reviews.ratingMessages.4'),
+                    5: t('reviews.ratingMessages.5')
                 };
                 return messages[rating] || "";
             };
@@ -692,14 +741,14 @@ $isAdmin = isAdmin();
                     className: "bg-white rounded-lg p-6 w-full max-w-md"
                 },
                     React.createElement('h3', { className: "text-lg font-bold mb-4" },
-                        "Évaluer cette commande"
+                        t('reviews.rateOrder')
                     ),
                     React.createElement('div', { className: "mb-4" },
                         React.createElement('p', { className: "text-sm text-gray-600 mb-2" },
-                            `Service: ${order?.service_title || 'Service'}`
+                            `${t('reviews.service')}${order?.service_title || 'Service'}`
                         ),
                         React.createElement('p', { className: "text-sm text-gray-600" },
-                            `Prestataire: ${order?.seller_name || 'Prestataire'}`
+                            `${t('reviews.provider')}${order?.seller_name || t('reviews.provider').replace(': ', '')}`
                         )
                     ),
 
@@ -707,7 +756,7 @@ $isAdmin = isAdmin();
                         // Rating stars
                         React.createElement('div', { className: "mb-4" },
                             React.createElement('label', { className: "block text-sm font-medium mb-2" },
-                                "Votre évaluation"
+                                t('reviews.yourRating')
                             ),
                             React.createElement('div', { className: "flex items-center space-x-2 mb-3" },
                                 React.createElement('div', { className: "star-rating flex space-x-1" },
@@ -741,12 +790,12 @@ $isAdmin = isAdmin();
                         // Comment
                         React.createElement('div', { className: "mb-6" },
                             React.createElement('label', { className: "block text-sm font-medium mb-2" },
-                                "Commentaire (optionnel)"
+                                t('reviews.commentOptional')
                             ),
                             React.createElement('textarea', {
                                 value: comment,
                                 onChange: (e) => setComment(e.target.value),
-                                placeholder: "Partagez votre expérience avec ce prestataire...",
+                                placeholder: t('reviews.commentPlaceholder'),
                                 className: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none",
                                 rows: 4
                             })
@@ -758,12 +807,12 @@ $isAdmin = isAdmin();
                                 type: "button",
                                 onClick: onClose,
                                 className: "flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                            }, "Annuler"),
+                            }, t('common.cancel')),
                             React.createElement('button', {
                                 type: "submit",
                                 disabled: submitting,
                                 className: `flex-1 px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors disabled:opacity-50`
-                            }, submitting ? "Envoi..." : "Publier l'évaluation")
+                            }, submitting ? t('reviews.submitting') : t('reviews.submit'))
                         )
                     )
                 )
@@ -771,7 +820,7 @@ $isAdmin = isAdmin();
         };
 
         // Reviews Tab Component
-        const ReviewsTab = ({ userData }) => {
+        const ReviewsTab = ({ userData, t }) => {
             const [reviews, setReviews] = useState([]);
             const [loading, setLoading] = useState(true);
 
@@ -803,7 +852,7 @@ $isAdmin = isAdmin();
 
             if (loading) {
                 return React.createElement('div', { className: "flex items-center justify-center h-64" },
-                    React.createElement('div', { className: "text-lg" }, "Chargement des évaluations...")
+                    React.createElement('div', { className: "text-lg" }, t('reviews.loadingReviews'))
                 );
             }
 
@@ -819,7 +868,7 @@ $isAdmin = isAdmin();
                                 receivedReviews.length
                             ),
                             React.createElement('p', { className: "text-sm text-gray-600 mt-1" },
-                                "Évaluations reçues"
+                                t('reviews.received')
                             )
                         )
                     ),
@@ -833,10 +882,10 @@ $isAdmin = isAdmin();
                                 }) :
                                 React.createElement('div', null,
                                     React.createElement('div', { className: "text-2xl font-bold text-gray-400" }, "—"),
-                                    React.createElement('p', { className: "text-sm text-gray-600 mt-1" }, "Note moyenne")
+                                    React.createElement('p', { className: "text-sm text-gray-600 mt-1" }, t('reviews.averageRating'))
                                 ),
                             receivedReviews.length > 0 && React.createElement('p', { className: "text-sm text-gray-600 mt-1" },
-                                "Note moyenne"
+                                t('reviews.averageRating')
                             )
                         )
                     ),
@@ -846,7 +895,7 @@ $isAdmin = isAdmin();
                                 givenReviews.length
                             ),
                             React.createElement('p', { className: "text-sm text-gray-600 mt-1" },
-                                "Évaluations données"
+                                t('reviews.given')
                             )
                         )
                     )
@@ -855,13 +904,13 @@ $isAdmin = isAdmin();
                 // Évaluations reçues
                 React.createElement('div', { className: "bg-white rounded-lg p-6", style: {boxShadow: 'var(--shadow-md)'} },
                     React.createElement('h3', { className: "text-lg font-bold mb-4" },
-                        "Évaluations reçues"
+                        t('reviews.received')
                     ),
                     receivedReviews.length === 0 ?
                         React.createElement('div', { className: "text-center py-8 text-gray-500" },
                             React.createElement('i', { className: "fas fa-star text-4xl mb-4 opacity-50" }),
-                            React.createElement('h4', { className: "text-lg font-medium mb-2" }, "Aucune évaluation reçue"),
-                            React.createElement('p', null, "Vos clients pourront vous évaluer après livraison.")
+                            React.createElement('h4', { className: "text-lg font-medium mb-2" }, t('reviews.noReceivedReviews')),
+                            React.createElement('p', null, t('reviews.clientsCanReview'))
                         ) :
                         React.createElement('div', { className: "space-y-4" },
                             receivedReviews.map(review =>
@@ -872,7 +921,7 @@ $isAdmin = isAdmin();
                                                 review.reviewer_name
                                             ),
                                             React.createElement('p', { className: "text-sm text-gray-600" },
-                                                `Pour: ${review.service_title}`
+                                                `${t('reviews.for')}${review.service_title}`
                                             )
                                         ),
                                         React.createElement('div', { className: "text-right" },
@@ -895,7 +944,7 @@ $isAdmin = isAdmin();
                 // Évaluations données
                 givenReviews.length > 0 && React.createElement('div', { className: "bg-white rounded-lg p-6", style: {boxShadow: 'var(--shadow-md)'} },
                     React.createElement('h3', { className: "text-lg font-bold mb-4" },
-                        "Évaluations données"
+                        t('reviews.given')
                     ),
                     React.createElement('div', { className: "space-y-4" },
                         givenReviews.map(review =>
@@ -903,10 +952,10 @@ $isAdmin = isAdmin();
                                 React.createElement('div', { className: "flex items-start justify-between mb-3" },
                                     React.createElement('div', null,
                                         React.createElement('h4', { className: "font-medium" },
-                                            `Évaluation de ${review.reviewee_name}`
+                                            `${t('reviews.reviewedBy')} ${review.reviewee_name}`
                                         ),
                                         React.createElement('p', { className: "text-sm text-gray-600" },
-                                            `Pour: ${review.service_title}`
+                                            `${t('reviews.for')}${review.service_title}`
                                         )
                                     ),
                                     React.createElement('div', { className: "text-right" },
@@ -1072,7 +1121,7 @@ $isAdmin = isAdmin();
                         // Recharger les données
                         loadDashboardData();
                         loadNotifications();
-                        window.toast.success('saved', 'messages', 'Évaluation publiée avec succès !');
+                        window.toast.success('saved', 'messages', t('reviews.publishedSuccess'));
                     } else {
                         throw new Error(result.error || 'Erreur lors de la publication');
                     }
@@ -1151,12 +1200,7 @@ $isAdmin = isAdmin();
                 }),
 
                 // Rating Modal
-                React.createElement(RatingModal, {
-                    isOpen: ratingModal.isOpen,
-                    onClose: closeRatingModal,
-                    order: ratingModal.order,
-                    onSubmit: submitRating
-                }),
+                React.createElement(RatingModal, { isOpen: ratingModal.isOpen, onClose: closeRatingModal, order: ratingModal.order, onSubmit: submitRating, t }),
 
                 // Overlay mobile
                 sidebarOpen && React.createElement('div', {
@@ -1342,7 +1386,7 @@ $isAdmin = isAdmin();
                                     React.createElement('div', null,
                                         React.createElement('p', { className: "font-medium" }, service.title),
                                         React.createElement('p', { className: "text-sm opacity-70" }, `${service.price}€`),
-                                        isAdmin && React.createElement('p', { className: "text-xs text-gray-500" }, `par ${service.user_name}`)
+                                        isAdmin && React.createElement('p', { className: "text-xs text-gray-500" }, `${t('common.by')} ${service.user_name}`)
                                     ),
                                     React.createElement('span', {
                                         className: `px-2 py-1 text-xs rounded-full ${service.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`
@@ -1364,7 +1408,7 @@ $isAdmin = isAdmin();
                                         React.createElement('p', { className: "text-sm opacity-70" }, `${order.price}€`),
                                         React.createElement('p', { className: "text-xs text-gray-500" },
                                             isAdmin ? `${order.buyer_name} > ${order.seller_name}` :
-                                            order.user_role === 'buyer' ? `Vendeur: ${order.seller_name}` : `Acheteur: ${order.buyer_name}`
+                                            order.user_role === 'buyer' ? `${t('orders.seller')}${order.seller_name}` : `${t('orders.buyer')}${order.buyer_name}`
                                         )
                                     ),
                                     React.createElement('span', {
@@ -1380,7 +1424,7 @@ $isAdmin = isAdmin();
         };
 
         // Messages Tab
-        const MessagesTab = ({ data, setData, loadNotifications }) => {
+        const MessagesTab = ({ data, setData, loadNotifications, t }) => {
             const [conversations, setConversations] = useState([]);
             const [selectedConversation, setSelectedConversation] = useState(null);
             const [messages, setMessages] = useState([]);
@@ -1447,7 +1491,7 @@ $isAdmin = isAdmin();
 
             if (loading) {
                 return React.createElement('div', { className: "flex items-center justify-center h-64" },
-                    React.createElement('div', { className: "text-lg" }, "Chargement...")
+                    React.createElement('div', { className: "text-lg" }, t('loading'))
                 );
             }
 
@@ -1460,7 +1504,7 @@ $isAdmin = isAdmin();
                                 React.createElement('button', {
                                     onClick: () => { setSelectedConversation(null); setMessages([]); },
                                     className: "text-gray-500 hover:text-gray-700"
-                                }, "← Retour"),
+                                }, `← ${t('common.back')}`),
                                 React.createElement('h3', { className: "font-medium" }, selectedConversation.title)
                             ),
                             React.createElement('a', {
@@ -1469,14 +1513,14 @@ $isAdmin = isAdmin();
                                 target: "_blank"
                             },
                                 React.createElement('i', { className: "fas fa-user" }),
-                                "Voir le profil"
+                                t('messages.viewProfile')
                             )
                         ),
 
                         // Messages
                         React.createElement('div', { className: "flex-1 overflow-y-auto p-4 space-y-4" },
                             messages.length === 0 && React.createElement('div', { className: "text-center text-gray-500 mt-8" },
-                                "Aucun message. Commencez la conversation !"
+                                t('messages.noMessagesStart')
                             ),
                             messages.map(msg =>
                                 React.createElement('div', {
@@ -1508,14 +1552,14 @@ $isAdmin = isAdmin();
                                     value: newMessage,
                                     onChange: (e) => setNewMessage(e.target.value),
                                     onKeyPress: (e) => e.key === 'Enter' && !sending && newMessage.trim() && sendMessage(),
-                                    placeholder: "Tapez votre message...",
+                                    placeholder: t('messages.messagePlaceholder'),
                                     className: "flex-1 message-input"
                                 }),
                                 React.createElement('button', {
                                     onClick: sendMessage,
                                     disabled: sending || !newMessage.trim(),
                                     className: `btn-primary px-4 py-2 rounded-lg ${sending ? 'opacity-50 cursor-not-allowed' : ''}`
-                                }, sending ? "Envoi..." : "Envoyer")
+                                }, sending ? t('messages.sending') : t('messages.send'))
                             )
                         )
                     )
@@ -1524,12 +1568,12 @@ $isAdmin = isAdmin();
 
             return React.createElement('div', { className: "bg-white rounded-lg", style: {boxShadow: 'var(--shadow-md)'} },
                 React.createElement('div', { className: "p-6 border-b" },
-                    React.createElement('h3', { className: "text-lg font-bold" }, "Messages")
+                    React.createElement('h3', { className: "text-lg font-bold" }, t('messages.title'))
                 ),
 
                 React.createElement('div', { className: "p-6" },
                     conversations.length === 0
-                        ? React.createElement('div', { className: "text-center py-8 text-gray-500" }, "Aucune conversation")
+                        ? React.createElement('div', { className: "text-center py-8 text-gray-500" }, t('messages.noMessages'))
                         : React.createElement('div', { className: "space-y-4" },
                             conversations.map(conv =>
                                 React.createElement('div', {
@@ -1573,7 +1617,7 @@ $isAdmin = isAdmin();
         };
 
         // Service Modal Component
-        const ServiceModal = ({ isOpen, onClose, editingService, serviceFormData, setServiceFormData, onSubmit, categories, predefinedServices }) => {
+        const ServiceModal = ({ isOpen, onClose, editingService, serviceFormData, setServiceFormData, onSubmit, categories, predefinedServices, t }) => {
             if (!isOpen) return null;
 
             const [selectedPredefinedId, setSelectedPredefinedId] = useState('');
@@ -1607,16 +1651,16 @@ $isAdmin = isAdmin();
             return React.createElement('div', { className: "fixed inset-0 z-50 flex items-center justify-center modal-overlay" },
                 React.createElement('div', { className: "bg-white rounded-lg p-6 w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto" },
                     React.createElement('h3', { className: "text-lg font-bold mb-4" },
-                        editingService ? 'Modifier le service' : 'Nouveau service'
+                        editingService ? t('services.editServiceTitle') : t('services.newService')
                     ),
                     React.createElement('form', { onSubmit: onSubmit, className: "space-y-4" },
                         !editingService && React.createElement('div', { className: "bg-blue-50 p-4 rounded-lg border border-blue-200" },
-                            React.createElement('label', { className: "block text-sm font-medium text-gray-700 mb-2" }, "🎯 Service prédéfini (optionnel)"),
+                            React.createElement('label', { className: "block text-sm font-medium text-gray-700 mb-2" }, `🎯 ${t('services.predefinedService')}`),
                             React.createElement('select', {
                                 onChange: handlePredefinedServiceChange,
                                 className: "w-full p-3 border rounded-lg bg-white"
                             },
-                                React.createElement('option', { value: "" }, "Choisir un service prédéfini..."),
+                                React.createElement('option', { value: "" }, t('services.choosePredefined')),
                                 (predefinedServices?.grouped ? Object.keys(predefinedServices.grouped).map(category =>
                                     React.createElement('optgroup', { key: category, label: category },
                                         predefinedServices.grouped[category].map(service =>
@@ -1625,27 +1669,27 @@ $isAdmin = isAdmin();
                                     )
                                 ) : [])
                             ),
-                            React.createElement('p', { className: "text-xs text-gray-500 mt-2" }, "Sélectionnez un service pour remplir automatiquement le titre et la description")
+                            React.createElement('p', { className: "text-xs text-gray-500 mt-2" }, t('services.predefinedHelper'))
                         ),
                         React.createElement('input', {
                             type: "text",
                             value: serviceFormData.title,
                             onChange: (e) => setServiceFormData({...serviceFormData, title: e.target.value}),
-                            placeholder: "Titre du service",
+                            placeholder: t('services.title_field'),
                             className: "w-full p-3 border rounded-lg",
                             required: true
                         }),
                         React.createElement('textarea', {
                             value: serviceFormData.description,
                             onChange: (e) => setServiceFormData({...serviceFormData, description: e.target.value}),
-                            placeholder: "Description du service",
+                            placeholder: t('services.description'),
                             className: "w-full p-3 border rounded-lg",
                             rows: 4,
                             required: true
                         }),
                         selectedPredefinedId && selectedCategory ?
                             React.createElement('div', { className: "bg-gray-50 p-3 border rounded-lg" },
-                                React.createElement('label', { className: "block text-sm font-medium text-gray-600 mb-1" }, "Catégorie"),
+                                React.createElement('label', { className: "block text-sm font-medium text-gray-600 mb-1" }, t('services.category')),
                                 React.createElement('p', { className: "text-gray-800 font-medium" }, selectedCategory.name)
                             ) :
                             React.createElement('select', {
@@ -1653,7 +1697,7 @@ $isAdmin = isAdmin();
                                 onChange: (e) => setServiceFormData({...serviceFormData, category_id: e.target.value}),
                                 className: "w-full p-3 border rounded-lg"
                             },
-                                React.createElement('option', { value: "" }, "Sélectionner une catégorie"),
+                                React.createElement('option', { value: "" }, t('services.selectCategory')),
                                 (categories || []).map(cat =>
                                     React.createElement('option', { key: cat.id, value: cat.id }, cat.name)
                                 )
@@ -1662,7 +1706,7 @@ $isAdmin = isAdmin();
                             type: "number",
                             value: serviceFormData.price,
                             onChange: (e) => setServiceFormData({...serviceFormData, price: e.target.value}),
-                            placeholder: "Prix (€)",
+                            placeholder: t('services.pricePlaceholder'),
                             className: "w-full p-3 border rounded-lg",
                             min: "0",
                             step: "0.01",
@@ -1672,7 +1716,7 @@ $isAdmin = isAdmin();
                             type: "number",
                             value: serviceFormData.delivery_days,
                             onChange: (e) => setServiceFormData({...serviceFormData, delivery_days: e.target.value}),
-                            placeholder: "Délai de livraison (jours)",
+                            placeholder: t('services.deliveryTimePlaceholder'),
                             className: "w-full p-3 border rounded-lg",
                             min: "1",
                             required: true
@@ -1681,19 +1725,19 @@ $isAdmin = isAdmin();
                             type: "url",
                             value: serviceFormData.image,
                             onChange: (e) => setServiceFormData({...serviceFormData, image: e.target.value}),
-                            placeholder: "URL de l'image (optionnel)",
+                            placeholder: t('services.image'),
                             className: "w-full p-3 border rounded-lg"
                         }),
                         React.createElement('div', { className: "flex space-x-2" },
                             React.createElement('button', {
                                 type: "submit",
                                 className: "btn-primary px-4 py-2 rounded-lg flex-1"
-                            }, editingService ? 'Modifier' : 'Créer'),
+                            }, editingService ? t('common.edit') : t('common.create')),
                             React.createElement('button', {
                                 type: "button",
                                 onClick: onClose,
                                 className: "btn-secondary px-4 py-2 rounded-lg flex-1"
-                            }, "Annuler")
+                            }, t('common.cancel'))
                         )
                     )
                 )
@@ -1701,7 +1745,7 @@ $isAdmin = isAdmin();
         };
 
         // Services Tab
-        const ServicesTab = ({ data, loadData, predefinedServices }) => {
+        const ServicesTab = ({ data, loadData, predefinedServices, t }) => {
             const [showServiceModal, setShowServiceModal] = useState(false);
             const [editingService, setEditingService] = useState(null);
             const [serviceFormData, setServiceFormData] = useState({
@@ -1726,7 +1770,7 @@ $isAdmin = isAdmin();
                 if (result.success) {
                     handleCloseModal();
                     loadData();
-                    window.toast.success('saved', 'messages', 'Service sauvegardé avec succès');
+                    window.toast.success('saved', 'messages', t('services.savedSuccess'));
                 } else {
                     window.toast.error('error', 'messages', result.error || 'Erreur lors de la sauvegarde');
                 }
@@ -1752,11 +1796,11 @@ $isAdmin = isAdmin();
             };
 
             const handleDelete = async (serviceId) => {
-                if (confirm('Êtes-vous sûr de vouloir supprimer ce service ?')) {
+                if (confirm(t('services.deleteConfirm'))) {
                     const result = await apiCall('services/services.php', 'DELETE', { id: serviceId });
                     if (result.success) {
                         loadData();
-                        window.toast.success('deleted', 'messages', 'Service supprimé avec succès');
+                        window.toast.success('deleted', 'messages', t('services.deletedSuccess'));
                     } else {
                         window.toast.error('error', 'messages', result.error || 'Erreur lors de la suppression');
                     }
@@ -1766,15 +1810,15 @@ $isAdmin = isAdmin();
             return React.createElement('div', { className: "space-y-6" },
                 React.createElement('div', { className: "bg-white rounded-lg p-6", style: {boxShadow: 'var(--shadow-md)'} },
                     React.createElement('div', { className: "flex items-center justify-between mb-6" },
-                        React.createElement('h3', { className: "text-lg font-bold" }, isAdmin ? "Tous les Services" : "Mes Services"),
+                        React.createElement('h3', { className: "text-lg font-bold" }, isAdmin ? t('services.all') : t('services.title')),
                         !isAdmin && React.createElement('button', {
                             onClick: () => setShowServiceModal(true),
                             className: "btn-primary px-4 py-2 rounded-lg"
-                        }, "Nouveau service")
+                        }, t('services.newService'))
                     ),
 
                 (data.services || []).length === 0
-                    ? React.createElement('div', { className: "text-center py-8 text-gray-500" }, "Aucun service")
+                    ? React.createElement('div', { className: "text-center py-8 text-gray-500" }, t('services.noServices'))
                     : React.createElement('div', { className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" },
                         (data.services || []).map(service =>
                             React.createElement('div', { key: service.id, className: "border rounded-lg p-4 hover:shadow-lg transition-shadow" },
@@ -1791,7 +1835,7 @@ $isAdmin = isAdmin();
                                         className: `px-2 py-1 text-xs rounded-full ${service.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`
                                     }, service.status)
                                 ),
-                                isAdmin && React.createElement('p', { className: "text-xs text-gray-500 mb-3" }, `par ${service.user_name}`),
+                                isAdmin && React.createElement('p', { className: "text-xs text-gray-500 mb-3" }, `${t('common.by')} ${service.user_name}`),
                                 React.createElement('div', { className: "text-xs text-gray-500 mb-3" },
                                     `Livraison: ${service.delivery_days} jour${service.delivery_days > 1 ? 's' : ''}`
                                 ),
@@ -1801,11 +1845,11 @@ $isAdmin = isAdmin();
                                     React.createElement('button', {
                                         onClick: () => handleEdit(service),
                                         className: "btn-secondary px-3 py-1 text-sm rounded flex-1"
-                                    }, "Modifier"),
+                                    }, t('common.edit')),
                                     React.createElement('button', {
                                         onClick: () => handleDelete(service.id),
                                         className: "px-3 py-1 text-sm rounded flex-1 bg-red-100 text-red-800 hover:bg-red-200"
-                                    }, "Supprimer")
+                                    }, t('common.delete'))
                                 )
                             )
                         )
@@ -1820,13 +1864,14 @@ $isAdmin = isAdmin();
                     setServiceFormData,
                     onSubmit: handleServiceSubmit,
                     categories: data.categories || [],
-                    predefinedServices: predefinedServices
+                    predefinedServices: predefinedServices,
+                    t: t
                 })
             );
         };
 
         // Orders Tab (Mes Ventes - only orders where user is seller)
-        const OrdersTab = ({ data, openRatingModal }) => {
+        const OrdersTab = ({ data, openRatingModal, t }) => {
             const [orders, setOrders] = useState([]);
             const [loading, setLoading] = useState(true);
 
@@ -1858,26 +1903,26 @@ $isAdmin = isAdmin();
 
             const formatStatus = (status) => {
                 const statusLabels = {
-                    pending: 'En attente',
-                    in_progress: 'En cours',
-                    delivered: 'Livré',
-                    completed: 'Terminé',
-                    cancelled: 'Annulé'
+                    pending: t('orders.status.pending'),
+                    in_progress: t('orders.status.in_progress'),
+                    delivered: t('orders.status.delivered'),
+                    completed: t('orders.status.completed'),
+                    cancelled: t('orders.status.cancelled')
                 };
                 return statusLabels[status] || status;
             };
 
             if (loading) {
                 return React.createElement('div', { className: "flex items-center justify-center h-64" },
-                    React.createElement('div', { className: "text-lg" }, "Chargement...")
+                    React.createElement('div', { className: "text-lg" }, t('loading'))
                 );
             }
 
             return React.createElement('div', { className: "bg-white rounded-lg p-6", style: {boxShadow: 'var(--shadow-md)'} },
-                React.createElement('h3', { className: "text-lg font-bold mb-6" }, isAdmin ? "Toutes les Commandes" : "Mes Ventes"),
+                React.createElement('h3', { className: "text-lg font-bold mb-6" }, isAdmin ? t('orders.allOrders') : t('orders.mySales')),
 
                 orders.length === 0
-                    ? React.createElement('div', { className: "text-center py-8 text-gray-500" }, isAdmin ? "Aucune commande" : "Aucune vente")
+                    ? React.createElement('div', { className: "text-center py-8 text-gray-500" }, isAdmin ? t('orders.noOrders') : t('orders.noSales'))
                     : React.createElement('div', { className: "space-y-4" },
                         orders.map(order =>
                             React.createElement('div', { key: order.id, className: "border rounded-lg p-4" },
@@ -1889,12 +1934,12 @@ $isAdmin = isAdmin();
                                 ),
                                 React.createElement('div', { className: "grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600" },
                                     React.createElement('div', null,
-                                        React.createElement('span', { className: "font-medium" }, "Prix: "),
+                                        React.createElement('span', { className: "font-medium" }, t('orders.price')),
                                         React.createElement('span', null, `${order.price}€`)
                                     ),
                                     React.createElement('div', null,
                                         React.createElement('span', { className: "font-medium" },
-                                            isAdmin ? "Acheteur: " : order.user_role === 'buyer' ? "Vendeur: " : "Acheteur: "
+                                            isAdmin ? t('orders.buyer') : order.user_role === 'buyer' ? t('orders.seller') : t('orders.buyer')
                                         ),
                                         React.createElement('span', null,
                                             isAdmin ? order.buyer_name :
@@ -1902,7 +1947,7 @@ $isAdmin = isAdmin();
                                         )
                                     ),
                                     order.deadline && React.createElement('div', null,
-                                        React.createElement('span', { className: "font-medium" }, "Échéance: "),
+                                        React.createElement('span', { className: "font-medium" }, t('orders.deadline')),
                                         React.createElement('span', null, new Date(order.deadline).toLocaleDateString())
                                     )
                                 ),
@@ -1914,15 +1959,15 @@ $isAdmin = isAdmin();
                                     order.status === 'pending' && React.createElement('button', {
                                         onClick: () => updateOrderStatus(order.id, 'in_progress'),
                                         className: "btn-primary px-3 py-1 text-sm rounded"
-                                    }, "Accepter"),
+                                    }, t('orders.accept')),
                                     order.status === 'in_progress' && React.createElement('button', {
                                         onClick: () => updateOrderStatus(order.id, 'delivered'),
                                         className: "btn-primary px-3 py-1 text-sm rounded"
-                                    }, "Marquer comme livré"),
+                                    }, t('orders.markDelivered')),
                                     React.createElement('button', {
                                         onClick: () => updateOrderStatus(order.id, 'cancelled'),
                                         className: "btn-secondary px-3 py-1 text-sm rounded"
-                                    }, "Annuler")
+                                    }, t('common.cancel'))
                                 ),
 
                                 // Bouton d'évaluation pour l'acheteur quand la commande est livrée
@@ -1931,16 +1976,16 @@ $isAdmin = isAdmin();
                                     React.createElement('div', { className: "flex items-center justify-between" },
                                         React.createElement('div', null,
                                             React.createElement('p', { className: "text-sm font-medium text-yellow-800" },
-                                                "📦 Commande livrée ! Évaluez votre prestataire"
+                                                t('orders.deliveredEvaluate')
                                             ),
                                             React.createElement('p', { className: "text-xs text-yellow-600 mt-1" },
-                                                "Votre avis aidera les autres utilisateurs"
+                                                t('orders.helpOthers')
                                             )
                                         ),
                                         React.createElement('button', {
                                             onClick: () => openRatingModal(order),
                                             className: "bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-                                        }, "⭐ Évaluer")
+                                        }, t('orders.rate'))
                                     )
                                 )
                             )
@@ -1950,7 +1995,7 @@ $isAdmin = isAdmin();
         };
 
         // Purchases Tab (Mes Achats - only orders where user is buyer)
-        const PurchasesTab = ({ data, openRatingModal }) => {
+        const PurchasesTab = ({ data, openRatingModal, t }) => {
             const [orders, setOrders] = useState([]);
             const [loading, setLoading] = useState(true);
 
@@ -1971,26 +2016,26 @@ $isAdmin = isAdmin();
 
             const formatStatus = (status) => {
                 const statusLabels = {
-                    pending: 'En attente',
-                    in_progress: 'En cours',
-                    delivered: 'Livré',
-                    completed: 'Terminé',
-                    cancelled: 'Annulé'
+                    pending: t('orders.status.pending'),
+                    in_progress: t('orders.status.in_progress'),
+                    delivered: t('orders.status.delivered'),
+                    completed: t('orders.status.completed'),
+                    cancelled: t('orders.status.cancelled')
                 };
                 return statusLabels[status] || status;
             };
 
             if (loading) {
                 return React.createElement('div', { className: "flex items-center justify-center h-64" },
-                    React.createElement('div', { className: "text-lg" }, "Chargement...")
+                    React.createElement('div', { className: "text-lg" }, t('loading'))
                 );
             }
 
             return React.createElement('div', { className: "bg-white rounded-lg p-6", style: {boxShadow: 'var(--shadow-md)'} },
-                React.createElement('h3', { className: "text-lg font-bold mb-6" }, "Mes Achats"),
+                React.createElement('h3', { className: "text-lg font-bold mb-6" }, t('purchases.title')),
 
                 orders.length === 0
-                    ? React.createElement('div', { className: "text-center py-8 text-gray-500" }, "Aucun achat")
+                    ? React.createElement('div', { className: "text-center py-8 text-gray-500" }, t('purchases.noPurchases'))
                     : React.createElement('div', { className: "space-y-4" },
                         orders.map(order =>
                             React.createElement('div', { key: order.id, className: "border rounded-lg p-4" },
@@ -2002,15 +2047,15 @@ $isAdmin = isAdmin();
                                 ),
                                 React.createElement('div', { className: "grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600" },
                                     React.createElement('div', null,
-                                        React.createElement('span', { className: "font-medium" }, "Prix: "),
+                                        React.createElement('span', { className: "font-medium" }, t('orders.price')),
                                         React.createElement('span', null, `${order.price}€`)
                                     ),
                                     React.createElement('div', null,
-                                        React.createElement('span', { className: "font-medium" }, "Vendeur: "),
+                                        React.createElement('span', { className: "font-medium" }, t('orders.seller')),
                                         React.createElement('span', null, order.seller_name)
                                     ),
                                     order.deadline && React.createElement('div', null,
-                                        React.createElement('span', { className: "font-medium" }, "Échéance: "),
+                                        React.createElement('span', { className: "font-medium" }, t('orders.deadline')),
                                         React.createElement('span', null, new Date(order.deadline).toLocaleDateString())
                                     )
                                 ),
@@ -2022,16 +2067,16 @@ $isAdmin = isAdmin();
                                     React.createElement('div', { className: "flex items-center justify-between" },
                                         React.createElement('div', null,
                                             React.createElement('p', { className: "text-sm font-medium text-yellow-800" },
-                                                "📦 Commande livrée ! Évaluez votre prestataire"
+                                                t('orders.deliveredEvaluate')
                                             ),
                                             React.createElement('p', { className: "text-xs text-yellow-600 mt-1" },
-                                                "Votre avis aidera les autres utilisateurs"
+                                                t('orders.helpOthers')
                                             )
                                         ),
                                         React.createElement('button', {
                                             onClick: () => openRatingModal(order),
                                             className: "bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-                                        }, "⭐ Évaluer")
+                                        }, t('orders.rate'))
                                     )
                                 ),
 
@@ -2053,14 +2098,14 @@ $isAdmin = isAdmin();
                                 order.status === 'completed' &&
                                 React.createElement('div', { className: "mt-4 p-3 bg-gray-50 border border-gray-200 rounded-lg" },
                                     React.createElement('p', { className: "text-sm text-gray-800" },
-                                        "✅ Commande terminée"
+                                        t('orders.orderCompleted')
                                     )
                                 ),
 
                                 order.status === 'cancelled' &&
                                 React.createElement('div', { className: "mt-4 p-3 bg-red-50 border border-red-200 rounded-lg" },
                                     React.createElement('p', { className: "text-sm text-red-800" },
-                                        "❌ Commande annulée"
+                                        t('orders.orderCancelled')
                                     )
                                 )
                             )
@@ -2070,27 +2115,27 @@ $isAdmin = isAdmin();
         };
 
         // Portfolio Modal Component
-        const PortfolioModal = ({ isOpen, onClose, editingProject, formData, setFormData, onSubmit, categories }) => {
+        const PortfolioModal = ({ isOpen, onClose, editingProject, formData, setFormData, onSubmit, categories, t }) => {
             if (!isOpen) return null;
 
             return React.createElement('div', { className: "fixed inset-0 z-50 flex items-center justify-center modal-overlay" },
                 React.createElement('div', { className: "bg-white rounded-lg p-6 w-full max-w-md mx-4" },
                     React.createElement('h3', { className: "text-lg font-bold mb-4" },
-                        editingProject ? 'Modifier le projet' : 'Nouveau projet'
+                        editingProject ? t('portfolio.editProject') : t('portfolio.newProject')
                     ),
                     React.createElement('form', { onSubmit: onSubmit, className: "space-y-4" },
                         React.createElement('input', {
                             type: "text",
                             value: formData.title,
                             onChange: (e) => setFormData({...formData, title: e.target.value}),
-                            placeholder: "Titre du projet",
+                            placeholder: t('portfolio.titleField'),
                             className: "w-full p-3 border rounded-lg",
                             required: true
                         }),
                         React.createElement('textarea', {
                             value: formData.description,
                             onChange: (e) => setFormData({...formData, description: e.target.value}),
-                            placeholder: "Description du projet",
+                            placeholder: t('portfolio.description'),
                             className: "w-full p-3 border rounded-lg",
                             rows: 3,
                             required: true
@@ -2100,7 +2145,7 @@ $isAdmin = isAdmin();
                             onChange: (e) => setFormData({...formData, category_id: e.target.value}),
                             className: "w-full p-3 border rounded-lg"
                         },
-                            React.createElement('option', { value: "" }, "Sélectionner une catégorie"),
+                            React.createElement('option', { value: "" }, t('services.selectCategory')),
                             (categories || []).map(cat =>
                                 React.createElement('option', { key: cat.id, value: cat.id }, cat.name)
                             )
@@ -2109,19 +2154,19 @@ $isAdmin = isAdmin();
                             type: "url",
                             value: formData.image,
                             onChange: (e) => setFormData({...formData, image: e.target.value}),
-                            placeholder: "URL de l'image (optionnel)",
+                            placeholder: t('services.image'),
                             className: "w-full p-3 border rounded-lg"
                         }),
                         React.createElement('div', { className: "flex space-x-2" },
                             React.createElement('button', {
                                 type: "submit",
                                 className: "btn-primary px-4 py-2 rounded-lg flex-1"
-                            }, editingProject ? 'Modifier' : 'Ajouter'),
+                            }, editingProject ? t('common.edit') : t('common.add')),
                             React.createElement('button', {
                                 type: "button",
                                 onClick: onClose,
                                 className: "btn-secondary px-4 py-2 rounded-lg flex-1"
-                            }, "Annuler")
+                            }, t('common.cancel'))
                         )
                     )
                 )
@@ -2129,7 +2174,7 @@ $isAdmin = isAdmin();
         };
 
         // Portfolio Tab
-        const PortfolioTab = ({ data, loadData }) => {
+        const PortfolioTab = ({ data, loadData, t }) => {
             const [showModal, setShowModal] = useState(false);
             const [editingProject, setEditingProject] = useState(null);
             const [formData, setFormData] = useState({
@@ -2173,7 +2218,7 @@ $isAdmin = isAdmin();
             };
 
             const handleDelete = async (projectId) => {
-                if (confirm('Êtes-vous sûr de vouloir supprimer ce projet ?')) {
+                if (confirm(t('portfolio.deleteConfirm'))) {
                     const result = await apiCall('services/portfolio.php', 'DELETE', { id: projectId });
                     if (result.success) {
                         loadData();
@@ -2185,15 +2230,15 @@ $isAdmin = isAdmin();
             return React.createElement('div', { className: "space-y-6" },
                 React.createElement('div', { className: "bg-white rounded-lg p-6", style: {boxShadow: 'var(--shadow-md)'} },
                     React.createElement('div', { className: "flex items-center justify-between mb-6" },
-                        React.createElement('h3', { className: "text-lg font-bold" }, "Portfolio"),
+                        React.createElement('h3', { className: "text-lg font-bold" }, t('portfolio.title')),
                         React.createElement('button', {
                             onClick: () => setShowModal(true),
                             className: "btn-primary px-4 py-2 rounded-lg"
-                        }, "Ajouter un projet")
+                        }, t('portfolio.addItem'))
                     ),
 
                     (data.portfolio || []).length === 0
-                        ? React.createElement('div', { className: "text-center py-8 text-gray-500" }, "Aucun projet dans votre portfolio")
+                        ? React.createElement('div', { className: "text-center py-8 text-gray-500" }, t('portfolio.noItems'))
                         : React.createElement('div', { className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" },
                             (data.portfolio || []).map(project =>
                                 React.createElement('div', { key: project.id, className: "border rounded-lg overflow-hidden hover:shadow-lg transition-shadow" },
@@ -2212,11 +2257,11 @@ $isAdmin = isAdmin();
                                             React.createElement('button', {
                                                 onClick: () => handleEdit(project),
                                                 className: "btn-secondary px-3 py-1 text-sm rounded flex-1"
-                                            }, "Modifier"),
+                                            }, t('common.edit')),
                                             React.createElement('button', {
                                                 onClick: () => handleDelete(project.id),
                                                 className: "px-3 py-1 text-sm rounded flex-1 bg-red-100 text-red-800 hover:bg-red-200"
-                                            }, "Supprimer")
+                                            }, t('common.delete'))
                                         )
                                     )
                                 )
@@ -2231,18 +2276,19 @@ $isAdmin = isAdmin();
                     formData,
                     setFormData,
                     onSubmit: handleSubmit,
-                    categories: data.categories || []
+                    categories: data.categories || [],
+                    t: t
                 })
             );
         };
 
         // Former Clients Tab
-        const FormerClientsTab = ({ data }) => {
+        const FormerClientsTab = ({ data, t }) => {
             return React.createElement('div', { className: "bg-white rounded-lg p-6", style: {boxShadow: 'var(--shadow-md)'} },
-                React.createElement('h3', { className: "text-lg font-bold mb-6" }, "Anciens Clients"),
+                React.createElement('h3', { className: "text-lg font-bold mb-6" }, t('formerClients.title')),
 
                 (data.formerClients || []).length === 0
-                    ? React.createElement('div', { className: "text-center py-8 text-gray-500" }, "Aucun client pour le moment")
+                    ? React.createElement('div', { className: "text-center py-8 text-gray-500" }, t('formerClients.noClients'))
                     : React.createElement('div', { className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" },
                         (data.formerClients || []).map(client =>
                             React.createElement('div', { key: client.id, className: "border rounded-lg p-4 hover:shadow-lg transition-shadow" },
@@ -2268,11 +2314,11 @@ $isAdmin = isAdmin();
                                 ),
                                 React.createElement('div', { className: "space-y-2 text-sm" },
                                     React.createElement('div', { className: "flex justify-between" },
-                                        React.createElement('span', null, "Commandes:"),
+                                        React.createElement('span', null, t('formerClients.orders')),
                                         React.createElement('span', { className: "font-medium" }, client.order_count)
                                     ),
                                     React.createElement('div', { className: "flex justify-between" },
-                                        React.createElement('span', null, "Dernière commande:"),
+                                        React.createElement('span', null, t('formerClients.lastOrder')),
                                         React.createElement('span', { className: "font-medium" },
                                             new Date(client.last_order).toLocaleDateString()
                                         )
@@ -2285,7 +2331,7 @@ $isAdmin = isAdmin();
         };
 
         // Admin Users Tab
-        const AdminUsersTab = ({ data, loadData }) => {
+        const AdminUsersTab = ({ data, loadData, t }) => {
             const [users, setUsers] = useState([]);
             const [loading, setLoading] = useState(true);
 
@@ -2314,7 +2360,7 @@ $isAdmin = isAdmin();
             };
 
             const deleteUser = async (userId) => {
-                if (confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) {
+                if (confirm(t('admin.deleteUserConfirm'))) {
                     const result = await apiCall('admin/users.php', 'DELETE', { user_id: userId });
                     if (result.success) {
                         loadUsers();
@@ -2324,23 +2370,23 @@ $isAdmin = isAdmin();
 
             if (loading) {
                 return React.createElement('div', { className: "flex items-center justify-center h-64" },
-                    React.createElement('div', { className: "text-lg" }, "Chargement...")
+                    React.createElement('div', { className: "text-lg" }, t('loading'))
                 );
             }
 
             return React.createElement('div', { className: "bg-white rounded-lg p-6", style: {boxShadow: 'var(--shadow-md)'} },
-                React.createElement('h3', { className: "text-lg font-bold mb-6" }, "Gestion des Utilisateurs"),
+                React.createElement('h3', { className: "text-lg font-bold mb-6" }, t('admin.users')),
 
                 React.createElement('div', { className: "overflow-x-auto" },
                     React.createElement('table', { className: "w-full text-sm text-left" },
                         React.createElement('thead', { className: "text-xs text-gray-700 uppercase bg-gray-50" },
                             React.createElement('tr', null,
-                                React.createElement('th', { className: "px-6 py-3" }, "Utilisateur"),
-                                React.createElement('th', { className: "px-6 py-3" }, "Email"),
-                                React.createElement('th', { className: "px-6 py-3" }, "Rôle"),
-                                React.createElement('th', { className: "px-6 py-3" }, "Note"),
-                                React.createElement('th', { className: "px-6 py-3" }, "Statistiques"),
-                                React.createElement('th', { className: "px-6 py-3" }, "Actions")
+                                React.createElement('th', { className: "px-6 py-3" }, t('admin.user')),
+                                React.createElement('th', { className: "px-6 py-3" }, t('admin.email')),
+                                React.createElement('th', { className: "px-6 py-3" }, t('admin.role')),
+                                React.createElement('th', { className: "px-6 py-3" }, t('admin.rating')),
+                                React.createElement('th', { className: "px-6 py-3" }, t('admin.stats')),
+                                React.createElement('th', { className: "px-6 py-3" }, t('admin.actions'))
                             )
                         ),
                         React.createElement('tbody', null,
@@ -2375,8 +2421,8 @@ $isAdmin = isAdmin();
                                             onChange: (e) => updateUser(user.id, { role: e.target.value }),
                                             className: "text-sm border rounded px-2 py-1"
                                         },
-                                            React.createElement('option', { value: "user" }, "Utilisateur"),
-                                            React.createElement('option', { value: "admin" }, "Admin")
+                                            React.createElement('option', { value: "user" }, t('admin.userRole')),
+                                            React.createElement('option', { value: "admin" }, t('admin.adminRole'))
                                         )
                                     ),
                                     React.createElement('td', { className: "px-6 py-4" },
@@ -2399,7 +2445,7 @@ $isAdmin = isAdmin();
                                         user.id !== userData.id && React.createElement('button', {
                                             onClick: () => deleteUser(user.id),
                                             className: "text-red-600 hover:text-red-800 text-sm"
-                                        }, "Supprimer")
+                                        }, t('common.delete'))
                                     )
                                 )
                             )
@@ -2410,7 +2456,7 @@ $isAdmin = isAdmin();
         };
 
         // Admin Support Tab
-        const AdminSupportTab = ({ data, loadData }) => {
+        const AdminSupportTab = ({ data, loadData, t }) => {
             const [tickets, setTickets] = useState([]);
             const [loading, setLoading] = useState(true);
             const [selectedTicket, setSelectedTicket] = useState(null);
@@ -2458,16 +2504,16 @@ $isAdmin = isAdmin();
             const formatStatus = (status) => {
                 const statusLabels = {
                     open: 'Ouvert',
-                    in_progress: 'En cours',
-                    resolved: 'Résolu',
-                    closed: 'Fermé'
+                    in_progress: t('orders.status.in_progress'),
+                    resolved: t('admin.statusResolved'),
+                    closed: t('admin.statusClosed')
                 };
                 return statusLabels[status] || status;
             };
 
             if (loading) {
                 return React.createElement('div', { className: "flex items-center justify-center h-64" },
-                    React.createElement('div', { className: "text-lg" }, "Chargement...")
+                    React.createElement('div', { className: "text-lg" }, t('loading'))
                 );
             }
 
@@ -2477,8 +2523,8 @@ $isAdmin = isAdmin();
                         React.createElement('button', {
                             onClick: () => setSelectedTicket(null),
                             className: "text-gray-500 hover:text-gray-700"
-                        }, "← Retour"),
-                        React.createElement('h3', { className: "text-lg font-bold" }, "Ticket Support")
+                        }, `← ${t('common.back')}`),
+                        React.createElement('h3', { className: "text-lg font-bold" }, t('admin.ticketSupport'))
                     ),
 
                     React.createElement('div', { className: "space-y-4" },
@@ -2515,33 +2561,33 @@ $isAdmin = isAdmin();
                         ),
 
                         selectedTicket.admin_response && React.createElement('div', null,
-                            React.createElement('h5', { className: "font-medium mb-2" }, "Réponse admin:"),
+                            React.createElement('h5', { className: "font-medium mb-2" }, t('admin.adminResponse')),
                             React.createElement('p', { className: "text-gray-700 bg-blue-50 p-3 rounded" }, selectedTicket.admin_response)
                         ),
 
                         React.createElement('div', null,
-                            React.createElement('h5', { className: "font-medium mb-2" }, "Répondre au ticket:"),
+                            React.createElement('h5', { className: "font-medium mb-2" }, t('admin.replyToTicket')),
                             React.createElement('textarea', {
                                 value: response,
                                 onChange: (e) => setResponse(e.target.value),
-                                placeholder: "Votre réponse...",
+                                placeholder: t('admin.yourResponse'),
                                 className: "w-full p-3 border rounded-lg",
                                 rows: 4
                             }),
                             React.createElement('button', {
                                 onClick: respondToTicket,
                                 className: "btn-primary px-4 py-2 rounded-lg mt-2"
-                            }, "Envoyer la réponse")
+                            }, t('admin.sendResponse'))
                         )
                     )
                 );
             }
 
             return React.createElement('div', { className: "bg-white rounded-lg p-6", style: {boxShadow: 'var(--shadow-md)'} },
-                React.createElement('h3', { className: "text-lg font-bold mb-6" }, "Support Tickets"),
+                React.createElement('h3', { className: "text-lg font-bold mb-6" }, t('admin.supportTickets')),
 
                 tickets.length === 0
-                    ? React.createElement('div', { className: "text-center py-8 text-gray-500" }, "Aucun ticket")
+                    ? React.createElement('div', { className: "text-center py-8 text-gray-500" }, t('admin.noTickets'))
                     : React.createElement('div', { className: "space-y-4" },
                         tickets.map(ticket =>
                             React.createElement('div', {
@@ -2568,20 +2614,20 @@ $isAdmin = isAdmin();
         };
 
         // Category Modal Component
-        const CategoryModal = ({ isOpen, onClose, editingCategory, formData, setFormData, onSubmit }) => {
+        const CategoryModal = ({ isOpen, onClose, editingCategory, formData, setFormData, onSubmit, t }) => {
             if (!isOpen) return null;
 
             return React.createElement('div', { className: "fixed inset-0 z-50 flex items-center justify-center modal-overlay" },
                 React.createElement('div', { className: "bg-white rounded-lg p-6 w-full max-w-md mx-4" },
                     React.createElement('h3', { className: "text-lg font-bold mb-4" },
-                        editingCategory ? 'Modifier la catégorie' : 'Nouvelle catégorie'
+                        editingCategory ? t('admin.editCategory') : t('admin.newCategory')
                     ),
                     React.createElement('form', { onSubmit: onSubmit, className: "space-y-4" },
                         React.createElement('input', {
                             type: "text",
                             value: formData.name,
                             onChange: (e) => setFormData({...formData, name: e.target.value}),
-                            placeholder: "Nom de la catégorie",
+                            placeholder: t('admin.categories'),
                             className: "w-full p-3 border rounded-lg",
                             required: true
                         }),
@@ -2589,23 +2635,23 @@ $isAdmin = isAdmin();
                             type: "text",
                             value: formData.icon,
                             onChange: (e) => setFormData({...formData, icon: e.target.value}),
-                            placeholder: "Icône (emoji ou symbole)",
+                            placeholder: t('common.icon'),
                             className: "w-full p-3 border rounded-lg",
                             maxLength: 10
                         }),
                         React.createElement('div', { className: "text-xs text-gray-500" },
-                            "Exemples d'icônes : 💻 🎨 ✍️ 📈 🌍 📱 🎬 🎵"
+                            t('common.iconExamples')
                         ),
                         React.createElement('div', { className: "flex space-x-2" },
                             React.createElement('button', {
                                 type: "submit",
                                 className: "btn-primary px-4 py-2 rounded-lg flex-1"
-                            }, editingCategory ? 'Modifier' : 'Créer'),
+                            }, editingCategory ? t('common.edit') : t('common.create')),
                             React.createElement('button', {
                                 type: "button",
                                 onClick: onClose,
                                 className: "btn-secondary px-4 py-2 rounded-lg flex-1"
-                            }, "Annuler")
+                            }, t('common.cancel'))
                         )
                     )
                 )
@@ -2613,7 +2659,7 @@ $isAdmin = isAdmin();
         };
 
         // Admin Categories Tab
-        const AdminCategoriesTab = ({ data, loadData }) => {
+        const AdminCategoriesTab = ({ data, loadData, t }) => {
             const [categories, setCategories] = useState(data.categories || []);
             const [showModal, setShowModal] = useState(false);
             const [editingCategory, setEditingCategory] = useState(null);
@@ -2646,7 +2692,7 @@ $isAdmin = isAdmin();
                     handleCloseModal();
                     loadCategories();
                     loadData(); // Recharger les données du dashboard
-                    window.toast.success('messages.saved', 'common', 'Sauvegardé avec succès');
+                    window.toast.success('messages.saved', 'common', t('common.savedSuccess'));
                 } else {
                     window.toast.error('messages.error', 'common', result.error || 'Erreur lors de la sauvegarde');
                 }
@@ -2668,12 +2714,12 @@ $isAdmin = isAdmin();
             };
 
             const handleDelete = async (categoryId) => {
-                if (confirm('Êtes-vous sûr de vouloir supprimer cette catégorie ?')) {
+                if (confirm(t('admin.deleteCategoryConfirm'))) {
                     const result = await apiCall('services/categories.php', 'DELETE', { id: categoryId });
                     if (result.success) {
                         loadCategories();
                         loadData();
-                        window.toast.success('deleted', 'messages', 'Service supprimé avec succès');
+                        window.toast.success('deleted', 'messages', t('services.deletedSuccess'));
                     } else {
                         window.toast.error('error', 'messages', result.error || 'Erreur lors de la suppression');
                     }
@@ -2682,22 +2728,22 @@ $isAdmin = isAdmin();
 
             if (loading && categories.length === 0) {
                 return React.createElement('div', { className: "flex items-center justify-center h-64" },
-                    React.createElement('div', { className: "text-lg" }, "Chargement...")
+                    React.createElement('div', { className: "text-lg" }, t('loading'))
                 );
             }
 
             return React.createElement('div', { className: "space-y-6" },
                 React.createElement('div', { className: "bg-white rounded-lg p-6", style: {boxShadow: 'var(--shadow-md)'} },
                     React.createElement('div', { className: "flex items-center justify-between mb-6" },
-                        React.createElement('h3', { className: "text-lg font-bold" }, "Gestion des Catégories"),
+                        React.createElement('h3', { className: "text-lg font-bold" }, t('admin.categories')),
                         React.createElement('button', {
                             onClick: () => setShowModal(true),
                             className: "btn-primary px-4 py-2 rounded-lg"
-                        }, "Nouvelle catégorie")
+                        }, t('admin.newCategory'))
                     ),
 
                     categories.length === 0
-                        ? React.createElement('div', { className: "text-center py-8 text-gray-500" }, "Aucune catégorie")
+                        ? React.createElement('div', { className: "text-center py-8 text-gray-500" }, t('admin.noCategories'))
                         : React.createElement('div', { className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" },
                             categories.map(category =>
                                 React.createElement('div', { key: category.id, className: "border rounded-lg p-4 hover:shadow-lg transition-shadow" },
@@ -2715,11 +2761,11 @@ $isAdmin = isAdmin();
                                         React.createElement('button', {
                                             onClick: () => handleEdit(category),
                                             className: "btn-secondary px-3 py-1 text-sm rounded flex-1"
-                                        }, "Modifier"),
+                                        }, t('common.edit')),
                                         React.createElement('button', {
                                             onClick: () => handleDelete(category.id),
                                             className: "px-3 py-1 text-sm rounded flex-1 bg-red-100 text-red-800 hover:bg-red-200"
-                                        }, "Supprimer")
+                                        }, t('common.delete'))
                                     )
                                 )
                             )
@@ -2732,7 +2778,8 @@ $isAdmin = isAdmin();
                     editingCategory,
                     formData,
                     setFormData,
-                    onSubmit: handleSubmit
+                    onSubmit: handleSubmit,
+                    t: t
                 })
             );
         };

@@ -34,7 +34,7 @@ class EmailService {
             $mail->isHTML(true);
             $mail->Subject = 'Vérifiez votre compte Novatis';
 
-            $verificationUrl = 'http://localhost/Novatis/public/verify-email?token=' . urlencode($token);
+            $verificationUrl = BASE_URL . '/verify-email?token=' . urlencode($token);
 
             $mail->Body = <<<HTML
 <!DOCTYPE html>
@@ -129,7 +129,7 @@ HTML;
             $mail->isHTML(true);
             $mail->Subject = '✅ Votre compte Novatis est activé !';
 
-            $dashboardUrl = 'http://localhost/Novatis/public/Dashboard';
+            $dashboardUrl = BASE_URL . '/Dashboard';
 
             $mail->Body = <<<HTML
 <!DOCTYPE html>
@@ -258,7 +258,7 @@ HTML;
         </div>
         <div class="footer">
             <p>Vous recevez cet email car vous avez activé les notifications par email dans vos paramètres.</p>
-            <p>Pour modifier vos préférences, rendez-vous dans <a href="http://localhost/Novatis/public/Parametres?section=notifications">Paramètres > Notifications</a></p>
+            <p>Pour modifier vos préférences, rendez-vous dans <a href="{BASE_URL}/Parametres?section=notifications">Paramètres > Notifications</a></p>
             <p>&copy; 2025 Novatis - Plateforme de services freelance pour étudiants</p>
         </div>
     </div>

@@ -185,7 +185,7 @@ try {
     <meta name='viewport' content='width=device-width, initial-scale=1'>
 
     <!-- Variables CSS -->
-    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/variables.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/Variables.css">
 
     <!-- Thème Global CSS -->
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/theme.css">
@@ -434,6 +434,9 @@ try {
     <!-- i18next pour les traductions -->
     <?php include __DIR__ . '/../../includes/i18n-head.php'; ?>
 
+    <!-- Toast notifications -->
+    <script src="<?= BASE_URL ?>/assets/js/toast.js"></script>
+
     <!-- Script de synchronisation de la langue -->
     <script>
         // Synchroniser la langue entre localStorage et la base de données
@@ -494,7 +497,7 @@ try {
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
                 <div class="flex items-center">
-                    <a href="<?= BASE_URL ?>/dashboard" class="text-xl font-bold text-custom-black">
+                    <a href="<?= BASE_URL ?>/Dashboard" class="text-xl font-bold text-custom-black">
                         <i class="fas fa-arrow-left mr-2"></i>
                         Novatis
                     </a>
@@ -662,41 +665,41 @@ try {
                     <div class="settings-header">
                         <h2 class="text-xl font-semibold text-custom-black">
                             <i class="fas fa-shield-alt mr-2"></i>
-                            Sécurité
+                            <span data-i18n="security.title" data-i18n-ns="settings">Sécurité</span>
                         </h2>
-                        <p class="text-sm text-gray-600 mt-1">Gérez vos paramètres de sécurité</p>
+                        <p class="text-sm text-gray-600 mt-1" data-i18n="security.subtitle" data-i18n-ns="settings">Gérez vos paramètres de sécurité</p>
                     </div>
 
                     <!-- Changement de mot de passe -->
                     <div class="mb-6">
-                        <h3 class="text-lg font-medium text-custom-black mb-3">Changer le mot de passe</h3>
+                        <h3 class="text-lg font-medium text-custom-black mb-3" data-i18n="security.changePassword" data-i18n-ns="settings">Changer le mot de passe</h3>
                         <form method="POST" action="<?= BASE_URL ?>/api/parametres/settings.php">
                             <input type="hidden" name="action" value="change_password">
 
                             <div class="form-group">
-                                <label class="form-label">Mot de passe actuel</label>
+                                <label class="form-label" data-i18n="security.currentPassword" data-i18n-ns="settings">Mot de passe actuel</label>
                                 <input type="password" name="current_password" class="form-input"
-                                       placeholder="Votre mot de passe actuel" required>
+                                       data-i18n-attr="placeholder" data-i18n="security.currentPassword" data-i18n-ns="settings" required>
                             </div>
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div class="form-group">
-                                    <label class="form-label">Nouveau mot de passe</label>
+                                    <label class="form-label" data-i18n="security.newPassword" data-i18n-ns="settings">Nouveau mot de passe</label>
                                     <input type="password" name="new_password" class="form-input"
-                                           placeholder="Nouveau mot de passe" required>
+                                           data-i18n-attr="placeholder" data-i18n="security.newPassword" data-i18n-ns="settings" required>
                                 </div>
 
                                 <div class="form-group">
-                                    <label class="form-label">Confirmer le mot de passe</label>
+                                    <label class="form-label" data-i18n="security.confirmPassword" data-i18n-ns="settings">Confirmer le mot de passe</label>
                                     <input type="password" name="confirm_password" class="form-input"
-                                           placeholder="Confirmer le mot de passe" required>
+                                           data-i18n-attr="placeholder" data-i18n="security.confirmPassword" data-i18n-ns="settings" required>
                                 </div>
                             </div>
 
                             <div class="flex justify-end">
                                 <button type="submit" class="btn-primary px-6 py-2 rounded-lg">
                                     <i class="fas fa-key mr-2"></i>
-                                    Changer le mot de passe
+                                    <span data-i18n="security.changePassword" data-i18n-ns="settings">Changer le mot de passe</span>
                                 </button>
                             </div>
                         </form>
@@ -706,9 +709,9 @@ try {
                     <div class="border-t pt-6">
                         <h3 class="text-lg font-medium text-custom-black mb-3">
                             <i class="fas fa-mobile-alt mr-2"></i>
-                            Authentification à deux facteurs (A2F)
+                            <span data-i18n="security.twoFactor.title" data-i18n-ns="settings">Authentification à deux facteurs (A2F)</span>
                         </h3>
-                        <p class="text-sm text-gray-600 mb-4">
+                        <p class="text-sm text-gray-600 mb-4" data-i18n="security.twoFactor.description" data-i18n-ns="settings">
                             Ajoutez une couche de sécurité supplémentaire à votre compte en utilisant une application d'authentification
                         </p>
 
@@ -720,17 +723,17 @@ try {
                                         <i class="fas fa-info-circle text-blue-500 text-xl"></i>
                                     </div>
                                     <div class="ml-3 flex-1">
-                                        <h4 class="text-sm font-medium text-blue-800 mb-2">
+                                        <h4 class="text-sm font-medium text-blue-800 mb-2" data-i18n="security.twoFactor.whyEnable" data-i18n-ns="settings">
                                             Pourquoi activer l'A2F ?
                                         </h4>
                                         <ul class="text-sm text-blue-700 space-y-1 mb-3">
-                                            <li>• Protégez votre compte contre les accès non autorisés</li>
-                                            <li>• Recevez une alerte en cas de tentative de connexion suspecte</li>
-                                            <li>• Ajoutez un code unique à 6 chiffres à votre connexion</li>
+                                            <li data-i18n="security.twoFactor.benefit1" data-i18n-ns="settings">• Protégez votre compte contre les accès non autorisés</li>
+                                            <li data-i18n="security.twoFactor.benefit2" data-i18n-ns="settings">• Recevez une alerte en cas de tentative de connexion suspecte</li>
+                                            <li data-i18n="security.twoFactor.benefit3" data-i18n-ns="settings">• Ajoutez un code unique à 6 chiffres à votre connexion</li>
                                         </ul>
                                         <button type="button" onclick="TwoFactorAuth.showEnableModal()" class="btn-primary px-4 py-2 rounded-lg text-sm">
                                             <i class="fas fa-shield-alt mr-2"></i>
-                                            Activer l'A2F
+                                            <span data-i18n="security.twoFactor.enable" data-i18n-ns="settings">Activer l'A2F</span>
                                         </button>
                                     </div>
                                 </div>
@@ -744,17 +747,17 @@ try {
                                             <i class="fas fa-check-circle text-green-500 text-2xl"></i>
                                         </div>
                                         <div class="ml-3">
-                                            <h4 class="text-sm font-medium text-green-800">
+                                            <h4 class="text-sm font-medium text-green-800" data-i18n="security.twoFactor.enabled" data-i18n-ns="settings">
                                                 L'authentification à deux facteurs est activée
                                             </h4>
-                                            <p class="text-sm text-green-700">
+                                            <p class="text-sm text-green-700" data-i18n="security.twoFactor.enabledDesc" data-i18n-ns="settings">
                                                 Votre compte est protégé par un code de sécurité supplémentaire
                                             </p>
                                         </div>
                                     </div>
                                     <button type="button" onclick="TwoFactorAuth.showDisableModal()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm">
                                         <i class="fas fa-times mr-2"></i>
-                                        Désactiver
+                                        <span data-i18n="security.twoFactor.disable" data-i18n-ns="settings">Désactiver</span>
                                     </button>
                                 </div>
                             </div>
@@ -763,20 +766,20 @@ try {
                             <div class="bg-gray-50 rounded-lg p-4">
                                 <h4 class="text-sm font-medium text-custom-black mb-2 flex items-center">
                                     <i class="fas fa-key mr-2 text-gray-600"></i>
-                                    Codes de sauvegarde
+                                    <span data-i18n="security.twoFactor.backupCodes" data-i18n-ns="settings">Codes de sauvegarde</span>
                                 </h4>
-                                <p class="text-sm text-gray-600 mb-3">
+                                <p class="text-sm text-gray-600 mb-3" data-i18n="security.twoFactor.backupCodesDesc" data-i18n-ns="settings">
                                     Utilisez ces codes si vous perdez l'accès à votre application d'authentification
                                 </p>
                                 <button type="button" onclick="TwoFactorAuth.showBackupCodes()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition text-sm">
                                     <i class="fas fa-eye mr-2"></i>
-                                    Voir les codes de sauvegarde
+                                    <span data-i18n="security.twoFactor.viewBackupCodes" data-i18n-ns="settings">Voir les codes de sauvegarde</span>
                                 </button>
                             </div>
                         <?php endif; ?>
 
                         <div class="mt-4 text-sm text-gray-600">
-                            <p><strong>Dernier changement de mot de passe :</strong>
+                            <p><strong data-i18n="security.lastPasswordChange" data-i18n-ns="settings">Dernier changement de mot de passe</strong> :
                             <?= date('d/m/Y à H:i', strtotime($security['last_password_change'])) ?></p>
                         </div>
                     </div>
@@ -789,9 +792,9 @@ try {
                     <div class="settings-header">
                         <h2 class="text-xl font-semibold text-custom-black">
                             <i class="fas fa-bell mr-2"></i>
-                            Préférences de notifications
+                            <span data-i18n="notifications.title" data-i18n-ns="settings">Préférences de notifications</span>
                         </h2>
-                        <p class="text-sm text-gray-600 mt-1">Choisissez comment vous souhaitez être notifié</p>
+                        <p class="text-sm text-gray-600 mt-1" data-i18n="notifications.subtitle" data-i18n-ns="settings">Choisissez comment vous souhaitez être notifié</p>
                     </div>
 
                     <form method="POST" action="<?= BASE_URL ?>/api/parametres/settings.php" id="notifications-form">
@@ -803,17 +806,17 @@ try {
                                 <div class="flex-1">
                                     <div class="font-medium text-custom-black flex items-center">
                                         <i class="fas fa-envelope text-blue-600 mr-2"></i>
-                                        Notifications par email
+                                        <span data-i18n="notifications.email" data-i18n-ns="settings">Notifications par email</span>
                                     </div>
                                     <div class="text-sm text-gray-600">
-                                        Recevoir des notifications importantes par email
+                                        <span data-i18n="notifications.emailDesc" data-i18n-ns="settings">Recevoir des notifications importantes par email</span>
                                         <?php if ($user['is_verified']): ?>
                                             <span class="ml-2 text-green-600">
-                                                <i class="fas fa-check-circle"></i> Vérifié
+                                                <i class="fas fa-check-circle"></i> <span data-i18n="notifications.verified" data-i18n-ns="settings">Vérifié</span>
                                             </span>
                                         <?php else: ?>
                                             <span class="ml-2 text-orange-600">
-                                                <i class="fas fa-exclamation-triangle"></i> Non vérifié
+                                                <i class="fas fa-exclamation-triangle"></i> <span data-i18n="notifications.notVerified" data-i18n-ns="settings">Non vérifié</span>
                                             </span>
                                         <?php endif; ?>
                                     </div>
@@ -831,9 +834,9 @@ try {
                                 <div class="flex-1">
                                     <div class="font-medium text-custom-black flex items-center">
                                         <i class="fas fa-desktop text-purple-600 mr-2"></i>
-                                        Notifications push
+                                        <span data-i18n="notifications.push" data-i18n-ns="settings">Notifications push</span>
                                     </div>
-                                    <div class="text-sm text-gray-600">
+                                    <div class="text-sm text-gray-600" data-i18n="notifications.pushDesc" data-i18n-ns="settings">
                                         Recevoir des notifications dans le navigateur
                                     </div>
                                 </div>
@@ -852,13 +855,13 @@ try {
                     <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                         <h4 class="font-medium text-blue-900 mb-2 flex items-center">
                             <i class="fas fa-info-circle mr-2"></i>
-                            Types de notifications
+                            <span data-i18n="notifications.typesTitle" data-i18n-ns="settings">Types de notifications</span>
                         </h4>
                         <ul class="text-sm text-blue-800 space-y-1">
-                            <li>• Nouvelles commandes et messages</li>
-                            <li>• Mises à jour de vos services</li>
-                            <li>• Alertes de sécurité importantes</li>
-                            <li>• Rappels de paiements</li>
+                            <li data-i18n="notifications.type1" data-i18n-ns="settings">• Nouvelles commandes et messages</li>
+                            <li data-i18n="notifications.type2" data-i18n-ns="settings">• Mises à jour de vos services</li>
+                            <li data-i18n="notifications.type3" data-i18n-ns="settings">• Alertes de sécurité importantes</li>
+                            <li data-i18n="notifications.type4" data-i18n-ns="settings">• Rappels de paiements</li>
                         </ul>
                     </div>
                 </div>
@@ -870,9 +873,9 @@ try {
                     <div class="settings-header">
                         <h2 class="text-xl font-semibold text-custom-black">
                             <i class="fas fa-user-shield mr-2"></i>
-                            Paramètres de confidentialité
+                            <span data-i18n="privacy.title" data-i18n-ns="settings">Paramètres de confidentialité</span>
                         </h2>
-                        <p class="text-sm text-gray-600 mt-1">Contrôlez la visibilité de vos informations</p>
+                        <p class="text-sm text-gray-600 mt-1" data-i18n="privacy.subtitle" data-i18n-ns="settings">Contrôlez la visibilité de vos informations</p>
                     </div>
 
                     <form method="POST" action="<?= BASE_URL ?>/api/parametres/settings.php">
@@ -880,18 +883,18 @@ try {
 
                         <div class="space-y-6">
                             <div>
-                                <label class="form-label">Visibilité du profil</label>
+                                <label class="form-label" data-i18n="privacy.profileVisibility" data-i18n-ns="settings">Visibilité du profil</label>
                                 <select name="profile_visibility" class="form-input">
-                                    <option value="public" <?= $privacy['profile_visibility'] === 'public' ? 'selected' : '' ?>>Public - Tout le monde peut voir votre profil</option>
-                                    <option value="private" <?= $privacy['profile_visibility'] === 'private' ? 'selected' : '' ?>>Privé - Seul vous pouvez voir votre profil</option>
+                                    <option value="public" <?= $privacy['profile_visibility'] === 'public' ? 'selected' : '' ?> data-i18n="privacy.public" data-i18n-ns="settings">Public - Tout le monde peut voir votre profil</option>
+                                    <option value="private" <?= $privacy['profile_visibility'] === 'private' ? 'selected' : '' ?> data-i18n="privacy.private" data-i18n-ns="settings">Privé - Seul vous pouvez voir votre profil</option>
                                 </select>
                             </div>
 
                             <div class="space-y-4">
                                 <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                                     <div>
-                                        <div class="font-medium text-custom-black">Afficher l'email</div>
-                                        <div class="text-sm text-gray-600">Permettre aux autres de voir votre adresse email</div>
+                                        <div class="font-medium text-custom-black" data-i18n="privacy.showEmail" data-i18n-ns="settings">Afficher l'email</div>
+                                        <div class="text-sm text-gray-600" data-i18n="privacy.showEmailDesc" data-i18n-ns="settings">Permettre aux autres de voir votre adresse email</div>
                                     </div>
                                     <label class="toggle-switch">
                                         <input type="checkbox" name="show_email"
@@ -902,8 +905,8 @@ try {
 
                                 <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                                     <div>
-                                        <div class="font-medium text-custom-black">Afficher le téléphone</div>
-                                        <div class="text-sm text-gray-600">Permettre aux autres de voir votre numéro de téléphone</div>
+                                        <div class="font-medium text-custom-black" data-i18n="privacy.showPhone" data-i18n-ns="settings">Afficher le téléphone</div>
+                                        <div class="text-sm text-gray-600" data-i18n="privacy.showPhoneDesc" data-i18n-ns="settings">Permettre aux autres de voir votre numéro de téléphone</div>
                                     </div>
                                     <label class="toggle-switch">
                                         <input type="checkbox" name="show_phone"
@@ -914,8 +917,8 @@ try {
 
                                 <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                                     <div>
-                                        <div class="font-medium text-custom-black">Indexation par les moteurs de recherche</div>
-                                        <div class="text-sm text-gray-600">Permettre aux moteurs de recherche d'indexer votre profil</div>
+                                        <div class="font-medium text-custom-black" data-i18n="privacy.searchEngines" data-i18n-ns="settings">Indexation par les moteurs de recherche</div>
+                                        <div class="text-sm text-gray-600" data-i18n="privacy.searchEnginesDesc" data-i18n-ns="settings">Permettre aux moteurs de recherche d'indexer votre profil</div>
                                     </div>
                                     <label class="toggle-switch">
                                         <input type="checkbox" name="allow_search_engines"
@@ -926,8 +929,8 @@ try {
 
                                 <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                                     <div>
-                                        <div class="font-medium text-custom-black">Partage de données</div>
-                                        <div class="text-sm text-gray-600">Autoriser le partage de données anonymisées pour améliorer nos services</div>
+                                        <div class="font-medium text-custom-black" data-i18n="privacy.dataSharing" data-i18n-ns="settings">Partage de données</div>
+                                        <div class="text-sm text-gray-600" data-i18n="privacy.dataSharingDesc" data-i18n-ns="settings">Autoriser le partage de données anonymisées pour améliorer nos services</div>
                                     </div>
                                     <label class="toggle-switch">
                                         <input type="checkbox" name="data_sharing"
@@ -940,7 +943,7 @@ try {
                             <div class="flex justify-end">
                                 <button type="submit" class="btn-primary px-6 py-2 rounded-lg">
                                     <i class="fas fa-save mr-2"></i>
-                                    Sauvegarder
+                                    <span data-i18n="buttons.save" data-i18n-ns="common">Sauvegarder</span>
                                 </button>
                             </div>
                         </div>
@@ -954,9 +957,9 @@ try {
                     <div class="settings-header">
                         <h2 class="text-xl font-semibold text-custom-black">
                             <i class="fas fa-plug mr-2"></i>
-                            Intégrations
+                            <span data-i18n="integrations.title" data-i18n-ns="settings">Intégrations</span>
                         </h2>
-                        <p class="text-sm text-gray-600 mt-1">Connectez vos services tiers</p>
+                        <p class="text-sm text-gray-600 mt-1" data-i18n="integrations.subtitle" data-i18n-ns="settings">Connectez vos services tiers</p>
                     </div>
 
                     <div class="space-y-4">
@@ -966,11 +969,11 @@ try {
                                 <i class="fab fa-google text-2xl mr-4 text-red-500"></i>
                                 <div class="flex-1">
                                     <div class="font-medium text-custom-black flex items-center">
-                                        Google
+                                        <span data-i18n="integrations.google" data-i18n-ns="settings">Google</span>
                                         <?php if (isset($connectedProviders['google'])): ?>
                                             <span class="ml-2 px-2 py-1 bg-green-500 text-white text-xs rounded-full flex items-center">
                                                 <i class="fas fa-check-circle mr-1"></i>
-                                                Connecté
+                                                <span data-i18n="integrations.connected" data-i18n-ns="settings">Connecté</span>
                                             </span>
                                         <?php endif; ?>
                                     </div>
@@ -979,22 +982,22 @@ try {
                                             <?= htmlspecialchars($connectedProviders['google']['email']) ?>
                                         </div>
                                         <div class="text-xs text-gray-500 mt-1">
-                                            Connecté le <?= date('d/m/Y', strtotime($connectedProviders['google']['created_at'])) ?>
+                                            <span data-i18n="integrations.connectedOn" data-i18n-ns="settings">Connecté le</span> <?= date('d/m/Y', strtotime($connectedProviders['google']['created_at'])) ?>
                                         </div>
                                     <?php else: ?>
-                                        <div class="text-sm text-gray-600">Se connecter avec votre compte Google</div>
+                                        <div class="text-sm text-gray-600" data-i18n="integrations.googleDesc" data-i18n-ns="settings">Se connecter avec votre compte Google</div>
                                     <?php endif; ?>
                                 </div>
                             </div>
                             <?php if (isset($connectedProviders['google'])): ?>
                                 <button onclick="disconnectOAuth('google')" class="px-4 py-2 bg-red-100 text-red-600 hover:bg-red-200 rounded-lg text-sm transition">
                                     <i class="fas fa-unlink mr-2"></i>
-                                    Déconnecter
+                                    <span data-i18n="buttons.disconnect" data-i18n-ns="common">Déconnecter</span>
                                 </button>
                             <?php else: ?>
                                 <button onclick="connectOAuth('google')" class="btn-secondary px-4 py-2 rounded-lg text-sm hover:shadow-md transition">
                                     <i class="fas fa-link mr-2"></i>
-                                    Connecter
+                                    <span data-i18n="buttons.connect" data-i18n-ns="common">Connecter</span>
                                 </button>
                             <?php endif; ?>
                         </div>
@@ -1005,11 +1008,11 @@ try {
                                 <i class="fab fa-microsoft text-2xl mr-4 text-blue-500"></i>
                                 <div class="flex-1">
                                     <div class="font-medium text-custom-black flex items-center">
-                                        Microsoft
+                                        <span data-i18n="integrations.microsoft" data-i18n-ns="settings">Microsoft</span>
                                         <?php if (isset($connectedProviders['microsoft'])): ?>
                                             <span class="ml-2 px-2 py-1 bg-green-500 text-white text-xs rounded-full flex items-center">
                                                 <i class="fas fa-check-circle mr-1"></i>
-                                                Connecté
+                                                <span data-i18n="integrations.connected" data-i18n-ns="settings">Connecté</span>
                                             </span>
                                         <?php endif; ?>
                                     </div>
@@ -1018,22 +1021,22 @@ try {
                                             <?= htmlspecialchars($connectedProviders['microsoft']['email']) ?>
                                         </div>
                                         <div class="text-xs text-gray-500 mt-1">
-                                            Connecté le <?= date('d/m/Y', strtotime($connectedProviders['microsoft']['created_at'])) ?>
+                                            <span data-i18n="integrations.connectedOn" data-i18n-ns="settings">Connecté le</span> <?= date('d/m/Y', strtotime($connectedProviders['microsoft']['created_at'])) ?>
                                         </div>
                                     <?php else: ?>
-                                        <div class="text-sm text-gray-600">Se connecter avec votre compte Microsoft</div>
+                                        <div class="text-sm text-gray-600" data-i18n="integrations.microsoftDesc" data-i18n-ns="settings">Se connecter avec votre compte Microsoft</div>
                                     <?php endif; ?>
                                 </div>
                             </div>
                             <?php if (isset($connectedProviders['microsoft'])): ?>
                                 <button onclick="disconnectOAuth('microsoft')" class="px-4 py-2 bg-red-100 text-red-600 hover:bg-red-200 rounded-lg text-sm transition">
                                     <i class="fas fa-unlink mr-2"></i>
-                                    Déconnecter
+                                    <span data-i18n="buttons.disconnect" data-i18n-ns="common">Déconnecter</span>
                                 </button>
                             <?php else: ?>
                                 <button onclick="connectOAuth('microsoft')" class="btn-secondary px-4 py-2 rounded-lg text-sm hover:shadow-md transition">
                                     <i class="fas fa-link mr-2"></i>
-                                    Connecter
+                                    <span data-i18n="buttons.connect" data-i18n-ns="common">Connecter</span>
                                 </button>
                             <?php endif; ?>
                         </div>
@@ -1044,11 +1047,11 @@ try {
                                 <i class="fab fa-github text-2xl mr-4 text-gray-800"></i>
                                 <div class="flex-1">
                                     <div class="font-medium text-custom-black flex items-center">
-                                        GitHub
+                                        <span data-i18n="integrations.github" data-i18n-ns="settings">GitHub</span>
                                         <?php if (isset($connectedProviders['github'])): ?>
                                             <span class="ml-2 px-2 py-1 bg-green-500 text-white text-xs rounded-full flex items-center">
                                                 <i class="fas fa-check-circle mr-1"></i>
-                                                Connecté
+                                                <span data-i18n="integrations.connected" data-i18n-ns="settings">Connecté</span>
                                             </span>
                                         <?php endif; ?>
                                     </div>
@@ -1057,22 +1060,22 @@ try {
                                             <?= htmlspecialchars($connectedProviders['github']['email']) ?>
                                         </div>
                                         <div class="text-xs text-gray-500 mt-1">
-                                            Connecté le <?= date('d/m/Y', strtotime($connectedProviders['github']['created_at'])) ?>
+                                            <span data-i18n="integrations.connectedOn" data-i18n-ns="settings">Connecté le</span> <?= date('d/m/Y', strtotime($connectedProviders['github']['created_at'])) ?>
                                         </div>
                                     <?php else: ?>
-                                        <div class="text-sm text-gray-600">Se connecter avec votre compte GitHub</div>
+                                        <div class="text-sm text-gray-600" data-i18n="integrations.githubDesc" data-i18n-ns="settings">Se connecter avec votre compte GitHub</div>
                                     <?php endif; ?>
                                 </div>
                             </div>
                             <?php if (isset($connectedProviders['github'])): ?>
                                 <button onclick="disconnectOAuth('github')" class="px-4 py-2 bg-red-100 text-red-600 hover:bg-red-200 rounded-lg text-sm transition">
                                     <i class="fas fa-unlink mr-2"></i>
-                                    Déconnecter
+                                    <span data-i18n="buttons.disconnect" data-i18n-ns="common">Déconnecter</span>
                                 </button>
                             <?php else: ?>
                                 <button onclick="connectOAuth('github')" class="btn-secondary px-4 py-2 rounded-lg text-sm hover:shadow-md transition">
                                     <i class="fas fa-link mr-2"></i>
-                                    Connecter
+                                    <span data-i18n="buttons.connect" data-i18n-ns="common">Connecter</span>
                                 </button>
                             <?php endif; ?>
                         </div>
@@ -1082,9 +1085,9 @@ try {
                     <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                         <h4 class="font-medium text-blue-900 mb-2 flex items-center">
                             <i class="fas fa-info-circle mr-2"></i>
-                            Connexion simplifiée
+                            <span data-i18n="integrations.simplifiedLogin" data-i18n-ns="settings">Connexion simplifiée</span>
                         </h4>
-                        <p class="text-sm text-blue-800">
+                        <p class="text-sm text-blue-800" data-i18n="integrations.simplifiedLoginDesc" data-i18n-ns="settings">
                             Connectez votre compte Novatis avec Google, Microsoft ou GitHub pour vous connecter rapidement sans saisir votre mot de passe.
                         </p>
                     </div>
@@ -1097,9 +1100,9 @@ try {
                     <div class="settings-header">
                         <h2 class="text-xl font-semibold text-custom-black">
                             <i class="fas fa-headset mr-2"></i>
-                            Contact Support
+                            <span data-i18n="support.title" data-i18n-ns="settings">Contact Support</span>
                         </h2>
-                        <p class="text-sm text-gray-600 mt-1">Besoin d'aide ? Contactez notre équipe</p>
+                        <p class="text-sm text-gray-600 mt-1" data-i18n="support.subtitle" data-i18n-ns="settings">Besoin d'aide ? Contactez notre équipe</p>
                     </div>
 
                     <div class="space-y-6">
@@ -1108,63 +1111,63 @@ try {
                             <div class="p-4 bg-gray-50 rounded-lg">
                                 <div class="flex items-center mb-2">
                                     <i class="fas fa-envelope text-custom-red text-xl mr-3"></i>
-                                    <h3 class="font-medium text-custom-black">Email</h3>
+                                    <h3 class="font-medium text-custom-black" data-i18n="support.email" data-i18n-ns="settings">Email</h3>
                                 </div>
-                                <a href="mailto:support@novatis.com" class="text-sm text-custom-red hover:underline">
+                                <a href="mailto:support@novatis.com" class="text-sm text-custom-red hover:underline" data-i18n="support.emailAddress" data-i18n-ns="settings">
                                     support@novatis.com
                                 </a>
-                                <p class="text-xs text-gray-600 mt-1">Réponse sous 24h</p>
+                                <p class="text-xs text-gray-600 mt-1" data-i18n="support.emailResponse" data-i18n-ns="settings">Réponse sous 24h</p>
                             </div>
 
                             <div class="p-4 bg-gray-50 rounded-lg">
                                 <div class="flex items-center mb-2">
                                     <i class="fas fa-phone text-custom-red text-xl mr-3"></i>
-                                    <h3 class="font-medium text-custom-black">Téléphone</h3>
+                                    <h3 class="font-medium text-custom-black" data-i18n="support.phone" data-i18n-ns="settings">Téléphone</h3>
                                 </div>
-                                <a href="tel:+33123456789" class="text-sm text-custom-red hover:underline">
+                                <a href="tel:+33123456789" class="text-sm text-custom-red hover:underline" data-i18n="support.phoneNumber" data-i18n-ns="settings">
                                     +33 1 23 45 67 89
                                 </a>
-                                <p class="text-xs text-gray-600 mt-1">Lun-Ven 9h-18h</p>
+                                <p class="text-xs text-gray-600 mt-1" data-i18n="support.phoneHours" data-i18n-ns="settings">Lun-Ven 9h-18h</p>
                             </div>
                         </div>
 
                         <!-- Formulaire de contact -->
                         <div class="border-t pt-6">
-                            <h3 class="text-lg font-medium text-custom-black mb-4">Envoyer un message</h3>
+                            <h3 class="text-lg font-medium text-custom-black mb-4" data-i18n="support.sendMessage" data-i18n-ns="settings">Envoyer un message</h3>
                             <form method="POST" action="<?= BASE_URL ?>/api/parametres/settings.php">
                                 <input type="hidden" name="action" value="contact_support">
 
                                 <div class="form-group">
-                                    <label class="form-label">Sujet</label>
+                                    <label class="form-label" data-i18n="support.subject" data-i18n-ns="settings">Sujet</label>
                                     <select name="subject" class="form-input" required>
-                                        <option value="">Sélectionnez un sujet</option>
-                                        <option value="technique">Problème technique</option>
-                                        <option value="facturation">Question de facturation</option>
-                                        <option value="fonctionnalite">Demande de fonctionnalité</option>
-                                        <option value="autre">Autre</option>
+                                        <option value="" data-i18n="support.selectSubject" data-i18n-ns="settings">Sélectionnez un sujet</option>
+                                        <option value="technique" data-i18n="support.subjectTech" data-i18n-ns="settings">Problème technique</option>
+                                        <option value="facturation" data-i18n="support.subjectBilling" data-i18n-ns="settings">Question de facturation</option>
+                                        <option value="fonctionnalite" data-i18n="support.subjectFeature" data-i18n-ns="settings">Demande de fonctionnalité</option>
+                                        <option value="autre" data-i18n="support.subjectOther" data-i18n-ns="settings">Autre</option>
                                     </select>
                                 </div>
 
                                 <div class="form-group">
-                                    <label class="form-label">Message</label>
+                                    <label class="form-label" data-i18n="support.message" data-i18n-ns="settings">Message</label>
                                     <textarea name="message" class="form-input" rows="6"
-                                              placeholder="Décrivez votre problème ou votre question..." required></textarea>
+                                              data-i18n-attr="placeholder" data-i18n="support.messagePlaceholder" data-i18n-ns="settings" required></textarea>
                                 </div>
 
                                 <div class="form-group">
-                                    <label class="form-label">Priorité</label>
+                                    <label class="form-label" data-i18n="support.priority" data-i18n-ns="settings">Priorité</label>
                                     <select name="priority" class="form-input">
-                                        <option value="low">Basse</option>
-                                        <option value="normal" selected>Normale</option>
-                                        <option value="high">Haute</option>
-                                        <option value="urgent">Urgente</option>
+                                        <option value="low" data-i18n="support.priorityLow" data-i18n-ns="settings">Basse</option>
+                                        <option value="normal" selected data-i18n="support.priorityNormal" data-i18n-ns="settings">Normale</option>
+                                        <option value="high" data-i18n="support.priorityHigh" data-i18n-ns="settings">Haute</option>
+                                        <option value="urgent" data-i18n="support.priorityUrgent" data-i18n-ns="settings">Urgente</option>
                                     </select>
                                 </div>
 
                                 <div class="flex justify-end">
                                     <button type="submit" class="btn-primary px-6 py-2 rounded-lg">
                                         <i class="fas fa-paper-plane mr-2"></i>
-                                        Envoyer
+                                        <span data-i18n="buttons.send" data-i18n-ns="common">Envoyer</span>
                                     </button>
                                 </div>
                             </form>
@@ -1172,31 +1175,31 @@ try {
 
                         <!-- FAQ rapide -->
                         <div class="border-t pt-6">
-                            <h3 class="text-lg font-medium text-custom-black mb-4">Questions fréquentes</h3>
+                            <h3 class="text-lg font-medium text-custom-black mb-4" data-i18n="support.faqTitle" data-i18n-ns="settings">Questions fréquentes</h3>
                             <div class="space-y-3">
                                 <details class="bg-gray-50 rounded-lg p-4">
-                                    <summary class="cursor-pointer font-medium text-custom-black">
+                                    <summary class="cursor-pointer font-medium text-custom-black" data-i18n="support.faq1Q" data-i18n-ns="settings">
                                         Comment réinitialiser mon mot de passe ?
                                     </summary>
-                                    <p class="text-sm text-gray-600 mt-2">
+                                    <p class="text-sm text-gray-600 mt-2" data-i18n="support.faq1A" data-i18n-ns="settings">
                                         Rendez-vous dans la section "Sécurité" de vos paramètres pour modifier votre mot de passe.
                                     </p>
                                 </details>
 
                                 <details class="bg-gray-50 rounded-lg p-4">
-                                    <summary class="cursor-pointer font-medium text-custom-black">
+                                    <summary class="cursor-pointer font-medium text-custom-black" data-i18n="support.faq2Q" data-i18n-ns="settings">
                                         Comment mettre à jour mes informations de facturation ?
                                     </summary>
-                                    <p class="text-sm text-gray-600 mt-2">
+                                    <p class="text-sm text-gray-600 mt-2" data-i18n="support.faq2A" data-i18n-ns="settings">
                                         Contactez le support par email avec vos nouvelles informations de facturation.
                                     </p>
                                 </details>
 
                                 <details class="bg-gray-50 rounded-lg p-4">
-                                    <summary class="cursor-pointer font-medium text-custom-black">
+                                    <summary class="cursor-pointer font-medium text-custom-black" data-i18n="support.faq3Q" data-i18n-ns="settings">
                                         Puis-je exporter mes données ?
                                     </summary>
-                                    <p class="text-sm text-gray-600 mt-2">
+                                    <p class="text-sm text-gray-600 mt-2" data-i18n="support.faq3A" data-i18n-ns="settings">
                                         Oui, contactez le support pour demander une exportation complète de vos données.
                                     </p>
                                 </details>
@@ -1212,22 +1215,22 @@ try {
                     <div class="settings-header">
                         <h2 class="text-xl font-semibold text-red-600">
                             <i class="fas fa-exclamation-triangle mr-2"></i>
-                            Zone de danger
+                            <span data-i18n="danger.title" data-i18n-ns="settings">Zone de danger</span>
                         </h2>
-                        <p class="text-sm text-gray-600 mt-1">Actions irréversibles</p>
+                        <p class="text-sm text-gray-600 mt-1" data-i18n="danger.subtitle" data-i18n-ns="settings">Actions irréversibles</p>
                     </div>
 
                     <div class="danger-zone">
                         <div class="flex items-center justify-between">
                             <div>
-                                <h3 class="font-medium text-red-800">Supprimer le compte</h3>
-                                <p class="text-sm text-red-600 mt-1">
+                                <h3 class="font-medium text-red-800" data-i18n="danger.deleteAccount" data-i18n-ns="settings">Supprimer le compte</h3>
+                                <p class="text-sm text-red-600 mt-1" data-i18n="danger.deleteAccountDesc" data-i18n-ns="settings">
                                     Cette action est irréversible. Toutes vos données seront perdues.
                                 </p>
                             </div>
                             <button class="btn-danger px-4 py-2 rounded-lg" onclick="confirmDeleteAccount()">
                                 <i class="fas fa-trash mr-2"></i>
-                                Supprimer le compte
+                                <span data-i18n="danger.deleteAccountBtn" data-i18n-ns="settings">Supprimer le compte</span>
                             </button>
                         </div>
                     </div>

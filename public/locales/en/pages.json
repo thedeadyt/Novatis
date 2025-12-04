@@ -1,12 +1,26 @@
 {
   "index": {
     "title": "Novatis | Home",
-    "welcome": "Welcome to Novatis",
-    "description": "Find the best service providers",
+    "welcome": "Welcome to",
+    "welcomeBrand": "Novatis",
+    "description": "Novatis is your professional services marketplace. Discover qualified providers, explore their services and build your project with the best talents.",
     "searchPlaceholder": "Search for a service...",
+    "discoverServices": "Discover services",
+    "becomeProvider": "Become a provider",
     "popularCategories": "Popular Categories",
     "recentProviders": "Recent Providers",
-    "viewAllProviders": "View all providers"
+    "viewAllProviders": "View all providers",
+    "loadingCategories": "Loading categories...",
+    "loading": "Loading...",
+    "popularServices": "Popular services",
+    "newProviders": "New providers",
+    "noServicesInCategory": "No services in this category",
+    "noProvidersInCategory": "No providers in this category",
+    "servicesOffered": "services offered",
+    "accountDeleted": {
+      "title": "Account successfully deleted",
+      "message": "Your data has been permanently deleted."
+    }
   },
   "apropos": {
     "title": "Novatis | About",
@@ -96,11 +110,15 @@
     "description": "Discover our qualified experts and their services",
     "searchPlaceholder": "Search for a provider...",
     "filters": "Filters",
+    "categories": "Categories",
     "category": "Category",
     "allCategories": "All categories",
     "location": "Location",
     "priceRange": "Price Range",
-    "rating": "Minimum Rating",
+    "min": "Min",
+    "max": "Max",
+    "rating": "Rating",
+    "ratingDesc": "Minimum rating",
     "sortBy": "Sort by",
     "name": "Name",
     "nameAZ": "Name (A-Z)",
@@ -109,15 +127,22 @@
     "priceDesc": "Price descending",
     "deliveryAsc": "Delivery ascending",
     "deliveryDesc": "Delivery descending",
+    "ratingBest": "Best rating",
     "apply": "Apply",
+    "applyFilters": "Apply filters",
     "reset": "Reset",
+    "resetAll": "Reset all",
     "results": "results",
     "resultsFound": "provider(s) found",
     "noResults": "No providers found",
     "modifySearch": "Try modifying your search.",
     "servicesOffered": "Services offered",
+    "services": "Services",
+    "moreServices": "more service(s)",
     "viewProfile": "View profile",
     "contact": "Contact",
-    "addToFavorites": "Add to favorites"
+    "addToFavorites": "Add to favorites",
+    "priceFrom": "From",
+    "andMore": "and more"
   }
 }

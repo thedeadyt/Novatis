@@ -4,6 +4,16 @@
  *
  * REMPLACEZ LES VALEURS CI-DESSOUS PAR VOS VRAIES CLÉS API
  *
+ * Détection automatique de l'URL de base (local ou Tailscale)
+ */
+
+// Déterminer l'URL de base dynamiquement avec détection HTTPS
+$host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ||
+            $_SERVER['SERVER_PORT'] == 443 ? 'https://' : 'http://';
+$baseUrl = $protocol . $host . '/novatis';
+
+/**
  * Pour obtenir vos clés:
  *
  * GOOGLE:
@@ -11,26 +21,26 @@
  * 2. Créez un nouveau projet
  * 3. Activez "Google+ API"
  * 4. Créez des identifiants OAuth 2.0
- * 5. Ajoutez l'URI: http://localhost/Novatis/public/api/oauth/callback.php?provider=google
+ * 5. Ajoutez l'URI: http://100.78.233.118/novatis/api/oauth/callback.php?provider=google
  *
  * MICROSOFT:
  * 1. Allez sur https://portal.azure.com/
  * 2. Créez une "App registration"
- * 3. Ajoutez l'URI: http://localhost/Novatis/public/api/oauth/callback.php?provider=microsoft
+ * 3. Ajoutez l'URI: http://100.78.233.118/novatis/api/oauth/callback.php?provider=microsoft
  * 4. Créez un secret client
  *
  * GITHUB:
  * 1. Allez sur https://github.com/settings/developers
  * 2. Créez une "New OAuth App"
- * 3. Homepage: http://localhost/Novatis
- * 4. Callback: http://localhost/Novatis/public/api/oauth/callback.php?provider=github
+ * 3. Homepage: http://100.78.233.118/novatis
+ * 4. Callback: http://100.78.233.118/novatis/api/oauth/callback.php?provider=github
  */
 
 return [
     'google' => [
         'client_id' => '378413768163-18h1j2mmvkf9b5ll1v4nc8omuqhcnbs4.apps.googleusercontent.com',
         'client_secret' => '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',
-        'redirect_uri' => 'http://localhost/Novatis/public/api/oauth/callback.php?provider=google',
+        'redirect_uri' => $baseUrl . '/api/oauth/callback.php?provider=google',
         'scopes' => [
             'https://www.googleapis.com/auth/userinfo.email',
             'https://www.googleapis.com/auth/userinfo.profile'
@@ -43,7 +53,7 @@ return [
     'microsoft' => [
         'client_id' => '4fce303c-54f4-4227-aec5-9a1f03d8a52d',
         'client_secret' => '.xA8Q~sKG_SSpi6QD4.FbNNbCfnRKr-~pGrjpdtp',
-        'redirect_uri' => 'http://localhost/Novatis/public/api/oauth/callback.php?provider=microsoft',
+        'redirect_uri' => $baseUrl . '/api/oauth/callback.php?provider=microsoft',
         'scopes' => [
             'openid',
             'profile',
@@ -58,7 +68,7 @@ return [
     'github' => [
         'client_id' => 'Ov23liWt1MZec2E0aSd7',
         'client_secret' => '2aebd70e58d6b591189d4023702d3affe0079732',
-        'redirect_uri' => 'http://localhost/Novatis/public/api/oauth/callback.php?provider=github',
+        'redirect_uri' => $baseUrl . '/api/oauth/callback.php?provider=github',
         'scopes' => [
             'user:email',
             'read:user'

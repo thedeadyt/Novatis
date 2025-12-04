@@ -22,7 +22,7 @@ require_once __DIR__ . '/../../config/Config.php';
     <?php include __DIR__ . '/../../includes/i18n-head.php'; ?>
 </head>
 <body class="flex flex-col min-h-screen">
-    <?php include __DIR__ . '/../../includes/header.php'; ?>
+    <?php include __DIR__ . '/../../includes/Header.php'; ?>
 
     <main class="flex-1">
     <div class="container">
@@ -62,6 +62,6 @@ require_once __DIR__ . '/../../config/Config.php';
     </div>
     </main>
 
-    <?php include __DIR__ . '/../../includes/footer.php'; ?>
+    <?php include __DIR__ . '/../../includes/Footer.php'; ?>
 </body>
 </html>

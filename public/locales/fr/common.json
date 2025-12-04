@@ -1,4 +1,6 @@
 {
+  "french": "Français",
+  "english": "Anglais",
   "header": {
     "home": "Accueil",
     "findProvider": "Trouver un prestataire",
@@ -15,7 +17,11 @@
     "viewAll": "Voir tout",
     "noNotifications": "Aucune notification",
     "administrator": "Administrateur",
-    "changeTheme": "Changer le thème"
+    "changeTheme": "Changer le thème",
+    "french": "Français",
+    "english": "Anglais",
+    "light_mode": "Mode clair",
+    "dark_mode": "Mode sombre"
   },
   "time": {
     "justNow": "À l'instant",

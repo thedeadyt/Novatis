@@ -78,6 +78,7 @@ if ($priceMin === PHP_INT_MAX || $priceMax === 0) {
 <head>
     <meta charset="UTF-8">
     <title data-i18n="prestataires.title" data-i18n-ns="pages">Novatis | Prestataires</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
     <link rel="icon" type="image/png" href="<?= BASE_URL ?>/assets/img/logos/Logo_Novatis.png">
     <link rel='stylesheet' type='text/css' media='screen' href='<?= BASE_URL ?>/assets/css/Variables.css'>
     <link rel='stylesheet' type='text/css' media='screen' href='<?= BASE_URL ?>/assets/css/prestataires.css'>
@@ -457,6 +458,8 @@ if ($priceMin === PHP_INT_MAX || $priceMax === 0) {
             transform: translateX(-100%);
             transition: transform 0.3s ease-in-out;
             overflow-y: auto;
+            visibility: hidden;
+            opacity: 0;
         }
 
         html.dark .mobile-filter-panel,
@@ -487,6 +490,8 @@ if ($priceMin === PHP_INT_MAX || $priceMax === 0) {
 
         .mobile-filter-panel.active {
             transform: translateX(0);
+            visibility: visible;
+            opacity: 1;
         }
 
         .filter-backdrop {
@@ -957,6 +962,26 @@ if ($priceMin === PHP_INT_MAX || $priceMax === 0) {
         // INITIALISATION AU CHARGEMENT
         // ========================================
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('🔄 DOMContentLoaded - Initialisation des filtres');
+
+            // Vérifier l'état initial du panneau mobile
+            const mobileFilterPanel = document.getElementById('mobileFilterPanel');
+            console.log('📱 État initial du panneau mobile:', {
+                classList: mobileFilterPanel.classList.toString(),
+                style: {
+                    display: mobileFilterPanel.style.display,
+                    visibility: mobileFilterPanel.style.visibility,
+                    opacity: mobileFilterPanel.style.opacity,
+                    transform: mobileFilterPanel.style.transform
+                },
+                computedStyle: {
+                    display: window.getComputedStyle(mobileFilterPanel).display,
+                    visibility: window.getComputedStyle(mobileFilterPanel).visibility,
+                    opacity: window.getComputedStyle(mobileFilterPanel).opacity,
+                    transform: window.getComputedStyle(mobileFilterPanel).transform
+                }
+            });
+
             // Récupérer toutes les cartes
             allCards = Array.from(document.querySelectorAll('.prestataire-card'));
 
@@ -974,6 +999,25 @@ if ($priceMin === PHP_INT_MAX || $priceMax === 0) {
 
             // Animations d'entrée
             animateCards();
+
+            // Vérifier l'état après initialisation
+            setTimeout(() => {
+                console.log('⏰ Après initialisation (100ms):', {
+                    classList: mobileFilterPanel.classList.toString(),
+                    style: {
+                        display: mobileFilterPanel.style.display,
+                        visibility: mobileFilterPanel.style.visibility,
+                        opacity: mobileFilterPanel.style.opacity,
+                        transform: mobileFilterPanel.style.transform
+                    },
+                    computedStyle: {
+                        display: window.getComputedStyle(mobileFilterPanel).display,
+                        visibility: window.getComputedStyle(mobileFilterPanel).visibility,
+                        opacity: window.getComputedStyle(mobileFilterPanel).opacity,
+                        transform: window.getComputedStyle(mobileFilterPanel).transform
+                    }
+                });
+            }, 100);
         });
 
         // ========================================
@@ -1396,10 +1440,21 @@ if ($priceMin === PHP_INT_MAX || $priceMax === 0) {
 
             // Fonction pour ouvrir le panel mobile
             function openPanel() {
+                console.log('📱 Ouverture du panneau mobile');
+                console.log('📱 État avant ouverture:', {
+                    classList: mobileFilterPanel.classList.toString(),
+                    style: {
+                        display: mobileFilterPanel.style.display,
+                        visibility: mobileFilterPanel.style.visibility,
+                        opacity: mobileFilterPanel.style.opacity,
+                        transform: mobileFilterPanel.style.transform
+                    }
+                });
+
                 mobileFilterPanel.classList.add('active');
                 filterBackdrop.classList.add('active');
                 document.body.style.overflow = 'hidden'; // Bloquer le scroll du body
-                
+
                 // Appliquer le thème dark si nécessaire
                 if (document.documentElement.classList.contains('dark')) {
                     mobileFilterPanel.style.backgroundColor = '#0f172a';
@@ -1408,15 +1463,46 @@ if ($priceMin === PHP_INT_MAX || $priceMax === 0) {
                     mobileFilterPanel.style.backgroundColor = 'white';
                     mobileFilterPanel.style.color = '#111827';
                 }
+
+                console.log('📱 État après ouverture:', {
+                    classList: mobileFilterPanel.classList.toString(),
+                    style: {
+                        display: mobileFilterPanel.style.display,
+                        visibility: mobileFilterPanel.style.visibility,
+                        opacity: mobileFilterPanel.style.opacity,
+                        transform: mobileFilterPanel.style.transform
+                    }
+                });
             }
 
             // Fonction pour fermer le panel mobile
             function closePanel() {
+                console.log('📱 Fermeture du panneau mobile');
+                console.log('📱 État avant fermeture:', {
+                    classList: mobileFilterPanel.classList.toString(),
+                    style: {
+                        display: mobileFilterPanel.style.display,
+                        visibility: mobileFilterPanel.style.visibility,
+                        opacity: mobileFilterPanel.style.opacity,
+                        transform: mobileFilterPanel.style.transform
+                    }
+                });
+
                 mobileFilterPanel.classList.remove('active');
                 filterBackdrop.classList.remove('active');
                 document.body.style.overflow = ''; // Réactiver le scroll du body
                 mobileFilterPanel.style.backgroundColor = '';
                 mobileFilterPanel.style.color = '';
+
+                console.log('📱 État après fermeture:', {
+                    classList: mobileFilterPanel.classList.toString(),
+                    style: {
+                        display: mobileFilterPanel.style.display,
+                        visibility: mobileFilterPanel.style.visibility,
+                        opacity: mobileFilterPanel.style.opacity,
+                        transform: mobileFilterPanel.style.transform
+                    }
+                });
             }
 
             // Ouvrir le panel

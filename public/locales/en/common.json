@@ -1,4 +1,6 @@
 {
+  "french": "French",
+  "english": "English",
   "header": {
     "home": "Home",
     "findProvider": "Find a Provider",
@@ -15,7 +17,11 @@
     "viewAll": "View all",
     "noNotifications": "No notifications",
     "administrator": "Administrator",
-    "changeTheme": "Change theme"
+    "changeTheme": "Change theme",
+    "french": "French",
+    "english": "English",
+    "light_mode": "Light mode",
+    "dark_mode": "Dark mode"
   },
   "time": {
     "justNow": "Just now",

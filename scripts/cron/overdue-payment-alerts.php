@@ -43,7 +43,7 @@ try {
             'payment',
             'Paiement en retard',
             $buyerMessage,
-            '/Novatis/public/Dashboard?tab=purchases'
+            '/novatis/Dashboard?tab=purchases'
         );
 
         // Notification pour le vendeur
@@ -55,7 +55,7 @@ try {
             'payment',
             'Paiement client en retard',
             $sellerMessage,
-            '/Novatis/public/Dashboard?tab=orders'
+            '/novatis/Dashboard?tab=orders'
         );
 
         $count++;
@@ -71,7 +71,7 @@ try {
                 'order',
                 'Commande annulée',
                 "Votre commande \"{$order['service_title']}\" a été automatiquement annulée pour non-paiement après 7 jours de retard.",
-                '/Novatis/public/Dashboard?tab=purchases'
+                '/novatis/Dashboard?tab=purchases'
             );
 
             $notificationService->create(
@@ -79,7 +79,7 @@ try {
                 'order',
                 'Commande annulée',
                 "La commande \"{$order['service_title']}\" a été annulée automatiquement pour non-paiement.",
-                '/Novatis/public/Dashboard?tab=orders'
+                '/novatis/Dashboard?tab=orders'
             );
         }
     }

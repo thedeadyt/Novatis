@@ -25,7 +25,7 @@ $notificationService = new NotificationService($pdo);
     <link rel="icon" type="image/png" href="<?= BASE_URL ?>/assets/img/logos/Logo_Novatis.png">
 
     <!-- Variables CSS -->
-    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/variables.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/Variables.css">
 
     <!-- Thème Global CSS -->
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/theme.css">
@@ -64,6 +64,9 @@ $notificationService = new NotificationService($pdo);
 
     <!-- i18next -->
     <?php include __DIR__ . '/../../includes/i18n-head.php'; ?>
+
+    <!-- Toast notifications -->
+    <script src="<?= BASE_URL ?>/assets/js/toast.js"></script>
 
     <style>
         body {

@@ -6,6 +6,9 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
+    'App\\Database\\Connection' => $baseDir . '/src/Database/Connection.php',
+    'App\\Repositories\\BaseRepository' => $baseDir . '/src/Repositories/BaseRepository.php',
+    'App\\Utils\\Response' => $baseDir . '/src/Utils/Response.php',
     'Attribute' => $vendorDir . '/symfony/polyfill-php80/Resources/stubs/Attribute.php',
     'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
     'DeepCopy\\DeepCopy' => $vendorDir . '/myclabs/deep-copy/src/DeepCopy/DeepCopy.php',

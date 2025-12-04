@@ -39,7 +39,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // Define constants for backward compatibility
-define('BASE_URL', rtrim(env('APP_URL'), '/') . '/public');
+define('BASE_URL', rtrim(env('APP_URL'), '/'));
 define('DB_HOST', env('DB_HOST'));
 define('DB_NAME', env('DB_NAME'));
 define('DB_USER', env('DB_USER'));

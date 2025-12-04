@@ -73,7 +73,16 @@ try {
         if ($isUserLoggedIn && $currentUserId == $userId) {
             // Déjà lié au bon compte, juste mettre à jour les tokens
             linkOAuthAccount($pdo, $userId, $provider, $userInfo, $tokenData);
-            showSuccess("Connexion réussie avec " . ucfirst($provider) . " !");
+
+            // Créer un token temporaire
+            $loginToken = bin2hex(random_bytes(32));
+            $_SESSION['login_token'] = $loginToken;
+            $_SESSION['login_token_user_id'] = $userId;
+            $_SESSION['login_token_expires'] = time() + 60;
+            session_write_close();
+            session_start();
+
+            showSuccess("Connexion réussie avec " . ucfirst($provider) . " !", $loginToken);
         }
         // CAS B : L'utilisateur est connecté MAIS c'est un compte différent
         else if ($isUserLoggedIn && $currentUserId != $userId) {
@@ -90,11 +99,21 @@ try {
             $stmt->execute([$userId]);
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            // Connecter l'utilisateur
+            // Connecter l'utilisateur dans la session de la popup
             $_SESSION['user'] = $user;
             $_SESSION['user_id'] = $userId;
 
-            showSuccess("Connexion réussie avec " . ucfirst($provider) . " !");
+            // Créer un token temporaire pour transférer la session à la fenêtre principale
+            $loginToken = bin2hex(random_bytes(32));
+            $_SESSION['login_token'] = $loginToken;
+            $_SESSION['login_token_user_id'] = $userId;
+            $_SESSION['login_token_expires'] = time() + 60; // 60 secondes
+
+            // Forcer l'écriture de la session
+            session_write_close();
+            session_start();
+
+            showSuccess("Connexion réussie avec " . ucfirst($provider) . " !", $loginToken);
         }
     }
     // ÉTAPE 2 : La connexion OAuth n'existe pas encore
@@ -122,7 +141,17 @@ try {
                 $_SESSION['user'] = $existingUser;
                 $_SESSION['user_id'] = $userId;
 
-                showSuccess("Connexion réussie avec " . ucfirst($provider) . " !");
+                // Créer un token temporaire
+                $loginToken = bin2hex(random_bytes(32));
+                $_SESSION['login_token'] = $loginToken;
+                $_SESSION['login_token_user_id'] = $userId;
+                $_SESSION['login_token_expires'] = time() + 60;
+
+                // Forcer l'écriture de la session
+                session_write_close();
+                session_start();
+
+                showSuccess("Connexion réussie avec " . ucfirst($provider) . " !", $loginToken);
             } else {
                 // Créer un nouveau compte utilisateur
                 $userId = createUserFromOAuth($pdo, $userInfo, $provider);
@@ -139,7 +168,17 @@ try {
                 $_SESSION['user'] = $newUser;
                 $_SESSION['user_id'] = $userId;
 
-                showSuccess("Compte créé avec succès via " . ucfirst($provider) . " !");
+                // Créer un token temporaire
+                $loginToken = bin2hex(random_bytes(32));
+                $_SESSION['login_token'] = $loginToken;
+                $_SESSION['login_token_user_id'] = $userId;
+                $_SESSION['login_token_expires'] = time() + 60;
+
+                // Forcer l'écriture de la session
+                session_write_close();
+                session_start();
+
+                showSuccess("Compte créé avec succès via " . ucfirst($provider) . " !", $loginToken);
             }
         }
     }
@@ -406,24 +445,79 @@ function linkOAuthAccount($pdo, $userId, $provider, $userInfo, $tokenData) {
 /**
  * Affiche un message de succès et ferme le popup
  */
-function showSuccess($message) {
+function showSuccess($message, $loginToken = null) {
     ?>
     <!DOCTYPE html>
     <html>
     <head>
         <title>Connexion réussie</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                margin: 0;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+            }
+            .success-box {
+                text-align: center;
+                background: rgba(255, 255, 255, 0.1);
+                padding: 40px;
+                border-radius: 20px;
+                backdrop-filter: blur(10px);
+            }
+            .checkmark {
+                font-size: 60px;
+                margin-bottom: 20px;
+            }
+            h2 { margin: 0 0 10px 0; }
+            p { opacity: 0.9; }
+        </style>
     </head>
     <body>
+        <div class="success-box">
+            <div class="checkmark">✓</div>
+            <h2>Connexion réussie !</h2>
+            <p><?= htmlspecialchars($message) ?></p>
+            <p><small>Fermeture automatique...</small></p>
+        </div>
         <script>
-            if (window.opener) {
-                window.opener.postMessage({
-                    type: 'oauth_success',
-                    message: '<?= addslashes($message) ?>'
-                }, window.location.origin);
-                window.close();
+            console.log('=== OAUTH CALLBACK - Envoi postMessage ===');
+            console.log('Login Token: <?= $loginToken ?>');
+
+            if (window.opener && !window.opener.closed) {
+                console.log('Envoi de postMessage avec token à la fenêtre parente...');
+
+                // Envoyer le message plusieurs fois pour être sûr
+                const sendMessage = function() {
+                    window.opener.postMessage({
+                        type: 'oauth_success',
+                        loginToken: '<?= $loginToken ?>',
+                        message: '<?= addslashes($message) ?>'
+                    }, '*');
+                    console.log('Message envoyé avec token');
+                };
+
+                // Envoyer immédiatement
+                sendMessage();
+                // Envoyer après 100ms
+                setTimeout(sendMessage, 100);
+                // Envoyer après 300ms
+                setTimeout(sendMessage, 300);
+
+                console.log('Messages envoyés, attente de redirection par le parent...');
+
+                // Fermer la popup après 2 secondes
+                setTimeout(function() {
+                    console.log('Fermeture de la popup...');
+                    window.close();
+                }, 2000);
             } else {
-                alert('<?= addslashes($message) ?>');
-                window.location.href = '<?= BASE_URL ?>/dashboard';
+                console.log('Pas de window.opener, redirection dans cette fenêtre');
+                window.location.replace('<?= BASE_URL ?>/pages/Dashboard.php<?= $loginToken ? "?token=" . $loginToken : "" ?>');
             }
         </script>
     </body>
