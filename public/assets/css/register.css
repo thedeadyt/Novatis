@@ -1,0 +1,105 @@
+/* register.css (même style que login/logout) */
+
+/* Conteneur principal */
+.login-container {
+  max-width: 400px;
+  margin: 100px auto;
+  padding: 40px 30px;
+  background-color: var(--color-white);
+  border-radius: 12px;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: var(--font-base);
+}
+
+/* Titre */
+.login-container h2 {
+  font-family: var(--font-heading);
+  font-weight: 900;
+  font-size: 2rem;
+  margin-bottom: 24px;
+  color: var(--color-black);
+  text-align: center;
+}
+
+/* Formulaire */
+.login-container form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Labels */
+.login-container label {
+  margin-bottom: 6px;
+  font-weight: 700;
+  color: var(--color-accent-1);
+}
+
+/* Inputs */
+.login-container input {
+  padding: 10px 12px;
+  margin-bottom: 16px;
+  border: 1px solid var(--color-hover-1);
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border 0.3s, box-shadow 0.3s;
+}
+
+.login-container input:focus {
+  outline: none;
+  border-color: var(--color-red);
+  box-shadow: 0 0 0 2px rgba(180, 18, 0, 0.2);
+}
+
+/* Bouton */
+.login-container button {
+  padding: 12px;
+  background-color: var(--color-red);
+  color: var(--color-white);
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.login-container button:hover {
+  background-color: var(--color-accent-2);
+  transform: translateY(-2px);
+}
+
+/* Message d'erreur */
+.error {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 16px;
+  background-color: #f8d7da;
+  color: #842029;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+/* Lien vers login */
+.login-container a {
+  color: var(--color-red);
+  text-decoration: none;
+  font-weight: 700;
+  transition: color 0.3s;
+}
+
+.login-container a:hover {
+  color: var(--color-accent-2);
+}
+
+/* Petit texte sous le formulaire */
+.login-container div {
+  margin-top: 12px;
+  font-size: 0.9rem;
+  text-align: center;
+}

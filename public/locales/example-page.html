@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="settings.title" data-i18n-ns="settings">Exemple de page multilingue</title>
+
+    <!-- i18next - Librairies CDN -->
+    <script src="https://unpkg.com/i18next@23.7.6/dist/umd/i18next.min.js"></script>
+    <script src="https://unpkg.com/i18next-http-backend@2.4.2/i18nextHttpBackend.min.js"></script>
+    <script src="https://unpkg.com/i18next-browser-languagedetector@7.2.0/i18nextBrowserLanguageDetector.min.js"></script>
+
+    <!-- React (pour le sélecteur de langue) -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+
+    <!-- Notre configuration i18n -->
+    <script src="../assets/js/i18n.js"></script>
+    <script src="../assets/js/LanguageSwitcher.js"></script>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <!-- Sélecteur de langue en haut à droite -->
+        <div class="flex justify-end mb-6">
+            <div id="language-switcher-root"></div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-lg p-8">
+            <!-- Titre traduit avec data-i18n -->
+            <h1 class="text-4xl font-bold mb-4" data-i18n="settings.title" data-i18n-ns="settings">
+                Paramètres
+            </h1>
+
+            <!-- Sous-titre traduit -->
+            <p class="text-gray-600 mb-8" data-i18n="settings.subtitle" data-i18n-ns="settings">
+                Gérez vos paramètres de sécurité
+            </p>
+
+            <!-- Section avec traductions -->
+            <div class="space-y-6">
+                <div class="border-b pb-4">
+                    <h2 class="text-2xl font-semibold mb-2" data-i18n="settings.profile.title" data-i18n-ns="settings">
+                        Informations du profil
+                    </h2>
+                    <p class="text-gray-600" data-i18n="settings.profile.subtitle" data-i18n-ns="settings">
+                        Modifiez vos informations personnelles
+                    </p>
+                </div>
+
+                <!-- Formulaire avec traductions -->
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2" data-i18n="settings.profile.firstname" data-i18n-ns="settings">
+                            Prénom
+                        </label>
+                        <input
+                            type="text"
+                            class="w-full border rounded px-4 py-2"
+                            data-i18n="settings.profile.firstname"
+                            data-i18n-ns="settings"
+                            data-i18n-attr="placeholder"
+                            placeholder="Votre prénom"
+                        >
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium mb-2" data-i18n="settings.profile.email" data-i18n-ns="settings">
+                            Email
+                        </label>
+                        <input
+                            type="email"
+                            class="w-full border rounded px-4 py-2"
+                            placeholder="votre@email.com"
+                        >
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium mb-2" data-i18n="settings.profile.bio" data-i18n-ns="settings">
+                            Bio
+                        </label>
+                        <textarea
+                            class="w-full border rounded px-4 py-2"
+                            rows="4"
+                            data-i18n="settings.profile.bioPlaceholder"
+                            data-i18n-ns="settings"
+                            data-i18n-attr="placeholder"
+                            placeholder="Parlez-nous de vous..."
+                        ></textarea>
+                    </div>
+                </div>
+
+                <!-- Boutons avec traductions -->
+                <div class="flex gap-4 mt-6">
+                    <button class="bg-red-600 text-white px-6 py-2 rounded hover:bg-red-700 transition">
+                        <span data-i18n="buttons.save" data-i18n-ns="common">Sauvegarder</span>
+                    </button>
+                    <button class="bg-gray-300 text-gray-700 px-6 py-2 rounded hover:bg-gray-400 transition">
+                        <span data-i18n="buttons.cancel" data-i18n-ns="common">Annuler</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Démonstration JavaScript -->
+            <div class="mt-8 p-4 bg-blue-50 rounded">
+                <h3 class="font-semibold mb-2">Démonstration JavaScript</h3>
+                <p class="text-sm text-gray-600 mb-4">Cliquez sur le bouton pour afficher un message traduit dynamiquement</p>
+                <button
+                    onclick="showTranslatedMessage()"
+                    class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                >
+                    Afficher un message
+                </button>
+                <div id="dynamic-message" class="mt-4 font-medium"></div>
+            </div>
+
+            <!-- Informations sur la langue actuelle -->
+            <div class="mt-8 p-4 bg-gray-50 rounded">
+                <p class="text-sm">
+                    <strong>Langue actuelle :</strong>
+                    <span id="current-language" class="font-mono bg-yellow-100 px-2 py-1 rounded">-</span>
+                </p>
+            </div>
+        </div>
+
+        <!-- Code source -->
+        <div class="mt-8 bg-gray-900 text-gray-100 rounded-lg p-6">
+            <h3 class="text-xl font-semibold mb-4">📝 Code source</h3>
+            <pre class="text-sm overflow-x-auto"><code>&lt;!-- Traduction simple --&gt;
+&lt;h1 data-i18n="settings.title" data-i18n-ns="settings"&gt;
+    Paramètres
+&lt;/h1&gt;
+
+&lt;!-- Traduction d'un placeholder --&gt;
+&lt;input
+    data-i18n="settings.profile.firstname"
+    data-i18n-ns="settings"
+    data-i18n-attr="placeholder"
+    placeholder="Votre prénom"
+&gt;
+
+&lt;!-- JavaScript dynamique --&gt;
+&lt;script&gt;
+window.addEventListener('i18nReady', function() {
+    const message = window.t('buttons.save', 'common');
+    console.log(message); // "Save" en anglais, "Guardar" en espagnol
+});
+&lt;/script&gt;</code></pre>
+        </div>
+    </div>
+
+    <!-- Initialiser le sélecteur de langue -->
+    <script>
+        // Attendre que React soit chargé
+        window.addEventListener('i18nReady', function() {
+            // Rendre le sélecteur de langue
+            if (typeof window.LanguageSwitcher !== 'undefined') {
+                const root = ReactDOM.createRoot(document.getElementById('language-switcher-root'));
+                root.render(React.createElement(window.LanguageSwitcher));
+            }
+
+            // Mettre à jour l'affichage de la langue actuelle
+            updateCurrentLanguageDisplay();
+
+            // Écouter les changements de langue
+            if (typeof i18next !== 'undefined') {
+                i18next.on('languageChanged', updateCurrentLanguageDisplay);
+            }
+        });
+
+        function updateCurrentLanguageDisplay() {
+            const lang = window.getCurrentLanguage ? window.getCurrentLanguage() : 'fr';
+            const display = document.getElementById('current-language');
+            if (display) {
+                const langNames = {
+                    'fr': '🇫🇷 Français',
+                    'en': '🇬🇧 English',
+                    'es': '🇪🇸 Español'
+                };
+                display.textContent = langNames[lang] || lang;
+            }
+        }
+
+        function showTranslatedMessage() {
+            const messageDiv = document.getElementById('dynamic-message');
+            if (messageDiv) {
+                // Utiliser window.t() pour traduire dynamiquement
+                const message = window.t('messages.success', 'common');
+                messageDiv.textContent = '✅ ' + message;
+                messageDiv.className = 'mt-4 font-medium text-green-600';
+            }
+        }
+    </script>
+</body>
+</html>

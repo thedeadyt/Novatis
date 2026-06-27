@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(/c/xampp/php/php.exe check_categories.php)",
+      "Bash(git add:*)",
+      "Bash(git rm:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nMerge remote-tracking branch ''origin/main'' into main\n\nRésolution des conflits de merge suite au pull de origin/main.\n\nChangements intégrés :\n- Nouvelles API pour les catégories et services prédéfinis\n- Scripts de migration de base de données\n- Suppression du fichier logout.php redondant\n- Résolution des conflits dans Config.php (conservation des fonctions helper)\n- Résolution des conflits dans Header.php (traductions)\n- Résolution des conflits dans settings.php et Parametres.php (affichage)\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(find:*)",
+      "Bash(/c/xampp/php/php.exe:*)",
+      "Bash(tree:*)",
+      "Bash(dir:*)",
+      "Bash(findstr:*)",
+      "Bash(composer install:*)",
+      "Bash(composer update:*)",
+      "Bash(tasklist:*)",
+      "Bash(curl:*)",
+      "Bash(while read file)",
+      "Bash(do if ! grep -q 'getDBConnection\\|global $pdo' \"$file\")",
+      "Bash(then echo \"$file needs fix\")",
+      "Bash(fi)",
+      "Bash(done)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

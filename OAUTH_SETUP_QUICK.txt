@@ -1,0 +1,78 @@
+╔════════════════════════════════════════════════════════════════╗
+║         CONFIGURATION OAUTH - CHECKLIST RAPIDE                 ║
+║         AVEC DOMAINE: alex2-server.fr                          ║
+╔════════════════════════════════════════════════════════════════╗
+
+✅ FICHIER PHP DÉJÀ CONFIGURÉ !
+   → /var/www/html/novatis/config/oauth.local.php
+   → Détection automatique domaine/IP
+
+📝 CONFIGURATION DNS OVH REQUISE :
+   1. Aller sur https://www.ovh.com/manager/
+   2. Zone DNS → alex2-server.fr
+   3. Ajouter enregistrement A : alex2-server.fr → 100.78.233.118
+   4. (Optionnel) Ajouter A : www.alex2-server.fr → 100.78.233.118
+   5. Attendre propagation DNS (5-30 min)
+
+📝 APRÈS PROPAGATION DNS, OBTENIR CERTIFICAT SSL :
+   sudo certbot --nginx -d alex2-server.fr -d www.alex2-server.fr
+
+📝 PUIS CONFIGURER LES PROVIDERS OAUTH :
+
+┌─────────────────────────────────────────────────────────────┐
+│ 1️⃣  GOOGLE CONSOLE                                          │
+│                                                             │
+│ URL : https://console.cloud.google.com/apis/credentials    │
+│                                                             │
+│ Ajoutez cette redirect URI (HTTPS avec domaine) :          │
+│ ✓ https://alex2-server.fr/novatis/api/oauth/callback.php?provider=google│
+│                                                             │
+│ (Optionnel pour dev local en HTTP) :                       │
+│ ✓ http://192.168.1.38/novatis/api/oauth/callback.php?provider=google│
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│ 2️⃣  MICROSOFT AZURE                                         │
+│                                                             │
+│ URL : https://portal.azure.com/                            │
+│ Recherchez : App registrations → Authentication            │
+│ App ID : 4fce303c-54f4-4227-aec5-9a1f03d8a52d             │
+│                                                             │
+│ Ajoutez cette redirect URI (HTTPS avec domaine) :          │
+│ ✓ https://alex2-server.fr/novatis/api/oauth/callback.php?provider=microsoft│
+│                                                             │
+│ (Optionnel pour dev local en HTTP) :                       │
+│ ✓ http://192.168.1.38/novatis/api/oauth/callback.php?provider=microsoft│
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│ 3️⃣  GITHUB                                                  │
+│                                                             │
+│ URL : https://github.com/settings/developers               │
+│                                                             │
+│ ⚠️  GitHub = 1 seule URL par app                           │
+│                                                             │
+│ OPTION A : Utiliser le domaine (recommandé)                │
+│ → Client ID : Ov23liWt1MZec2E0aSd7                         │
+│ → Callback : https://alex2-server.fr/novatis/api/oauth/callback.php?provider=github│
+│                                                             │
+│ OPTION B : Créer 2 apps (domaine + local)                  │
+│ → App 1 Domaine : https://alex2-server.fr/novatis/...     │
+│ → App 2 Local : http://192.168.1.38/novatis/...           │
+│ → Puis modifier oauth.local.php avec les 2 Client IDs      │
+└─────────────────────────────────────────────────────────────┘
+
+🔍 COMMENT ÇA MARCHE :
+
+Le fichier PHP détecte automatiquement l'URL utilisée :
+• Vous accédez via alex2-server.fr → callback vers alex2-server.fr
+• Vous accédez via 192.168.1.38 → callback vers 192.168.1.38
+
+✅ RECOMMANDATION : Utilisez alex2-server.fr partout (même en local)
+   → Une seule URL HTTPS qui marche partout
+   → Certificat SSL valide accepté par Google/Microsoft/GitHub
+
+📚 Documentation complète :
+→ /var/www/html/novatis/docs/OAUTH_TAILSCALE_SETUP.md
+
+╚════════════════════════════════════════════════════════════════╝

@@ -1,0 +1,49 @@
+/* logout.css (ou reuse login.css) */
+
+/* Conteneur principal */
+.login-container {
+  max-width: 400px;
+  margin: 100px auto;
+  padding: 40px 30px;
+  background-color: var(--color-white);
+  border-radius: 12px;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: var(--font-base);
+}
+
+/* Titre */
+.login-container h2 {
+  font-family: var(--font-heading);
+  font-weight: 900;
+  font-size: 2rem;
+  margin-bottom: 24px;
+  color: var(--color-black);
+  text-align: center;
+}
+
+/* Message de succès */
+.success {
+  width: 100%;
+  padding: 12px;
+  background-color: #d1e7dd;
+  color: #0f5132;
+  border-radius: 8px;
+  font-size: 1rem;
+  text-align: center;
+  margin-top: 16px;
+}
+
+/* Lien éventuel */
+.login-container a {
+  color: var(--color-green);
+  text-decoration: none;
+  font-weight: 700;
+  transition: color 0.3s;
+}
+
+.login-container a:hover {
+  color: var(--color-accent-2);
+}
